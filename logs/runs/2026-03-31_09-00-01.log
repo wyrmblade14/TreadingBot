@@ -1,0 +1,1454 @@
+2026-03-31 09:00:03 IST | INFO     | PaperBroker initialised | capital=₹100,000 | leverage=5x MIS
+2026-03-31 09:00:03 IST | DEBUG    | Trade database ready at /Users/shubhambhosale/Repos/Personal/TreadingBot/logs/trades.db
+2026-03-31 09:00:03 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']
+2026-03-31 09:00:03 IST | INFO     | Telegram notifications enabled.
+2026-03-31 09:00:03 IST | INFO     | Bot started | paper mode | watchlist=10 symbols | capital=₹100,000
+2026-03-31 09:00:03 IST | INFO     | Press Ctrl+C to stop and square off all positions.
+2026-03-31 09:00:03 IST | INFO     | Dashboard: streamlit run dashboard/app.py
+2026-03-31 09:15:00 IST | DEBUG    | Signal check @ 09:15
+2026-03-31 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:15:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:15:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:02 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:15:03 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:03 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:15:04 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:04 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:15:04 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:04 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:15:04 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:04 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:15:05 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:05 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:15:05 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:05 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:06 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:15:06 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:15:06 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:20:00 IST | DEBUG    | Signal check @ 09:20
+2026-03-31 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:20:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:20:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:20:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:20:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:20:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:20:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:20:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:20:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:20:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:20:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:25:00 IST | DEBUG    | Signal check @ 09:25
+2026-03-31 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:25:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:25:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:25:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:25:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:30:00 IST | DEBUG    | Signal check @ 09:30
+2026-03-31 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:30:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:30:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:30:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:30:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:30:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:30:04 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:04 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:30:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:30:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:05 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:30:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:30:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:35:00 IST | DEBUG    | Signal check @ 09:35
+2026-03-31 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:35:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:35:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:35:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:35:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:35:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:35:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:35:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:35:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:35:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:35:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:40:00 IST | DEBUG    | Signal check @ 09:40
+2026-03-31 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:40:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:40:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:02 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:40:03 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:03 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:40:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:40:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:40:04 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:04 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:40:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:40:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:05 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:40:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:40:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:45:00 IST | DEBUG    | Signal check @ 09:45
+2026-03-31 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:45:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:45:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:45:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:45:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:45:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:45:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:45:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:45:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:45:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:45:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:50:00 IST | DEBUG    | Signal check @ 09:50
+2026-03-31 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:50:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:50:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:50:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:50:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:50:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:50:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:50:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:50:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:50:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:50:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 09:55:00 IST | DEBUG    | Signal check @ 09:55
+2026-03-31 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 09:55:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 09:55:00 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 09:55:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 09:55:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:00:00 IST | DEBUG    | Signal check @ 10:00
+2026-03-31 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:00:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:00:00 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:00:02 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:00:02 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:05:00 IST | DEBUG    | Signal check @ 10:05
+2026-03-31 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:05:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:05:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:05:02 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:05:02 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:10:00 IST | DEBUG    | Signal check @ 10:10
+2026-03-31 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:10:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:10:00 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:10:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:10:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:10:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:10:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:10:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:10:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:10:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:10:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:15:00 IST | DEBUG    | Signal check @ 10:15
+2026-03-31 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:15:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:15:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:15:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:15:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:15:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:15:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:15:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:15:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:15:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:15:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:20:00 IST | DEBUG    | Signal check @ 10:20
+2026-03-31 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:20:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:20:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:20:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:20:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:20:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:20:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:20:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:20:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:20:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:20:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:25:00 IST | DEBUG    | Signal check @ 10:25
+2026-03-31 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:25:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:25:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:25:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:25:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:25:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:25:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:25:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:25:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:25:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:25:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:30:00 IST | DEBUG    | Signal check @ 10:30
+2026-03-31 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:30:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:30:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:30:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:30:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:30:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:30:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:30:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:30:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:30:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:30:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:35:00 IST | DEBUG    | Signal check @ 10:35
+2026-03-31 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:35:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:35:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:35:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:35:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:35:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:35:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:35:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:35:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:35:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:35:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:40:00 IST | DEBUG    | Signal check @ 10:40
+2026-03-31 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:40:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:40:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:40:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:40:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:40:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:40:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:40:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:40:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:40:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:40:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:45:00 IST | DEBUG    | Signal check @ 10:45
+2026-03-31 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:45:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:45:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:45:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:45:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:45:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:45:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:45:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:45:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:45:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:45:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:50:00 IST | DEBUG    | Signal check @ 10:50
+2026-03-31 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:50:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:50:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:50:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:50:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:50:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:50:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:50:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:50:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:50:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:50:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 10:55:00 IST | DEBUG    | Signal check @ 10:55
+2026-03-31 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 10:55:03 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:03 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 10:55:04 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:04 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 10:55:05 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:05 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 10:55:05 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:05 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 10:55:05 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:05 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 10:55:06 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:06 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 10:55:06 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:06 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 10:55:06 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:07 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:07 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 10:55:07 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 10:55:07 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:00:00 IST | DEBUG    | Signal check @ 11:00
+2026-03-31 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:00:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:00:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:00:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:00:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:05:00 IST | DEBUG    | Signal check @ 11:05
+2026-03-31 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:05:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:05:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:05:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:05:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:05:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:05:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:05:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:05:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:05:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:05:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:10:00 IST | DEBUG    | Signal check @ 11:10
+2026-03-31 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:10:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:10:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:10:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:10:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:10:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:10:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:10:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:10:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:10:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:10:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:15:00 IST | DEBUG    | Signal check @ 11:15
+2026-03-31 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:15:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:15:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:15:00 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:15:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:15:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:15:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:15:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:15:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:15:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:15:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:20:00 IST | DEBUG    | Signal check @ 11:20
+2026-03-31 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:20:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:20:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:20:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:20:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:25:00 IST | DEBUG    | Signal check @ 11:25
+2026-03-31 11:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:25:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:25:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:25:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:25:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:25:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:25:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:25:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:25:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:25:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:25:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:30:00 IST | DEBUG    | Signal check @ 11:30
+2026-03-31 11:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:30:00 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:30:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:30:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:30:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:35:00 IST | DEBUG    | Signal check @ 11:35
+2026-03-31 11:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:35:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:35:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:02 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:35:03 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:03 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:35:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:35:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:35:04 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:04 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:35:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:35:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:05 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:35:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:35:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:40:00 IST | DEBUG    | Signal check @ 11:40
+2026-03-31 11:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:40:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:40:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:40:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:40:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:45:00 IST | DEBUG    | Signal check @ 11:45
+2026-03-31 11:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:45:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:45:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:45:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:45:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:45:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:45:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:45:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:45:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:45:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:45:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:50:00 IST | DEBUG    | Signal check @ 11:50
+2026-03-31 11:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:50:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:50:00 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:50:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:50:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:50:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:50:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:50:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:50:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:50:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:50:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 11:55:00 IST | DEBUG    | Signal check @ 11:55
+2026-03-31 11:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 11:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 11:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 11:55:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 11:55:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 11:55:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 11:55:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 11:55:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 11:55:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 11:55:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 11:55:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 11:55:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 11:55:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 12:00:00 IST | DEBUG    | Signal check @ 12:00
+2026-03-31 12:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:00:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:00:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:00:01 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 12:00:01 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 12:05:00 IST | DEBUG    | Signal check @ 12:05
+2026-03-31 12:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:05:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:05:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:05:02 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:05:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:05:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:05:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:05:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:05:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:05:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 12:05:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 12:10:00 IST | DEBUG    | Signal check @ 12:10
+2026-03-31 12:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:10:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:10:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:10:03 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:03 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:10:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:10:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:10:04 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:04 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:10:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:10:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:05 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:10:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 12:10:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 12:15:00 IST | DEBUG    | Signal check @ 12:15
+2026-03-31 12:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:15:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:15:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:15:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:15:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:15:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:15:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:15:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:15:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:15:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 12:15:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 12:20:00 IST | DEBUG    | Signal check @ 12:20
+2026-03-31 12:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:20:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:20:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:20:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:20:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:20:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:20:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:20:03 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:20:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:04 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:20:04 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 12:20:04 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 12:25:00 IST | DEBUG    | Signal check @ 12:25
+2026-03-31 12:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:25:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:25:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:25:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:25:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:25:02 IST | DEBUG    | No 5m data for KOTAKBANK: 'NoneType' object is not subscriptable
+2026-03-31 12:25:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:25:02 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:25:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:25:02 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:25:02 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:25:02 IST | DEBUG    | No 5m data for BAJFINANCE: 'NoneType' object is not subscriptable
+2026-03-31 12:25:02 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:25:02 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:25:02 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:25:03 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:25:03 IST | DEBUG    | No 5m data for TCS: 'NoneType' object is not subscriptable
+2026-03-31 12:25:03 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 12:25:03 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 12:25:03 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 12:30:00 IST | DEBUG    | Signal check @ 12:30
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for HDFCBANK: 'NoneType' object is not subscriptable
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for ICICIBANK: 'NoneType' object is not subscriptable
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for AXISBANK: 'NoneType' object is not subscriptable
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for SBIN: 'NoneType' object is not subscriptable
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for BAJAJFINSV: 'NoneType' object is not subscriptable
+2026-03-31 12:30:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: 'NoneType' object is not subscriptable
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 12:30:00 IST | DEBUG    | No 5m data for INFY: 'NoneType' object is not subscriptable
+2026-03-31 12:35:00 IST | DEBUG    | Signal check @ 12:35
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 12:35:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | Signal check @ 12:40
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 12:40:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | Signal check @ 12:45
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 12:45:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | Signal check @ 12:50
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 12:50:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | Signal check @ 12:55
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 12:55:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | Signal check @ 13:00
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:00:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | Signal check @ 13:05
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:05:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | Signal check @ 13:10
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:10:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | Signal check @ 13:15
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:15:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | Signal check @ 13:20
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:20:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | Signal check @ 13:25
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:25:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | Signal check @ 13:30
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:30:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | Signal check @ 13:35
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:35:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | Signal check @ 13:40
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:40:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | Signal check @ 13:45
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:45:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | Signal check @ 13:50
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for HDFCBANK: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for KOTAKBANK: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for ICICIBANK: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for AXISBANK: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for BAJFINANCE: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for BAJAJFINSV: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for SBIN: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for TCS: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: unable to open database file
+2026-03-31 13:50:00 IST | DEBUG    | No 5m data for INFY: unable to open database file
+2026-03-31 13:55:00 IST | DEBUG    | Signal check @ 13:55
+2026-03-31 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 13:55:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 13:55:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:02 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 13:55:03 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:03 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 13:55:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 13:55:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 13:55:04 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:04 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 13:55:05 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:05 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 13:55:05 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:06 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:06 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 13:55:06 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 13:55:06 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 14:00:00 IST | DEBUG    | Signal check @ 14:00
+2026-03-31 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 14:00:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 14:00:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 14:00:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 14:00:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 14:00:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 14:00:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 14:00:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 14:00:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:00:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 14:00:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 14:05:00 IST | DEBUG    | Signal check @ 14:05
+2026-03-31 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 14:05:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 14:05:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 14:05:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 14:05:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 14:05:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 14:05:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 14:05:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 14:05:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:05:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 14:05:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 14:10:00 IST | DEBUG    | Signal check @ 14:10
+2026-03-31 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 14:10:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 14:10:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 14:10:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 14:10:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 14:10:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 14:10:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 14:10:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 14:10:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:10:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 14:10:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 14:15:00 IST | DEBUG    | Signal check @ 14:15
+2026-03-31 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 14:15:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 14:15:01 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 14:15:02 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 14:15:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 14:15:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 14:15:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 14:15:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 14:15:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:15:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 14:15:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 14:20:00 IST | DEBUG    | Signal check @ 14:20
+2026-03-31 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 14:20:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 14:20:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 14:20:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 14:20:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 14:20:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 14:20:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 14:20:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 14:20:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:20:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 14:20:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 14:25:00 IST | DEBUG    | Signal check @ 14:25
+2026-03-31 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 14:25:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 14:25:01 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:01 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 14:25:02 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 14:25:03 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:03 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 14:25:03 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:03 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 14:25:03 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 14:25:04 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:04 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 14:25:04 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:04 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:05 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:25:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 14:25:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 14:30:00 IST | DEBUG    | Signal check @ 14:30
+2026-03-31 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-31 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-31 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-31 14:30:01 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:01 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-31 14:30:03 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:03 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-31 14:30:04 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:04 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-31 14:30:04 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:04 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-31 14:30:05 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:05 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-31 14:30:05 IST | INFO     | Downloaded 75 5m candles for BAJFINANCE.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:05 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-31 14:30:05 IST | INFO     | Downloaded 75 5m candles for BAJAJFINSV.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:05 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-31 14:30:06 IST | INFO     | Downloaded 75 5m candles for SHRIRAMFIN.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:06 IST | INFO     | Downloaded 75 5m candles for TCS.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:06 IST | INFO     | Downloaded 75 5m candles for INFY.NS (2026-03-30 → 2026-03-30)
+2026-03-31 14:30:06 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-03-31 14:30:06 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-03-31 15:30:00 IST | INFO     | ============================================================
+2026-03-31 15:30:00 IST | INFO     | DAILY REPORT (15:30 IST)
+2026-03-31 15:30:00 IST | INFO     |   Cash:          ₹100,000
+2026-03-31 15:30:00 IST | INFO     |   Realised P&L:  ₹0
+2026-03-31 15:30:00 IST | INFO     |   Today trades:  0
+2026-03-31 15:30:00 IST | INFO     |   Today net P&L: ₹0
+2026-03-31 15:30:00 IST | INFO     | ============================================================
+2026-03-31 15:35:00 IST | INFO     | === AUTO-SHUTDOWN (15:35 IST) === Trading day complete. Bye!
+2026-03-31 15:35:00 IST | INFO     | Shutdown signal received — stopping bot...

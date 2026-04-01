@@ -1,0 +1,79 @@
+2026-03-27 14:42:55 IST | INFO     | PaperBroker initialised | capital=₹100,000
+2026-03-27 14:42:55 IST | DEBUG    | Trade database ready at /Users/shubhambhosale/Repos/Personal/TreadingBot/logs/trades.db
+2026-03-27 14:42:55 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']
+2026-03-27 14:42:55 IST | INFO     | Telegram notifications enabled.
+2026-03-27 14:42:55 IST | INFO     | Bot started | paper mode | watchlist=10 symbols | capital=₹100,000
+2026-03-27 14:42:55 IST | INFO     | Press Ctrl+C to stop and square off all positions.
+2026-03-27 14:42:55 IST | INFO     | Dashboard: streamlit run dashboard/app.py
+2026-03-27 14:45:00 IST | DEBUG    | Signal check @ 14:45
+2026-03-27 14:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:45:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:45:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:45:02 IST | INFO     | Downloaded 66 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:02 IST | INFO     | Downloaded 67 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:45:03 IST | INFO     | Downloaded 67 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | DEBUG    | Signal check @ 14:50
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:50:00 IST | INFO     | Downloaded 68 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:50:00 IST | INFO     | Downloaded 68 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:50:00 IST | INFO     | Downloaded 67 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | DEBUG    | Signal check @ 14:55
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | INFO     | Downloaded 69 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | INFO     | Downloaded 69 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:55:00 IST | INFO     | Downloaded 68 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 15:30:00 IST | INFO     | ============================================================
+2026-03-27 15:30:00 IST | INFO     | DAILY REPORT (15:30 IST)
+2026-03-27 15:30:00 IST | INFO     |   Cash:          ₹100,000
+2026-03-27 15:30:00 IST | INFO     |   Realised P&L:  ₹0
+2026-03-27 15:30:00 IST | INFO     |   Today trades:  0
+2026-03-27 15:30:00 IST | INFO     |   Today net P&L: ₹0
+2026-03-27 15:30:00 IST | INFO     | ============================================================
+2026-03-27 15:35:00 IST | INFO     | === AUTO-SHUTDOWN (15:35 IST) === Trading day complete. Bye!
+2026-03-27 15:35:00 IST | INFO     | Shutdown signal received — stopping bot...

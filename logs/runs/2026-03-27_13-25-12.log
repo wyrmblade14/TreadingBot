@@ -1,0 +1,332 @@
+2026-03-27 13:25:12 IST | INFO     | PaperBroker initialised | capital=₹100,000
+2026-03-27 13:25:12 IST | DEBUG    | Trade database ready at /Users/shubhambhosale/Repos/Personal/TreadingBot/logs/trades.db
+2026-03-27 13:25:12 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']
+2026-03-27 13:25:12 IST | INFO     | Telegram notifications enabled.
+2026-03-27 13:25:12 IST | INFO     | Bot started | paper mode | watchlist=10 symbols | capital=₹100,000
+2026-03-27 13:25:12 IST | INFO     | Press Ctrl+C to stop and square off all positions.
+2026-03-27 13:25:12 IST | INFO     | Dashboard: streamlit run dashboard/app.py
+2026-03-27 13:30:00 IST | DEBUG    | Signal check @ 13:30
+2026-03-27 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 13:30:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 13:30:01 IST | INFO     | Downloaded 52 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:01 IST | INFO     | Downloaded 52 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:01 IST | INFO     | Downloaded 52 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 13:30:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 13:30:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 13:30:01 IST | INFO     | Downloaded 51 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 13:30:01 IST | INFO     | Downloaded 52 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 13:30:02 IST | INFO     | Downloaded 52 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:02 IST | INFO     | Downloaded 52 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:02 IST | INFO     | Downloaded 52 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:02 IST | INFO     | Downloaded 52 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:30:02 IST | INFO     | Downloaded 51 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | DEBUG    | Signal check @ 13:35
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:35:00 IST | INFO     | Downloaded 52 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:00 IST | DEBUG    | Signal check @ 13:40
+2026-03-27 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 13:40:00 IST | INFO     | Downloaded 54 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 13:40:01 IST | INFO     | Downloaded 53 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | INFO     | Downloaded 54 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | INFO     | Downloaded 53 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 13:40:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 13:40:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 13:40:01 IST | INFO     | Downloaded 54 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 13:40:01 IST | INFO     | Downloaded 53 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | INFO     | Downloaded 53 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | INFO     | Downloaded 54 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | INFO     | Downloaded 54 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | INFO     | Downloaded 53 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:40:01 IST | INFO     | EMA SELL | KOTAKBANK | price=363.90
+2026-03-27 13:40:01 IST | DEBUG    | PositionSizer | capital=100000 entry=363.90 sl=364.82 risk_per_share=0.92 rupees_at_risk=1000 qty=82
+2026-03-27 13:40:01 IST | DEBUG    | Signal rejected [KOTAKBANK / ema_crossover]: Reward:risk ratio 1.99x is below minimum 2.0x. Move target further or tighten stop-loss.
+2026-03-27 13:40:01 IST | DEBUG    | MACD bearish crossover | MACD=0.4602 Signal=0.5039
+2026-03-27 13:40:01 IST | INFO     | RSI+MACD SELL | AXISBANK | MACD bearish crossover (MACD=0.4602 < Signal=0.5039)
+2026-03-27 13:40:01 IST | DEBUG    | PositionSizer | capital=100000 entry=1209.10 sl=1211.26 risk_per_share=2.16 rupees_at_risk=1000 qty=24
+2026-03-27 13:40:01 IST | INFO     | Risk APPROVED | [rsi_macd_combo] SELL AXISBANK entry=1209.10 sl=1211.26 target=1204.77 qty=24 RR=2.00x | daily_pnl=0 open_positions=0
+2026-03-27 13:40:01 IST | INFO     | OrderManager: Placing SELL order | 24×AXISBANK @ ~₹1209.10
+2026-03-27 13:40:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=24
+2026-03-27 13:40:01 IST | WARNING  | OrderManager: Entry order not filled | AXISBANK | status=OrderStatus.REJECTED reason=Cannot sell 24 shares of AXISBANK; holding 0
+2026-03-27 13:45:00 IST | DEBUG    | Signal check @ 13:45
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | INFO     | Downloaded 54 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:45:00 IST | DEBUG    | ORB SELL breakdown | close=848.05 below orb_low=857.00
+2026-03-27 13:45:00 IST | INFO     | ORB SELL | BAJFINANCE | price=848.05 orb_low=857.00 sl=875.00 target=794.15
+2026-03-27 13:45:00 IST | DEBUG    | PositionSizer | capital=100000 entry=848.05 sl=875.00 risk_per_share=26.95 rupees_at_risk=1000 qty=37
+2026-03-27 13:45:00 IST | DEBUG    | Signal rejected [BAJFINANCE / opening_range_breakout]: Reward:risk ratio 2.00x is below minimum 2.0x. Move target further or tighten stop-loss.
+2026-03-27 13:45:00 IST | DEBUG    | ORB SELL breakdown | close=1689.40 below orb_low=1697.00
+2026-03-27 13:45:00 IST | INFO     | ORB SELL | BAJAJFINSV | price=1689.40 orb_low=1697.00 sl=1738.60 target=1591.00
+2026-03-27 13:45:00 IST | DEBUG    | PositionSizer | capital=100000 entry=1689.40 sl=1738.60 risk_per_share=49.20 rupees_at_risk=1000 qty=20
+2026-03-27 13:45:00 IST | INFO     | Risk APPROVED | [opening_range_breakout] SELL BAJAJFINSV entry=1689.40 sl=1738.60 target=1591.00 qty=20 RR=2.00x | daily_pnl=0 open_positions=0
+2026-03-27 13:45:00 IST | INFO     | OrderManager: Placing SELL order | 20×BAJAJFINSV @ ~₹1689.40
+2026-03-27 13:45:00 IST | WARNING  | Order REJECTED (oversell): BAJAJFINSV hold=0 sell=20
+2026-03-27 13:45:00 IST | WARNING  | OrderManager: Entry order not filled | BAJAJFINSV | status=OrderStatus.REJECTED reason=Cannot sell 20 shares of BAJAJFINSV; holding 0
+2026-03-27 13:45:00 IST | INFO     | EMA SELL | SHRIRAMFIN | price=911.10
+2026-03-27 13:45:00 IST | DEBUG    | PositionSizer | capital=100000 entry=911.10 sl=914.28 risk_per_share=3.18 rupees_at_risk=1000 qty=32
+2026-03-27 13:45:00 IST | DEBUG    | Signal rejected [SHRIRAMFIN / ema_crossover]: Reward:risk ratio 2.00x is below minimum 2.0x. Move target further or tighten stop-loss.
+2026-03-27 13:50:00 IST | DEBUG    | Signal check @ 13:50
+2026-03-27 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 13:50:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 13:50:01 IST | INFO     | Downloaded 55 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 13:50:01 IST | INFO     | Downloaded 55 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 13:50:01 IST | INFO     | Downloaded 56 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | INFO     | Downloaded 56 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 13:50:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 13:50:01 IST | INFO     | Downloaded 55 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 13:50:01 IST | INFO     | Downloaded 55 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | INFO     | Downloaded 55 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | INFO     | Downloaded 55 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | INFO     | Downloaded 55 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | INFO     | Downloaded 56 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:50:01 IST | INFO     | EMA SELL | ICICIBANK | price=1248.50
+2026-03-27 13:50:01 IST | DEBUG    | PositionSizer | capital=100000 entry=1248.50 sl=1251.67 risk_per_share=3.17 rupees_at_risk=1000 qty=24
+2026-03-27 13:50:01 IST | DEBUG    | Signal rejected [ICICIBANK / ema_crossover]: Reward:risk ratio 2.00x is below minimum 2.0x. Move target further or tighten stop-loss.
+2026-03-27 13:50:01 IST | DEBUG    | ORB SELL breakdown | close=1248.50 below orb_low=1250.30
+2026-03-27 13:50:01 IST | INFO     | ORB SELL | ICICIBANK | price=1248.50 orb_low=1250.30 sl=1260.00 target=1225.50
+2026-03-27 13:50:01 IST | DEBUG    | PositionSizer | capital=100000 entry=1248.50 sl=1260.00 risk_per_share=11.50 rupees_at_risk=1000 qty=24
+2026-03-27 13:50:01 IST | INFO     | Risk APPROVED | [opening_range_breakout] SELL ICICIBANK entry=1248.50 sl=1260.00 target=1225.50 qty=24 RR=2.00x | daily_pnl=0 open_positions=0
+2026-03-27 13:50:01 IST | INFO     | OrderManager: Placing SELL order | 24×ICICIBANK @ ~₹1248.50
+2026-03-27 13:50:01 IST | WARNING  | Order REJECTED (oversell): ICICIBANK hold=0 sell=24
+2026-03-27 13:50:01 IST | WARNING  | OrderManager: Entry order not filled | ICICIBANK | status=OrderStatus.REJECTED reason=Cannot sell 24 shares of ICICIBANK; holding 0
+2026-03-27 13:50:01 IST | INFO     | EMA SELL | AXISBANK | price=1208.00
+2026-03-27 13:50:01 IST | DEBUG    | PositionSizer | capital=100000 entry=1208.00 sl=1210.21 risk_per_share=2.21 rupees_at_risk=1000 qty=24
+2026-03-27 13:50:01 IST | DEBUG    | Signal rejected [AXISBANK / ema_crossover]: Reward:risk ratio 2.00x is below minimum 2.0x. Move target further or tighten stop-loss.
+2026-03-27 13:50:01 IST | DEBUG    | MACD bearish crossover | MACD=-0.4883 Signal=-0.4590
+2026-03-27 13:50:01 IST | INFO     | RSI+MACD SELL | SBIN | MACD bearish crossover (MACD=-0.4883 < Signal=-0.4590)
+2026-03-27 13:50:01 IST | DEBUG    | PositionSizer | capital=100000 entry=1038.50 sl=1040.72 risk_per_share=2.22 rupees_at_risk=1000 qty=28
+2026-03-27 13:50:01 IST | INFO     | Risk APPROVED | [rsi_macd_combo] SELL SBIN entry=1038.50 sl=1040.72 target=1034.06 qty=28 RR=2.00x | daily_pnl=0 open_positions=0
+2026-03-27 13:50:01 IST | INFO     | OrderManager: Placing SELL order | 28×SBIN @ ~₹1038.50
+2026-03-27 13:50:01 IST | WARNING  | Order REJECTED (oversell): SBIN hold=0 sell=28
+2026-03-27 13:50:01 IST | WARNING  | OrderManager: Entry order not filled | SBIN | status=OrderStatus.REJECTED reason=Cannot sell 28 shares of SBIN; holding 0
+2026-03-27 13:55:00 IST | DEBUG    | Signal check @ 13:55
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 13:55:00 IST | INFO     | Downloaded 56 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 13:55:00 IST | INFO     | Downloaded 56 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 13:55:00 IST | INFO     | Downloaded 57 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 13:55:00 IST | INFO     | Downloaded 57 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 13:55:00 IST | INFO     | Downloaded 56 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:00 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 13:55:01 IST | INFO     | Downloaded 56 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:01 IST | INFO     | Downloaded 56 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:01 IST | INFO     | Downloaded 56 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:01 IST | INFO     | Downloaded 57 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:01 IST | INFO     | Downloaded 56 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 13:55:01 IST | DEBUG    | ORB SELL breakdown | close=1686.50 below orb_low=1697.00
+2026-03-27 13:55:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1686.50 orb_low=1697.00 sl=1738.60 target=1582.30
+2026-03-27 13:55:01 IST | DEBUG    | PositionSizer | capital=100000 entry=1686.50 sl=1738.60 risk_per_share=52.10 rupees_at_risk=1000 qty=19
+2026-03-27 13:55:01 IST | INFO     | Risk APPROVED | [opening_range_breakout] SELL BAJAJFINSV entry=1686.50 sl=1738.60 target=1582.30 qty=19 RR=2.00x | daily_pnl=0 open_positions=0
+2026-03-27 13:55:01 IST | INFO     | OrderManager: Placing SELL order | 19×BAJAJFINSV @ ~₹1686.50
+2026-03-27 13:55:01 IST | WARNING  | Order REJECTED (oversell): BAJAJFINSV hold=0 sell=19
+2026-03-27 13:55:01 IST | WARNING  | OrderManager: Entry order not filled | BAJAJFINSV | status=OrderStatus.REJECTED reason=Cannot sell 19 shares of BAJAJFINSV; holding 0
+2026-03-27 14:00:00 IST | DEBUG    | Signal check @ 14:00
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:00:00 IST | INFO     | Downloaded 57 5m candles for AXISBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:00:00 IST | INFO     | Downloaded 57 5m candles for HDFCBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:00:00 IST | INFO     | Downloaded 57 5m candles for ICICIBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:00:01 IST | INFO     | Downloaded 57 5m candles for BAJFINANCE.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:00:01 IST | INFO     | Downloaded 57 5m candles for BAJAJFINSV.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:01 IST | INFO     | Downloaded 58 5m candles for SHRIRAMFIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:00:01 IST | INFO     | Downloaded 58 5m candles for TCS.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:01 IST | INFO     | Downloaded 57 5m candles for INFY.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:02 IST | INFO     | Downloaded 58 5m candles for SBIN.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:00:02 IST | INFO     | Downloaded 58 5m candles for KOTAKBANK.NS (2026-03-27 → 2026-03-27)
+2026-03-27 14:05:00 IST | DEBUG    | Signal check @ 14:05
+2026-03-27 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:05:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:05:30 IST | DEBUG    | No 5m data for ICICIBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:05:30 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:05:30 IST | DEBUG    | No 5m data for HDFCBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:05:30 IST | DEBUG    | No 5m data for AXISBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:05:30 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:05:30 IST | DEBUG    | No 5m data for KOTAKBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:05:30 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:05:30 IST | DEBUG    | No 5m data for SBIN: 'NoneType' object is not subscriptable
+2026-03-27 14:05:30 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:05:30 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:06:00 IST | DEBUG    | No 5m data for BAJFINANCE: 'NoneType' object is not subscriptable
+2026-03-27 14:06:00 IST | DEBUG    | No 5m data for BAJAJFINSV: 'NoneType' object is not subscriptable
+2026-03-27 14:06:00 IST | DEBUG    | No 5m data for INFY: 'NoneType' object is not subscriptable
+2026-03-27 14:06:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: 'NoneType' object is not subscriptable
+2026-03-27 14:06:00 IST | DEBUG    | No 5m data for TCS: 'NoneType' object is not subscriptable
+2026-03-27 14:10:00 IST | DEBUG    | Signal check @ 14:10
+2026-03-27 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:10:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:10:30 IST | DEBUG    | No 5m data for KOTAKBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:10:30 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:10:30 IST | DEBUG    | No 5m data for HDFCBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:10:30 IST | DEBUG    | No 5m data for AXISBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:10:30 IST | DEBUG    | No 5m data for ICICIBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:10:30 IST | DEBUG    | No 5m data for SBIN: 'NoneType' object is not subscriptable
+2026-03-27 14:10:30 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:10:30 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:10:30 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:10:30 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:11:00 IST | DEBUG    | No 5m data for TCS: 'NoneType' object is not subscriptable
+2026-03-27 14:11:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: 'NoneType' object is not subscriptable
+2026-03-27 14:11:00 IST | DEBUG    | No 5m data for BAJAJFINSV: 'NoneType' object is not subscriptable
+2026-03-27 14:11:00 IST | DEBUG    | No 5m data for INFY: 'NoneType' object is not subscriptable
+2026-03-27 14:11:00 IST | DEBUG    | No 5m data for BAJFINANCE: 'NoneType' object is not subscriptable
+2026-03-27 14:15:00 IST | DEBUG    | Signal check @ 14:15
+2026-03-27 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:15:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:15:30 IST | DEBUG    | No 5m data for HDFCBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:15:30 IST | DEBUG    | No 5m data for ICICIBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:15:30 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:15:30 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:15:30 IST | DEBUG    | No 5m data for SBIN: 'NoneType' object is not subscriptable
+2026-03-27 14:15:30 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:15:30 IST | DEBUG    | No 5m data for KOTAKBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:15:30 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:15:30 IST | DEBUG    | No 5m data for AXISBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:15:30 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:16:00 IST | DEBUG    | No 5m data for TCS: 'NoneType' object is not subscriptable
+2026-03-27 14:16:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: 'NoneType' object is not subscriptable
+2026-03-27 14:16:00 IST | DEBUG    | No 5m data for BAJAJFINSV: 'NoneType' object is not subscriptable
+2026-03-27 14:16:00 IST | DEBUG    | No 5m data for INFY: 'NoneType' object is not subscriptable
+2026-03-27 14:16:00 IST | DEBUG    | No 5m data for BAJFINANCE: 'NoneType' object is not subscriptable
+2026-03-27 14:20:00 IST | DEBUG    | Signal check @ 14:20
+2026-03-27 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:20:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:20:30 IST | DEBUG    | No 5m data for KOTAKBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:20:30 IST | DEBUG    | No 5m data for AXISBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:20:30 IST | DEBUG    | No 5m data for HDFCBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:20:30 IST | DEBUG    | No 5m data for SBIN: 'NoneType' object is not subscriptable
+2026-03-27 14:20:30 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:20:30 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:20:30 IST | DEBUG    | No 5m data for ICICIBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:20:30 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:20:30 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:20:30 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:21:00 IST | DEBUG    | No 5m data for TCS: 'NoneType' object is not subscriptable
+2026-03-27 14:21:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: 'NoneType' object is not subscriptable
+2026-03-27 14:21:00 IST | DEBUG    | No 5m data for BAJAJFINSV: 'NoneType' object is not subscriptable
+2026-03-27 14:21:00 IST | DEBUG    | No 5m data for INFY: 'NoneType' object is not subscriptable
+2026-03-27 14:21:00 IST | DEBUG    | No 5m data for BAJFINANCE: 'NoneType' object is not subscriptable
+2026-03-27 14:25:00 IST | DEBUG    | Signal check @ 14:25
+2026-03-27 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:25:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:25:30 IST | DEBUG    | No 5m data for HDFCBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:25:30 IST | DEBUG    | No 5m data for ICICIBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:25:30 IST | DEBUG    | No 5m data for AXISBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:25:30 IST | DEBUG    | No 5m data for KOTAKBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:25:30 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:25:30 IST | DEBUG    | No 5m data for SBIN: 'NoneType' object is not subscriptable
+2026-03-27 14:25:30 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:25:30 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:25:30 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:25:30 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:26:00 IST | DEBUG    | No 5m data for INFY: 'NoneType' object is not subscriptable
+2026-03-27 14:26:00 IST | DEBUG    | No 5m data for BAJAJFINSV: 'NoneType' object is not subscriptable
+2026-03-27 14:26:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: 'NoneType' object is not subscriptable
+2026-03-27 14:26:00 IST | DEBUG    | No 5m data for TCS: 'NoneType' object is not subscriptable
+2026-03-27 14:26:00 IST | DEBUG    | No 5m data for BAJFINANCE: 'NoneType' object is not subscriptable
+2026-03-27 14:30:00 IST | DEBUG    | Signal check @ 14:30
+2026-03-27 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-03-27 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-03-27 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-03-27 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-03-27 14:30:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-03-27 14:30:30 IST | DEBUG    | No 5m data for ICICIBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:30:30 IST | DEBUG    | No 5m data for SBIN: 'NoneType' object is not subscriptable
+2026-03-27 14:30:30 IST | DEBUG    | No 5m data for KOTAKBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:30:30 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-03-27 14:30:30 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-03-27 14:30:30 IST | DEBUG    | No 5m data for HDFCBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:30:30 IST | DEBUG    | No 5m data for AXISBANK: 'NoneType' object is not subscriptable
+2026-03-27 14:30:30 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-03-27 14:30:30 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-03-27 14:30:30 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-03-27 14:31:00 IST | DEBUG    | No 5m data for BAJFINANCE: 'NoneType' object is not subscriptable
+2026-03-27 14:31:00 IST | DEBUG    | No 5m data for INFY: 'NoneType' object is not subscriptable
+2026-03-27 14:31:00 IST | DEBUG    | No 5m data for TCS: 'NoneType' object is not subscriptable
+2026-03-27 14:31:00 IST | DEBUG    | No 5m data for BAJAJFINSV: 'NoneType' object is not subscriptable
+2026-03-27 14:31:00 IST | DEBUG    | No 5m data for SHRIRAMFIN: 'NoneType' object is not subscriptable
+2026-03-27 14:42:52 IST | INFO     | Shutdown signal received — stopping bot...

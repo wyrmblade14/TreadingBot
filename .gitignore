@@ -1,0 +1,44 @@
+# Secrets — NEVER commit these
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Logs and data
+logs/*.json
+data/historical/*.csv
+data/historical/*.parquet
+
+# Database
+# (keeping .db files in repo for trade history)
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kite session
+kite_session.json
+access_token.txt
+
+# Backtest reports
+backtesting/reports/*.html

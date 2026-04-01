@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m venv venv)",
+      "Bash(source venv/bin/activate)",
+      "Bash(python -m pytest tests/test_indicators.py -v)",
+      "Bash(python -m pytest tests/test_strategies.py tests/test_risk_manager.py -v)",
+      "Bash(pip install:*)",
+      "Bash(python -m pytest tests/test_paper_broker.py -v)",
+      "Bash(python -m pytest tests/ -v --tb=short)",
+      "Bash(wc:*)",
+      "Bash(python -m pytest tests/test_backtesting.py -v)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python -c \":*)",
+      "Bash(python -m pytest tests/ -q)",
+      "Bash(python scripts/run_bot.py --dry-run)",
+      "Bash(python scripts/run_backtest.py --all-strategies --symbol RELIANCE --start 2025-01-01 --end 2026-03-27)",
+      "Bash(grep -v \"FutureWarning\\\\|ChainedAssign\\\\|df\\\\[\"\"col\"\"\\\\]\\\\|Use \\\\`df\\\\|See the cav\\\\|pandas-docs\\\\|df\\\\[''''Volume''''\\\\]\")",
+      "Bash(source /Users/shubhambhosale/Repos/Personal/TreadingBot/venv/bin/activate)",
+      "Bash(python -c \"import streamlit; print\\(streamlit.__version__\\)\")",
+      "Bash(python -c \"import scripts.run_replay; print\\(''run_replay.py OK''\\)\")",
+      "Bash(python -c \"import dashboard.views.replay; print\\(''replay view OK''\\)\")",
+      "Bash(venv/bin/streamlit run:*)",
+      "Bash(where python:*)",
+      "Bash(cmd.exe /c \"dir W:\\\\Projects\\\\TreadingBot\\\\venv\\\\Scripts 2>&1\")",
+      "Bash(cmd.exe /c \"dir /b W:\\\\Projects\\\\TreadingBot\\\\venv\\\\\" 2>&1)",
+      "Bash(cmd.exe /c 'dir /b W:\\\\Projects\\\\TreadingBot\\\\venv')",
+      "Bash(venv/Scripts/pip install:*)",
+      "Bash(venv/Scripts/pip.exe install:*)",
+      "Bash(sed -n '95,115p' W:/Projects/TreadingBot/risk/risk_manager.py)",
+      "Bash(sed -n '235,245p' W:/Projects/TreadingBot/execution/order_manager.py)",
+      "Bash(venv/Scripts/python.exe -m pytest tests/ -x -q)",
+      "Bash(venv/Scripts/python.exe -m streamlit run dashboard/app.py --server.headless true --server.port 8503)",
+      "Bash(source venv/Scripts/activate)",
+      "Bash(python -m pytest tests/ -v --tb=short -q)",
+      "Bash(python scripts/run_simulation.py --days 5 --symbols RELIANCE TCS INFY)",
+      "Bash(gh auth:*)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(gh --version)"
+    ]
+  }
+}
