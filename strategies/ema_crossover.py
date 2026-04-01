@@ -49,7 +49,9 @@ from __future__ import annotations
 import pandas as pd
 from loguru import logger
 
+from analysis.regime_detector import get_current_regime, regime_allows_strategy
 from config import strategies as cfg
+from config.settings import REGIME_FILTER_ENABLED
 from indicators.ema import EMAIndicator
 from indicators.supertrend import SupertrendIndicator
 from indicators.vwap import get_vwap_signal
@@ -90,6 +92,17 @@ class EMACrossoverStrategy(BaseStrategy):
             df:     OHLCV DataFrame (5-minute candles, at least 55 candles needed)
         """
         current_price = df["close"].iloc[-1]
+
+        # ── Regime filter ─────────────────────────────────────────────
+        # EMA Crossover needs a trending market — crossovers in a ranging
+        # market are noisy and frequently reverse. Suppress on RANGING + VOLATILE.
+        if REGIME_FILTER_ENABLED:
+            regime = get_current_regime()
+            if not regime_allows_strategy(regime, self.name):
+                logger.debug(
+                    f"EMA Crossover suppressed for {symbol} — market regime: {regime.value}"
+                )
+                return self.hold_signal(symbol, current_price)
 
         # Need enough candles for both EMAs and Supertrend
         min_needed = max(self.trend_period + 2, self._supertrend.min_candles)

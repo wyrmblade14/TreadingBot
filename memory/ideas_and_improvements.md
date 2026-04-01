@@ -21,6 +21,20 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 12 | "No ORB after 11 AM" rule | M | L | Ph2 enh | DONE |
 | 13 | MACD histogram acceleration filter (RSI+MACD) | M | L | Ph2 enh | DONE |
 | 14 | yfinance retry with backoff on None response | M | L | Ph6 enh | DONE |
+| 15 | Bollinger Band Mean Reversion strategy | M | M | Ph2 enh | Idea |
+| 16 | Gap & Go morning gap strategy | M | M | Ph2 enh | DONE |
+| 17 | VWAP Retest Entry strategy | H | M | Ph2 enh | Idea |
+| 18 | Sector rotation / market breadth signal bias | M | M | Ph5 enh | Idea |
+| 19 | Trailing stop after 1× ATR profit | H | M | Ph3 enh | DONE |
+| 20 | Time-based force-exit at 2:00 PM | M | L | Ph2 enh | Idea |
+| 21 | Volatility-scaled position sizing | M | M | Ph2 enh | Idea |
+| 22 | Trade Journal dashboard view | H | M | Ph5 enh | DONE |
+| 23 | Strategy head-to-head live comparison panel | H | L | Ph5 enh | DONE |
+| 24 | Signal confidence score (visual, 0–5) | M | L | Ph5 enh | DONE |
+| 25 | Daily P&L heatmap (calendar view) | M | L | Ph5 enh | DONE |
+| 26 | Market regime detector (Trending/Ranging/Volatile) | H | M | Ph7 | Idea |
+| 27 | Per-strategy auto-disable on win rate drop | M | L | Ph7 | Idea |
+| 28 | Best entry time analysis from paper trade data | M | L | Ph7 | Idea |
 
 ---
 
@@ -41,6 +55,34 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 **#13 MACD acceleration filter**: Require MACD histogram to be both positive AND larger than the previous bar for 2 consecutive bars before firing. Reduces noise signals that cause RSI+MACD 28% win rate on 1h.
 
 **#14 yfinance retry**: When `ticker.history()` returns None (rate-limited), retry once after 2 seconds before returning None. Reduces missed signals during parallel fetches.
+
+**#15 Bollinger Band Mean Reversion**: Buy when price touches lower band + RSI < 35, targeting the mean (middle band). Adds counter-trend diversity — current 3 strategies are all momentum, so they all fail together in choppy markets.
+
+**#16 Gap & Go**: Enter stocks that open >0.5% above previous close with a volume surge in the first 15 minutes. Reuses ORB infrastructure. Classic intraday pattern, strong on NIFTY50 large caps.
+
+**#17 VWAP Retest Entry**: Price breaks above VWAP, pulls back to touch it, then bounces — enter on the bounce with tight stop below VWAP. Higher quality entries than current breakout-only VWAP filter; reduces false positives.
+
+**#18 Sector rotation bias**: Use `market_overview.py` breadth data (advance/decline ratio) to bias signals. If NIFTY50 breadth >70% bullish → long-only mode. If <30% → suppress all signals or short-only. Overlay on existing strategies, not a new one.
+
+**#19 Trailing stop after 1× ATR profit**: Once trade is up 1× ATR, move stop to breakeven. Once up 2× ATR, trail stop at 1× ATR below price. Locks in profit on big movers without cutting winners short prematurely.
+
+**#20 Time-based force-exit at 2:00 PM**: Exit any open trade not yet at SL or target by 2:00 PM. Avoids holding through low-liquidity afternoon. Especially useful for ORB trades which are morning-only signals.
+
+**#21 Volatility-scaled position sizing**: On days where NIFTY ATR > 1.5× its 20-day average, reduce qty by 25–50%. Prevents oversizing on chaotic days where SL is more likely to be hit.
+
+**#22 Trade Journal view**: New dashboard page. Each closed paper trade shown with: strategy that fired, entry time, signal confidence indicators at entry, NIFTY trend at the time, and outcome. Readable like a logbook. Single biggest confidence builder before going live.
+
+**#23 Strategy head-to-head panel**: Dashboard panel showing live win rate, avg P&L per trade, and Sharpe for all 3 strategies side by side — updated from actual paper trade data in real time. No need to run separate backtests to compare.
+
+**#24 Signal confidence score**: Each signal on the Signals page shows a score 0–5: one point each for trend aligned, volume confirmed, VWAP confirmed, RSI not extreme, MACD direction matches. Visual bar or colour indicator. No logic changes — pure visibility.
+
+**#25 Daily P&L heatmap**: Calendar heatmap (GitHub-style green/red squares) on the dashboard. Immediately reveals if losses cluster on specific days, post-gap days, or at start/end of week. Hard to spot from equity curve alone.
+
+**#26 Market regime detector**: Classify each trading day as Trending / Ranging / Volatile using NIFTY's ADX + daily ATR. Run momentum strategies (EMA, ORB) only on Trending days. Suppress all signals on Volatile days. Highest-leverage single improvement for reducing bad-day losses.
+
+**#27 Per-strategy auto-disable**: Extend existing degradation detector (#7) to actually disable a strategy (not just alert) when its rolling 10-trade win rate drops below 35%. Prevents continuing to trade a broken strategy during a regime change.
+
+**#28 Best entry time analysis**: Analyse paper trade data to find which hours of day each strategy wins vs loses. If EMA signals before 10:30 AM show <35% win rate, add a time filter. Turns paper trading data into concrete rule refinements.
 
 ---
 

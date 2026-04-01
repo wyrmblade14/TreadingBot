@@ -52,6 +52,20 @@ STRATEGY_CONFIGS: dict = {
         "supertrend_period": 10,       # ATR lookback for Supertrend
         "supertrend_multiplier": 3.0,  # Band width multiplier
     },
+    "gap_and_go": {
+        "enabled": True,
+        "name": "Gap & Go",
+        "description": (
+            "Trades stocks that open with a significant upward gap (≥0.5% above "
+            "yesterday's close) and continue higher with a volume surge in the first "
+            "15 minutes. Long-only, morning-only (before 11 AM). VWAP filter confirms "
+            "institutional participation. Stop at yesterday's close — if the gap fills, "
+            "the thesis is broken."
+        ),
+        "gap_min_pct": 0.5,           # Minimum gap size in % (0.5% = 50 basis points)
+        "volume_multiplier": 1.5,      # Breakout candle must have 1.5× avg volume
+        "exit_time": "11:00",          # No new Gap & Go entries after 11:00 AM
+    },
 }
 
 # List of active strategies (used by the bot's strategy runner)

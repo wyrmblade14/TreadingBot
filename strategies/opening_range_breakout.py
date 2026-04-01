@@ -56,7 +56,9 @@ from datetime import time
 import pandas as pd
 from loguru import logger
 
+from analysis.regime_detector import get_current_regime, regime_allows_strategy
 from config import strategies as cfg
+from config.settings import REGIME_FILTER_ENABLED
 from indicators.orb import ORBIndicator
 from indicators.supertrend import SupertrendIndicator
 from indicators.vwap import get_vwap_signal
@@ -98,6 +100,18 @@ class ORBStrategy(BaseStrategy):
 
         if len(df) < 4:
             return self.hold_signal(symbol, current_price)
+
+        # ── Regime filter ─────────────────────────────────────────────
+        # ORB breakouts need follow-through after the range break. In a Ranging
+        # market, the breakout quickly reverses back into the range. In a Volatile
+        # market, false spikes trigger the breakout with no real commitment.
+        if REGIME_FILTER_ENABLED:
+            regime = get_current_regime()
+            if not regime_allows_strategy(regime, self.name):
+                logger.debug(
+                    f"ORB suppressed for {symbol} — market regime: {regime.value}"
+                )
+                return self.hold_signal(symbol, current_price)
 
         # Check time constraints
         current_time = df.index[-1].time()

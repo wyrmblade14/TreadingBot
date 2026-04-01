@@ -38,7 +38,9 @@ from __future__ import annotations
 import pandas as pd
 from loguru import logger
 
+from analysis.regime_detector import get_current_regime, regime_allows_strategy
 from config import strategies as cfg
+from config.settings import REGIME_FILTER_ENABLED
 from indicators.macd import MACDIndicator
 from indicators.rsi import RSIIndicator
 from strategies.base_strategy import Action, BaseStrategy, Signal
@@ -77,6 +79,17 @@ class RSIMACDStrategy(BaseStrategy):
             df:     OHLCV DataFrame (needs at least 35 candles for MACD)
         """
         current_price = df["close"].iloc[-1]
+
+        # ── Regime filter ─────────────────────────────────────────────
+        # RSI+MACD is allowed in Ranging markets (RSI catches range extremes)
+        # but suppressed in Volatile markets where price spikes hit stops randomly.
+        if REGIME_FILTER_ENABLED:
+            regime = get_current_regime()
+            if not regime_allows_strategy(regime, self.name):
+                logger.debug(
+                    f"RSI+MACD suppressed for {symbol} — market regime: {regime.value}"
+                )
+                return self.hold_signal(symbol, current_price)
 
         # Need enough candles for both indicators
         min_candles = self._macd.min_candles + 2

@@ -132,7 +132,7 @@ st.sidebar.markdown("---")
 
 page = st.sidebar.radio(
     "Navigate",
-    ["🏠 Home", "🔍 Signals", "📊 Backtest", "⏮ Replay", "🌐 Analysis", "🤖 Bot Monitor", "⚙️ Settings"],
+    ["🏠 Home", "📓 Journal", "⚔️ Compare", "🔍 Signals", "📊 Backtest", "⏮ Replay", "🌐 Analysis", "🤖 Bot Monitor", "⚙️ Settings"],
     label_visibility="collapsed",
 )
 
@@ -141,13 +141,19 @@ st.sidebar.markdown("""
 <div style='font-size:0.78rem;color:#6b7280;line-height:1.8'>
 🟡 &nbsp;<b style='color:#e0e0e0'>Paper Trading</b><br>
 📍 &nbsp;NSE India<br>
-🧠 &nbsp;EMA · RSI+MACD · ORB
+🧠 &nbsp;EMA · RSI+MACD · ORB · Gap&Go
 </div>
 """, unsafe_allow_html=True)
 
 # ── Route to page ─────────────────────────────────────────────────────
 if page == "🏠 Home":
     from dashboard.views.home import render
+    render()
+elif page == "📓 Journal":
+    from dashboard.views.journal import render
+    render()
+elif page == "⚔️ Compare":
+    from dashboard.views.comparison import render
     render()
 elif page == "🔍 Signals":
     from dashboard.views.signals import render

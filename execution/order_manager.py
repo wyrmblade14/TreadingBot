@@ -30,26 +30,40 @@ from typing import Optional
 from loguru import logger
 
 from broker.base_broker import BaseBroker, OrderType, TransactionType
-from config.settings import IST, SQUAREOFF_TIME
+from config.settings import (
+    IST, SQUAREOFF_TIME,
+    TRAIL_STOP_ENABLED, TRAIL_BREAKEVEN_ATR, TRAIL_START_ATR, TRAIL_DISTANCE_ATR,
+)
 from execution.trade_log import TradeLogger
 from strategies.base_strategy import Action, Signal
 
 
 @dataclass
 class OpenTrade:
-    """Tracks a live trade from entry to exit."""
-    trade_log_id: int
-    symbol:       str
-    action:       Action
-    quantity:     int
-    entry_price:  float
-    stop_loss:    float
-    target:       float
-    strategy:     str
+    """
+    Tracks a live trade from entry to exit.
+
+    Trailing stop fields:
+        atr         — the ATR at entry, back-calculated from (entry_price - stop_loss) / 1.5.
+                      Used to measure profit milestones for the trailing stop.
+        trail_phase — 0 = initial fixed stop
+                      1 = stop moved to breakeven (profit hit 1×ATR)
+                      2 = actively trailing (profit hit 2×ATR)
+    """
+    trade_log_id:   int
+    symbol:         str
+    action:         Action
+    quantity:       int
+    entry_price:    float
+    stop_loss:      float
+    target:         float
+    strategy:       str
     entry_order_id: str
-    opened_at:    datetime = field(default_factory=lambda: datetime.now(IST))
-    exit_price:   Optional[float] = None
-    exit_reason:  str = ""
+    opened_at:      datetime       = field(default_factory=lambda: datetime.now(IST))
+    exit_price:     Optional[float] = None
+    exit_reason:    str            = ""
+    atr:            float          = 0.0   # ATR at entry — drives trailing stop milestones
+    trail_phase:    int            = 0     # 0=fixed, 1=breakeven, 2=trailing
 
 
 class OrderManager:
@@ -127,6 +141,11 @@ class OrderManager:
             trading_mode=self._mode,
         )
 
+        # Back-calculate ATR from SL distance: all strategies use SL = entry ± 1.5×ATR
+        # so ATR = |entry - stop_loss| / 1.5. Fallback to 0.5% of price if somehow zero.
+        sl_distance = abs(order.filled_price - signal.stop_loss)
+        entry_atr   = sl_distance / 1.5 if sl_distance > 0 else order.filled_price * 0.005
+
         self._open_trades[signal.symbol] = OpenTrade(
             trade_log_id=trade_id,
             symbol=signal.symbol,
@@ -137,6 +156,7 @@ class OrderManager:
             target=signal.target,
             strategy=signal.strategy,
             entry_order_id=order.order_id,
+            atr=round(entry_atr, 4),
         )
 
         logger.info(
@@ -163,16 +183,33 @@ class OrderManager:
         if trade is None:
             return None
 
+        # ── Trailing stop: update SL before checking exit conditions ──
+        # The trail may move the stop_loss upward (BUY) or downward (SELL),
+        # so we always apply it first. This way a trade that reaches 2×ATR
+        # profit will trail its stop, and may immediately exit if price has
+        # pulled back past the new stop on the same candle.
+        if TRAIL_STOP_ENABLED and trade.atr > 0:
+            self._update_trailing_stop(trade, current_price)
+
+        # ── Check exit conditions ──────────────────────────────────────
         exit_reason = None
 
         if trade.action == Action.BUY:
             if current_price <= trade.stop_loss:
-                exit_reason = f"Stop-loss hit @ ₹{current_price:.2f} (sl=₹{trade.stop_loss:.2f})"
+                phase_str = {0: "SL", 1: "breakeven stop", 2: "trailing stop"}[trade.trail_phase]
+                exit_reason = (
+                    f"{phase_str} hit @ ₹{current_price:.2f} "
+                    f"(sl=₹{trade.stop_loss:.2f})"
+                )
             elif current_price >= trade.target:
                 exit_reason = f"Target hit @ ₹{current_price:.2f} (target=₹{trade.target:.2f})"
         else:  # SELL
             if current_price >= trade.stop_loss:
-                exit_reason = f"Stop-loss hit @ ₹{current_price:.2f} (sl=₹{trade.stop_loss:.2f})"
+                phase_str = {0: "SL", 1: "breakeven stop", 2: "trailing stop"}[trade.trail_phase]
+                exit_reason = (
+                    f"{phase_str} hit @ ₹{current_price:.2f} "
+                    f"(sl=₹{trade.stop_loss:.2f})"
+                )
             elif current_price <= trade.target:
                 exit_reason = f"Target hit @ ₹{current_price:.2f} (target=₹{trade.target:.2f})"
 
@@ -203,6 +240,85 @@ class OrderManager:
             )
             results[symbol] = pnl or 0.0
         return results
+
+    def _update_trailing_stop(self, trade: OpenTrade, current_price: float) -> None:
+        """
+        Advance the trailing stop through its two phases.
+
+        Phase 1 — breakeven: triggered when unrealised profit ≥ TRAIL_BREAKEVEN_ATR × ATR.
+          Moves stop to entry price. The trade can now only break even or profit.
+
+        Phase 2 — trailing: triggered when unrealised profit ≥ TRAIL_START_ATR × ATR.
+          Trails the stop at TRAIL_DISTANCE_ATR × ATR behind the current price.
+          The stop is ratcheted — it only ever moves in the favourable direction.
+
+        ATR is fixed at the value computed at entry so the milestones don't shift
+        as market volatility changes during the trade.
+
+        Args:
+            trade:         The open trade to update (mutated in place).
+            current_price: Latest candle close price.
+        """
+        atr    = trade.atr
+        entry  = trade.entry_price
+
+        if trade.action == Action.BUY:
+            profit = current_price - entry
+
+            # Phase 1: move stop to breakeven
+            if trade.trail_phase == 0 and profit >= TRAIL_BREAKEVEN_ATR * atr:
+                new_sl = entry
+                if new_sl > trade.stop_loss:   # only move in favourable direction
+                    old_sl = trade.stop_loss
+                    trade.stop_loss  = round(new_sl, 2)
+                    trade.trail_phase = 1
+                    logger.info(
+                        f"Trail Phase 1 (breakeven) | {trade.symbol} | "
+                        f"profit={profit:.2f} ≥ {TRAIL_BREAKEVEN_ATR}×ATR={TRAIL_BREAKEVEN_ATR*atr:.2f} | "
+                        f"SL: ₹{old_sl:.2f} → ₹{new_sl:.2f}"
+                    )
+
+            # Phase 2: trail at TRAIL_DISTANCE_ATR × ATR below current price
+            if trade.trail_phase >= 1 and profit >= TRAIL_START_ATR * atr:
+                new_sl = current_price - TRAIL_DISTANCE_ATR * atr
+                if new_sl > trade.stop_loss:   # ratchet — never lower the stop
+                    old_sl = trade.stop_loss
+                    trade.stop_loss  = round(new_sl, 2)
+                    trade.trail_phase = 2
+                    logger.info(
+                        f"Trail Phase 2 (trailing) | {trade.symbol} | "
+                        f"price=₹{current_price:.2f} | "
+                        f"SL: ₹{old_sl:.2f} → ₹{new_sl:.2f}"
+                    )
+
+        else:  # SELL / short
+            profit = entry - current_price
+
+            # Phase 1: move stop to breakeven
+            if trade.trail_phase == 0 and profit >= TRAIL_BREAKEVEN_ATR * atr:
+                new_sl = entry
+                if new_sl < trade.stop_loss:
+                    old_sl = trade.stop_loss
+                    trade.stop_loss  = round(new_sl, 2)
+                    trade.trail_phase = 1
+                    logger.info(
+                        f"Trail Phase 1 (breakeven) | {trade.symbol} | "
+                        f"profit={profit:.2f} ≥ {TRAIL_BREAKEVEN_ATR}×ATR={TRAIL_BREAKEVEN_ATR*atr:.2f} | "
+                        f"SL: ₹{old_sl:.2f} → ₹{new_sl:.2f}"
+                    )
+
+            # Phase 2: trail at TRAIL_DISTANCE_ATR × ATR above current price
+            if trade.trail_phase >= 1 and profit >= TRAIL_START_ATR * atr:
+                new_sl = current_price + TRAIL_DISTANCE_ATR * atr
+                if new_sl < trade.stop_loss:   # ratchet — never raise the stop
+                    old_sl = trade.stop_loss
+                    trade.stop_loss  = round(new_sl, 2)
+                    trade.trail_phase = 2
+                    logger.info(
+                        f"Trail Phase 2 (trailing) | {trade.symbol} | "
+                        f"price=₹{current_price:.2f} | "
+                        f"SL: ₹{old_sl:.2f} → ₹{new_sl:.2f}"
+                    )
 
     def _close_trade(self, trade: OpenTrade, exit_price: float, reason: str) -> float:
         """Execute the exit order and record P&L."""

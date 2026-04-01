@@ -138,3 +138,35 @@ STRATEGY_BASELINES: dict[str, float] = {
 }
 DEGRADATION_THRESHOLD_PCT = 15.0   # alert if win rate drops >15% below baseline
 DEGRADATION_MIN_TRADES    = 10     # skip alert until at least this many trades logged
+
+# ── Market Regime Filter ──────────────────────────────────────────────
+# When True, strategies check the NIFTY50 market regime before generating signals.
+# Suppresses momentum signals in Ranging and Volatile markets to avoid bad trades.
+# Set False to disable (useful during backtesting or debugging).
+# See: analysis/regime_detector.py for regime classification logic.
+REGIME_FILTER_ENABLED = True
+
+# ── Trailing Stop ─────────────────────────────────────────────────────
+# Automatically moves the stop-loss in your favour as a trade profits.
+# This locks in gains on big movers without cutting winners short early.
+#
+# How it works (ATR = the stop-loss distance used at entry):
+#   Phase 1 — once profit reaches TRAIL_BREAKEVEN_ATR × ATR:
+#             move stop to breakeven (entry price). You can't lose now.
+#   Phase 2 — once profit reaches TRAIL_START_ATR × ATR:
+#             trail the stop at TRAIL_DISTANCE_ATR × ATR behind current price.
+#             The stop only ever moves UP (for BUY) or DOWN (for SELL) — never back.
+#
+# Example with ATR = ₹20, entry = ₹1000:
+#   Original stop = ₹970  (entry - 1.5×ATR)
+#   Phase 1 triggered @ ₹1020 (profit = 1×ATR) → stop moves to ₹1000 (breakeven)
+#   Phase 2 triggered @ ₹1040 (profit = 2×ATR) → stop trails at price - ₹20
+#     If price reaches ₹1060 → stop = ₹1040
+#     If price reaches ₹1080 → stop = ₹1060
+#     If price then drops to ₹1060 → stop-loss exits at ₹1060 locking in ₹60 profit
+#
+# Set TRAIL_STOP_ENABLED = False to revert to fixed SL/target behaviour.
+TRAIL_STOP_ENABLED    = True
+TRAIL_BREAKEVEN_ATR   = 1.0   # move stop to breakeven after this many ATRs of profit
+TRAIL_START_ATR       = 2.0   # begin trailing after this many ATRs of profit
+TRAIL_DISTANCE_ATR    = 1.0   # keep trailing stop this many ATRs behind price

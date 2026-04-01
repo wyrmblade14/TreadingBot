@@ -20,31 +20,36 @@ from datetime import datetime
 
 import pandas as pd
 
+from analysis.signal_scorer import score_signal, ScoreResult
 from data.historical import fetch_ohlcv
 from data.instruments import NIFTY50_INSTRUMENTS, KITE_TO_YF
 from strategies.base_strategy import Action, Signal
 from strategies.ema_crossover import EMACrossoverStrategy
-from strategies.rsi_macd_combo import RSIMACDStrategy
+from strategies.gap_and_go import GapAndGoStrategy
 from strategies.opening_range_breakout import ORBStrategy
+from strategies.rsi_macd_combo import RSIMACDStrategy
 
 
 @dataclass
 class ScanResult:
     """A stock that produced a non-HOLD signal."""
-    symbol:      str
-    strategy:    str
-    action:      Action
-    entry_price: float
-    stop_loss:   float
-    target:      float
-    rr_ratio:    float
-    scanned_at:  datetime
+    symbol:            str
+    strategy:          str
+    action:            Action
+    entry_price:       float
+    stop_loss:         float
+    target:            float
+    rr_ratio:          float
+    scanned_at:        datetime
+    confidence_score:  int   = 0     # 0–5 — how many of the 5 quality checks passed
+    confidence_checks: dict  = None  # {check_name: (passed, detail_text)}
 
 
 _STRATEGIES = {
     "EMA Crossover":  EMACrossoverStrategy(),
     "RSI+MACD Combo": RSIMACDStrategy(),
     "ORB":            ORBStrategy(),
+    "Gap & Go":       GapAndGoStrategy(),
 }
 
 
@@ -85,6 +90,7 @@ def scan_nifty50(
             try:
                 signal: Signal = strategy.generate_signal(kite_sym, df)
                 if signal.action != Action.HOLD and signal.is_valid():
+                    scored: ScoreResult = score_signal(signal, df)
                     results.append(ScanResult(
                         symbol=kite_sym,
                         strategy=strat_name,
@@ -94,6 +100,8 @@ def scan_nifty50(
                         target=round(signal.target, 2),
                         rr_ratio=round(signal.reward_risk_ratio, 2),
                         scanned_at=now,
+                        confidence_score=scored.score,
+                        confidence_checks=scored.checks,
                     ))
             except Exception:
                 continue
