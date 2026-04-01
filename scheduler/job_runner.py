@@ -129,6 +129,18 @@ def pre_market_scan() -> None:
     else:
         logger.warning("Could not fetch market overview (network issue?)")
 
+    try:
+        from data.india_vix import get_vix_data
+        _vix = get_vix_data()
+        _status = (
+            "ALL entries suppressed" if _vix["skip_all"]
+            else "BUY entries suppressed" if _vix["skip_buys"]
+            else "Normal trading"
+        )
+        logger.info(f"India VIX: {_vix['vix']:.1f} ({_vix['level'].upper()}) | {_status}")
+    except Exception as exc:
+        logger.warning(f"VIX fetch failed: {exc}")
+
 
 def market_open() -> None:
     """09:15 — Market opens. Reset risk state for the new day."""

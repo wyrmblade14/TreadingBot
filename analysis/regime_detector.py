@@ -65,9 +65,9 @@ ADX_RANGING_THRESHOLD  = 20.0   # ADX below this = no trend / sideways
 ATR_VOLATILE_RATIO     = 1.5    # ATR today > 1.5× its 20-day avg = spike day
 
 # Strategy names that are ALLOWED in each non-trending regime:
-#   RANGING: RSI+MACD only (its RSI component catches range-end reversals)
+#   RANGING: RSI+MACD and BB Mean Reversion (both catch range-extreme reversals)
 #   VOLATILE: none allowed
-_RANGING_ALLOWED: set[str]  = {"rsi_macd_combo"}
+_RANGING_ALLOWED: set[str]  = {"rsi_macd_combo", "bb_mean_reversion"}
 _VOLATILE_ALLOWED: set[str] = set()
 
 

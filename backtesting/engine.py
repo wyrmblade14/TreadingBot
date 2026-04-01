@@ -34,7 +34,7 @@ from typing import Optional
 import pandas as pd
 from loguru import logger
 
-from config.settings import IST, SQUAREOFF_TIME
+from config.settings import IST, SLIPPAGE_PCT, SQUAREOFF_TIME
 from data.historical import fetch_ohlcv
 from data.instruments import KITE_TO_YF
 from risk.position_sizer import calculate_quantity
@@ -293,14 +293,20 @@ class BacktestEngine:
                     if open_trade is not None:
                         exit_reason = _check_exit(open_trade, current_price, current_time)
                         if exit_reason:
-                            brokerage = _estimate_brokerage(open_trade.quantity, open_trade.entry_price, current_price)
+                            # Slippage on exit: selling a BUY gets less; covering a SELL costs more.
+                            _exit_price = round(
+                                current_price * (1 - SLIPPAGE_PCT) if open_trade.action == Action.BUY
+                                else current_price * (1 + SLIPPAGE_PCT),
+                                2,
+                            )
+                            brokerage = _estimate_brokerage(open_trade.quantity, open_trade.entry_price, _exit_price)
                             trade = BacktestTrade(
                                 symbol=symbol,
                                 strategy=self._strategy.name,
                                 action=open_trade.action,
                                 quantity=open_trade.quantity,
                                 entry_price=open_trade.entry_price,
-                                exit_price=current_price,
+                                exit_price=_exit_price,
                                 stop_loss=open_trade.stop_loss,
                                 target=open_trade.target,
                                 entry_time=open_trade.entry_time,
@@ -337,10 +343,17 @@ class BacktestEngine:
                     if signal.reward_risk_ratio < 2.0:
                         continue
 
+                    # Apply slippage: market orders fill worse than the displayed price.
+                    # BUY = pay more (slippage up); SELL = receive less (slippage down).
+                    _entry_price = round(
+                        current_price * (1 + SLIPPAGE_PCT) if signal.action == Action.BUY
+                        else current_price * (1 - SLIPPAGE_PCT),
+                        2,
+                    )
                     open_trade = _OpenTrade(
                         action=signal.action,
                         quantity=qty,
-                        entry_price=current_price,
+                        entry_price=_entry_price,
                         stop_loss=signal.stop_loss,
                         target=signal.target,
                         entry_time=current_time,
@@ -355,7 +368,12 @@ class BacktestEngine:
 
                 # End-of-day: square off any open position
                 if open_trade is not None:
-                    eod_price = float(day_df.iloc[-1]["close"])
+                    _raw_eod  = float(day_df.iloc[-1]["close"])
+                    eod_price = round(
+                        _raw_eod * (1 - SLIPPAGE_PCT) if open_trade.action == Action.BUY
+                        else _raw_eod * (1 + SLIPPAGE_PCT),
+                        2,
+                    )
                     brokerage  = _estimate_brokerage(open_trade.quantity, open_trade.entry_price, eod_price)
                     trade = BacktestTrade(
                         symbol=symbol,

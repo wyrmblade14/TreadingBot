@@ -1,5 +1,5 @@
 """
-Unit tests for the three trading strategies.
+Unit tests for all trading strategies.
 
 We test that each strategy:
   1. Returns a Signal object of the correct type
@@ -18,6 +18,7 @@ import pandas as pd
 import pytest
 
 from strategies.base_strategy import Action, Signal
+from strategies.bb_mean_reversion import BBMeanReversionStrategy
 from strategies.ema_crossover import EMACrossoverStrategy
 from strategies.opening_range_breakout import ORBStrategy
 from strategies.rsi_macd_combo import RSIMACDStrategy
@@ -227,3 +228,109 @@ class TestORBStrategy:
     def test_strategy_name(self):
         strategy = ORBStrategy()
         assert strategy.name == "opening_range_breakout"
+
+
+# ── BB Mean Reversion Strategy tests ─────────────────────────────────
+
+def _make_bb_buy_df() -> pd.DataFrame:
+    """
+    Price oscillates around 100 then drops sharply.
+    This pushes the last close well below the lower Bollinger Band
+    and drives RSI into oversold territory (< 35).
+    """
+    base = [100 + np.sin(i * 0.6) * 6 for i in range(30)]
+    tail = [94.0, 88.0, 82.0, 75.0, 68.0]
+    return make_ohlcv(base + tail)
+
+
+def _make_bb_sell_df() -> pd.DataFrame:
+    """
+    Price oscillates around 100 then surges sharply.
+    This pushes the last close well above the upper Bollinger Band
+    and drives RSI into overbought territory (> 65).
+    """
+    base = [100 + np.sin(i * 0.6) * 6 for i in range(30)]
+    tail = [106.0, 112.0, 118.0, 125.0, 132.0]
+    return make_ohlcv(base + tail)
+
+
+class TestBBMeanReversionStrategy:
+    def test_returns_signal_object(self):
+        df = make_ohlcv([100.0] * 30)
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        assert isinstance(result, Signal)
+
+    def test_hold_with_insufficient_data(self):
+        """Fewer candles than bb_period + rsi_period → HOLD."""
+        df = make_ohlcv([100.0] * 15)
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        assert result.action == Action.HOLD
+
+    def test_hold_when_price_is_mid_band(self):
+        """Price oscillating inside the bands with RSI near 50 → HOLD (no extreme)."""
+        # Gentle oscillation: last price ≈ 100 (well inside both bands), RSI neutral
+        prices = [100 + np.sin(i * 0.3) * 4 for i in range(40)]
+        df = make_ohlcv(prices)
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        assert result.action == Action.HOLD
+
+    def test_buy_signal_generated_on_oversold_drop(self):
+        """Sharp drop below lower band with RSI < 35 should generate a BUY."""
+        df = _make_bb_buy_df()
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        assert result.action == Action.BUY
+
+    def test_sell_signal_generated_on_overbought_surge(self):
+        """Sharp surge above upper band with RSI > 65 should generate a SELL."""
+        df = _make_bb_sell_df()
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        assert result.action == Action.SELL
+
+    def test_buy_signal_prices_are_valid(self):
+        """BUY signal must have SL < entry < target."""
+        df = _make_bb_buy_df()
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        if result.action == Action.BUY:
+            assert result.stop_loss < result.entry_price < result.target
+            assert result.is_valid()
+
+    def test_sell_signal_prices_are_valid(self):
+        """SELL signal must have target < entry < SL."""
+        df = _make_bb_sell_df()
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        if result.action == Action.SELL:
+            assert result.target < result.entry_price < result.stop_loss
+            assert result.is_valid()
+
+    def test_buy_reward_risk_at_least_2_to_1(self):
+        """BUY target must give ≥ 2:1 reward-to-risk ratio."""
+        df = _make_bb_buy_df()
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        if result.action == Action.BUY:
+            assert float(result.reward_risk_ratio) >= 2.0
+
+    def test_sell_reward_risk_at_least_2_to_1(self):
+        """SELL target must give ≥ 2:1 reward-to-risk ratio."""
+        df = _make_bb_sell_df()
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("WIPRO", df)
+        if result.action == Action.SELL:
+            assert float(result.reward_risk_ratio) >= 2.0
+
+    def test_symbol_in_signal(self):
+        df = make_ohlcv([100.0] * 35)
+        strategy = BBMeanReversionStrategy()
+        result = strategy.generate_signal("HCLTECH", df)
+        assert result.symbol == "HCLTECH"
+
+    def test_strategy_name(self):
+        strategy = BBMeanReversionStrategy()
+        assert strategy.name == "bb_mean_reversion"

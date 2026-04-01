@@ -13,6 +13,7 @@ Available strategies:
     ema_crossover          EMA 9/21/50 crossover with volume filter
     rsi_macd_combo         RSI neutral zone + MACD crossover
     opening_range_breakout Opening range breakout (9:15–9:30 AM)
+    bb_mean_reversion      Bollinger Band mean reversion (counter-trend)
 """
 
 from __future__ import annotations
@@ -28,6 +29,7 @@ from backtesting.engine import BacktestEngine
 from backtesting.performance import calculate
 from backtesting.report import generate_report
 from backtesting.walk_forward import WalkForwardEngine
+from strategies.bb_mean_reversion import BBMeanReversionStrategy
 from strategies.ema_crossover import EMACrossoverStrategy
 from strategies.opening_range_breakout import ORBStrategy
 from strategies.rsi_macd_combo import RSIMACDStrategy
@@ -36,6 +38,7 @@ STRATEGY_MAP = {
     "ema_crossover":          EMACrossoverStrategy,
     "rsi_macd_combo":         RSIMACDStrategy,
     "opening_range_breakout": ORBStrategy,
+    "bb_mean_reversion":      BBMeanReversionStrategy,
 }
 
 

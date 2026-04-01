@@ -29,8 +29,12 @@ PRE_MARKET_START    = time(9, 0)    # Pre-market session starts
 MARKET_OPEN         = time(9, 15)   # Regular session opens
 ORB_END_TIME        = time(9, 30)   # End of Opening Range (first 15 min)
 NO_NEW_ENTRIES_TIME = time(14, 30)  # Stop opening new positions after this
-SQUAREOFF_TIME      = time(15, 15)  # Force-close ALL positions by this time
+FORCE_EXIT_TIME     = time(14, 0)   # Force-close any trade still open by this time
+                                    # (before 2:30 PM cutoff — avoids thin afternoon liquidity)
+                                    # Change to time(14, 30) if you prefer more time in a trade.
+SQUAREOFF_TIME      = time(15, 15)  # Hard stop: close ALL positions before market end
 MARKET_CLOSE        = time(15, 30)  # Market closes
+FORCE_EXIT_ENABLED  = True          # Set False to disable time-based force exit (SL/target only)
 
 # No trading in the first 5 minutes (9:15–9:20) — opening auction is chaotic
 FIRST_CANDLE_BLACKOUT = time(9, 20)
@@ -79,7 +83,7 @@ EMA_TREND_PERIOD  = 50   # Trend filter — price above this = uptrend
 
 # RSI (Relative Strength Index) — measures how overbought or oversold a stock is
 # Scale: 0–100. Below 30 = oversold (potentially cheap). Above 70 = overbought (potentially expensive).
-RSI_PERIOD     = 14
+RSI_PERIOD     = 6    # RSI(6) responds to last 30 min on 5m charts — RSI(14) lags 70 min
 RSI_OVERSOLD   = 30   # Buy signal zone
 RSI_OVERBOUGHT = 70   # Sell signal zone
 
@@ -113,7 +117,7 @@ STAMP_DUTY_BUY             = 0.00003    # 0.003% on buy-side turnover
 # ── Slippage Simulation ───────────────────────────────────────────────
 # In real markets, you never get the exact last-traded price when placing orders.
 # Market orders fill slightly worse than the displayed price.
-SLIPPAGE_PCT = 0.001  # 0.1% slippage on market orders (both buy and sell)
+SLIPPAGE_PCT = 0.002  # 0.2% per side — realistic for NSE intraday market orders
 
 # ── Partial Fill Simulation ───────────────────────────────────────────
 # In real markets, large orders "sweep" through multiple price levels in the
@@ -135,6 +139,7 @@ STRATEGY_BASELINES: dict[str, float] = {
     "ema_crossover":          50.0,   # % expected win rate
     "rsi_macd_combo":         45.0,
     "opening_range_breakout": 50.0,
+    "gap_and_go":             50.0,   # Morning momentum — expect similar hit rate to ORB
 }
 DEGRADATION_THRESHOLD_PCT = 15.0   # alert if win rate drops >15% below baseline
 DEGRADATION_MIN_TRADES    = 10     # skip alert until at least this many trades logged

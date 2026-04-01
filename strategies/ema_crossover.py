@@ -53,6 +53,7 @@ from analysis.regime_detector import get_current_regime, regime_allows_strategy
 from config import strategies as cfg
 from config.settings import REGIME_FILTER_ENABLED
 from indicators.ema import EMAIndicator
+from indicators.first_candle import get_first_candle_levels
 from indicators.supertrend import SupertrendIndicator
 from indicators.vwap import get_vwap_signal
 from strategies.base_strategy import Action, BaseStrategy, Signal
@@ -82,6 +83,7 @@ class EMACrossoverStrategy(BaseStrategy):
             period=params["supertrend_period"],
             multiplier=params["supertrend_multiplier"],
         )
+        self.use_first_candle_filter = params.get("use_first_candle_filter", False)
 
     def generate_signal(self, symbol: str, df: pd.DataFrame) -> Signal:
         """
@@ -138,11 +140,24 @@ class EMACrossoverStrategy(BaseStrategy):
         # VWAP filter: 0 means daily data (skip), +1 bullish, -1 bearish
         vwap_bias = get_vwap_signal(df)
 
+        # ── First candle anchor filter ───────────────────────────────
+        # BUY only when price is above the 9:15 candle high (bullish day confirmed).
+        # SELL only when price is below the 9:15 candle low (bearish day confirmed).
+        # Returns None for daily data or before 9:20 AM — skipped gracefully.
+        first_candle_ok_buy  = True
+        first_candle_ok_sell = True
+        if self.use_first_candle_filter:
+            fc_levels = get_first_candle_levels(df)
+            if fc_levels is not None:
+                fc_high, fc_low = fc_levels
+                first_candle_ok_buy  = current_price > fc_high
+                first_candle_ok_sell = current_price < fc_low
+
         # ── BUY signal ──────────────────────────────────────────────
         bullish_cross = (fast_prev < slow_prev) and (fast_now > slow_now)
         vwap_ok_buy   = vwap_bias >= 0   # above VWAP or daily (no filter)
 
-        if bullish_cross and supertrend_bullish and volume_ok and vwap_ok_buy:
+        if bullish_cross and supertrend_bullish and volume_ok and vwap_ok_buy and first_candle_ok_buy:
             atr       = self._compute_atr(df)
             stop_loss = round(current_price - 1.5 * atr, 2)
             target    = round(current_price + 3.0 * atr, 2)  # 3/1.5 = 2:1 RR
@@ -171,7 +186,7 @@ class EMACrossoverStrategy(BaseStrategy):
         bearish_cross = (fast_prev > slow_prev) and (fast_now < slow_now)
         vwap_ok_sell  = vwap_bias <= 0   # below VWAP or daily (no filter)
 
-        if bearish_cross and vwap_ok_sell:
+        if bearish_cross and vwap_ok_sell and first_candle_ok_sell:
             atr       = self._compute_atr(df)
             stop_loss = round(current_price + 1.5 * atr, 2)
             target    = round(current_price - 3.0 * atr, 2)  # 3/1.5 = 2:1 RR

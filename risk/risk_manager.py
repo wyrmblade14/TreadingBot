@@ -69,6 +69,11 @@ from config.settings import (
 from risk.position_sizer import calculate_quantity
 from strategies.base_strategy import Action, Signal
 
+try:
+    from data.india_vix import get_vix_data as _get_vix_data
+except ImportError:  # pragma: no cover
+    _get_vix_data = None  # type: ignore[assignment]
+
 
 @dataclass
 class RiskState:
@@ -181,6 +186,26 @@ class RiskManager:
                 approved=False,
                 reason=f"No new entries after {NO_NEW_ENTRIES_TIME} IST.",
             )
+
+        # ── VIX safety check ─────────────────────────────────────────
+        # India VIX > 22: elevated fear — suppress BUY entries (random spikes hit stops).
+        # India VIX > 30: extreme fear (crash/event) — suppress ALL entries.
+        # Fail-open: if VIX fetch fails, trading continues normally.
+        if _get_vix_data is not None:
+            try:
+                _vix = _get_vix_data()
+                if _vix["skip_all"]:
+                    return RiskDecision(
+                        approved=False,
+                        reason=f"India VIX={_vix['vix']:.1f} > 25 — extreme fear, all entries suppressed.",
+                    )
+                if _vix["skip_buys"] and signal.action == Action.BUY:
+                    return RiskDecision(
+                        approved=False,
+                        reason=f"India VIX={_vix['vix']:.1f} > 20 — elevated fear, BUY entries suppressed.",
+                    )
+            except Exception:
+                pass  # Non-fatal: allow trading if VIX data unavailable
 
         # ── Rule 8: Max open positions ───────────────────────────────
         if len(self.state.open_positions) >= MAX_OPEN_POSITIONS:

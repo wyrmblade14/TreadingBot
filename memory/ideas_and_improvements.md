@@ -21,20 +21,26 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 12 | "No ORB after 11 AM" rule | M | L | Ph2 enh | DONE |
 | 13 | MACD histogram acceleration filter (RSI+MACD) | M | L | Ph2 enh | DONE |
 | 14 | yfinance retry with backoff on None response | M | L | Ph6 enh | DONE |
-| 15 | Bollinger Band Mean Reversion strategy | M | M | Ph2 enh | Idea |
+| 15 | Bollinger Band Mean Reversion strategy | M | M | Ph2 enh | DONE |
 | 16 | Gap & Go morning gap strategy | M | M | Ph2 enh | DONE |
 | 17 | VWAP Retest Entry strategy | H | M | Ph2 enh | Idea |
 | 18 | Sector rotation / market breadth signal bias | M | M | Ph5 enh | Idea |
 | 19 | Trailing stop after 1× ATR profit | H | M | Ph3 enh | DONE |
-| 20 | Time-based force-exit at 2:00 PM | M | L | Ph2 enh | Idea |
+| 20 | Time-based force-exit at 2:00 PM | M | L | Ph2 enh | DONE |
 | 21 | Volatility-scaled position sizing | M | M | Ph2 enh | Idea |
 | 22 | Trade Journal dashboard view | H | M | Ph5 enh | DONE |
 | 23 | Strategy head-to-head live comparison panel | H | L | Ph5 enh | DONE |
 | 24 | Signal confidence score (visual, 0–5) | M | L | Ph5 enh | DONE |
 | 25 | Daily P&L heatmap (calendar view) | M | L | Ph5 enh | DONE |
-| 26 | Market regime detector (Trending/Ranging/Volatile) | H | M | Ph7 | Idea |
+| 26 | Market regime detector (Trending/Ranging/Volatile) | H | M | Ph7 | DONE |
 | 27 | Per-strategy auto-disable on win rate drop | M | L | Ph7 | Idea |
 | 28 | Best entry time analysis from paper trade data | M | L | Ph7 | Idea |
+| 29 | Swing trading mode (overnight holds for BB Mean Reversion) | M | H | Future | Idea |
+| 30 | Realistic slippage 0.2%/side in backtest engine | H | L | Ph4 enh | DONE |
+| 31 | First 5-min candle (9:15–9:20) anchor filter on EMA Crossover | H | M | Ph2 enh | DONE |
+| 32 | RSI period 14→6 for intraday sensitivity (5m charts) | M | L | Ph2 enh | DONE |
+| 33 | India VIX as market fear filter (VIX>20 suppress BUY, >25 all) | H | M | Ph6 enh | DONE |
+| 34 | ORB window widened 15→30 min (9:15–9:45 to avoid open chaos) | M | L | Ph2 enh | DONE |
 
 ---
 
@@ -57,6 +63,7 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 **#14 yfinance retry**: When `ticker.history()` returns None (rate-limited), retry once after 2 seconds before returning None. Reduces missed signals during parallel fetches.
 
 **#15 Bollinger Band Mean Reversion**: Buy when price touches lower band + RSI < 35, targeting the mean (middle band). Adds counter-trend diversity — current 3 strategies are all momentum, so they all fail together in choppy markets.
+  ⚠️ Backtested RELIANCE Jul–Dec 2025: win rate 47.8%, profit factor 0.70, −2% return. Root cause: EOD square-off cuts trades before the middle-band target is reached — this is a multi-day reversion strategy, not intraday. Needs swing trading mode (overnight holds) to work properly. Deferred to future phase.
 
 **#16 Gap & Go**: Enter stocks that open >0.5% above previous close with a volume surge in the first 15 minutes. Reuses ORB infrastructure. Classic intraday pattern, strong on NIFTY50 large caps.
 

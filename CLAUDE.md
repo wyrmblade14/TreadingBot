@@ -75,6 +75,7 @@ Market data → indicators/ → strategies/ → RiskManager.evaluate()
 | 3 Paper Trading | ✅ Done | 23 | broker/, execution/ |
 | 4 Backtesting | ✅ Done | 21 | backtesting/engine.py, performance.py, report.py |
 | 5 Dashboard | ✅ Done | — | dashboard/app.py, dashboard/views/, analysis/ |
+| BB Mean Reversion | ✅ Done | 11 | strategies/bb_mean_reversion.py |
 | 6 Scheduler + Notifications | ✅ Done | — | scheduler/, notifications/ |
 | 6b Live Kite | 🔲 Deferred | — | data/market_feed.py, broker/kite_broker.py |
 | 7 Paper Period | 🔲 | — | 30+ trading days, win rate >45% |

@@ -21,19 +21,20 @@ STRATEGY_CONFIGS: dict = {
         "volume_multiplier": 1.5,   # Volume on signal candle must be 1.5× the 20-bar avg
         "supertrend_period": 10,    # ATR lookback for Supertrend band calculation
         "supertrend_multiplier": 3.0,  # Band width = multiplier × ATR (wider = fewer signals)
+        "use_first_candle_filter": True,  # Only BUY above 9:15 candle high, SELL below its low
     },
     "rsi_macd_combo": {
         "enabled": True,
         "name": "RSI + MACD Combo",
         "description": (
-            "Buys when MACD crosses up AND RSI is in the neutral zone (40–60), "
+            "Buys when MACD crosses up AND RSI is in the neutral zone (35–65), "
             "avoiding entries into already-overbought stocks. Sells when MACD "
-            "crosses back down or RSI reaches 75."
+            "crosses back down or RSI reaches 80."
         ),
-        "rsi_period": 14,
-        "rsi_buy_min": 40,    # RSI must be above this to enter (not oversold chase)
-        "rsi_buy_max": 60,    # RSI must be below this to enter (not overbought)
-        "rsi_exit": 75,       # Exit if RSI hits this level (overbought exit)
+        "rsi_period": 6,      # RSI(6) for intraday — responds to last 30 min, not 70 min
+        "rsi_buy_min": 35,    # RSI must be above this to enter (wider zone for faster RSI)
+        "rsi_buy_max": 65,    # RSI must be below this to enter
+        "rsi_exit": 80,       # Exit if RSI hits this level (RSI(6) can spike to 90+)
         "macd_fast": 12,
         "macd_slow": 26,
         "macd_signal": 9,
@@ -42,11 +43,11 @@ STRATEGY_CONFIGS: dict = {
         "enabled": True,
         "name": "Opening Range Breakout (ORB)",
         "description": (
-            "Captures the breakout from the first 15-minute price range (9:15–9:30 AM). "
+            "Captures the breakout from the first 30-minute price range (9:15–9:45 AM). "
             "Very popular strategy in Indian intraday markets. Supertrend filter ensures "
             "breakouts align with the day's underlying trend direction."
         ),
-        "orb_duration_minutes": 15,   # Opening range window: 9:15–9:30 AM
+        "orb_duration_minutes": 30,   # Opening range window: 9:15–9:45 AM (30 min settles chaos)
         "volume_multiplier": 1.5,      # Breakout candle must have 1.5× avg volume
         "exit_time": "14:30",          # Exit all ORB positions by 2:30 PM
         "supertrend_period": 10,       # ATR lookback for Supertrend
@@ -65,6 +66,21 @@ STRATEGY_CONFIGS: dict = {
         "gap_min_pct": 0.5,           # Minimum gap size in % (0.5% = 50 basis points)
         "volume_multiplier": 1.5,      # Breakout candle must have 1.5× avg volume
         "exit_time": "11:00",          # No new Gap & Go entries after 11:00 AM
+    },
+    "bb_mean_reversion": {
+        "enabled": True,
+        "name": "Bollinger Band Mean Reversion",
+        "description": (
+            "Buys when price touches the lower Bollinger Band and RSI < 35 (oversold). "
+            "Sells when price touches the upper band and RSI > 65 (overbought). "
+            "Targets the middle band (20-period SMA). Counter-trend — works in ranging "
+            "markets where momentum strategies struggle."
+        ),
+        "bb_period": 20,          # SMA window for the middle band
+        "bb_std_dev": 2.0,        # Band width: middle ± (2.0 × std dev) covers ~95% of prices
+        "rsi_period": 6,          # RSI(6) for intraday — faster signal
+        "rsi_oversold": 25,       # Stricter: RSI(6) hits 35 often; 25 = genuinely oversold
+        "rsi_overbought": 75,     # Stricter: RSI(6) hits 65 often; 75 = genuinely overbought
     },
 }
 

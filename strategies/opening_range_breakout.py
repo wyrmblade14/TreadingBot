@@ -51,7 +51,7 @@ This gives a natural target based on the morning's volatility.
 
 from __future__ import annotations
 
-from datetime import time
+from datetime import date, datetime, time, timedelta
 
 import pandas as pd
 from loguru import logger
@@ -79,8 +79,12 @@ class ORBStrategy(BaseStrategy):
         params = cfg.STRATEGY_CONFIGS["opening_range_breakout"]
 
         self.volume_multiplier = params["volume_multiplier"]
+        _orb_minutes  = params["orb_duration_minutes"]
+        _orb_end_time = (
+            datetime.combine(date.today(), time(9, 15)) + timedelta(minutes=_orb_minutes)
+        ).time()
         self._indicator = ORBIndicator(
-            orb_end_time=time(9, 30),
+            orb_end_time=_orb_end_time,
             volume_multiplier=self.volume_multiplier,
         )
         self._supertrend = SupertrendIndicator(

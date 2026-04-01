@@ -32,6 +32,7 @@ from loguru import logger
 from broker.base_broker import BaseBroker, OrderType, TransactionType
 from config.settings import (
     IST, SQUAREOFF_TIME,
+    FORCE_EXIT_ENABLED, FORCE_EXIT_TIME,
     TRAIL_STOP_ENABLED, TRAIL_BREAKEVEN_ATR, TRAIL_START_ATR, TRAIL_DISTANCE_ATR,
 )
 from execution.trade_log import TradeLogger
@@ -182,6 +183,32 @@ class OrderManager:
         trade = self._open_trades.get(symbol)
         if trade is None:
             return None
+
+        # ── Time-based force exit ─────────────────────────────────────
+        # If the current IST time is at or past FORCE_EXIT_TIME (default 2:00 PM),
+        # close the trade regardless of whether SL or target has been reached.
+        #
+        # Why: afternoon liquidity thins significantly after 2 PM. Bid-ask spreads
+        # widen, price moves become random, and end-of-day institutional rebalancing
+        # creates noise that has nothing to do with the trade's original thesis.
+        # Better to exit at a fair price now than risk a random move at 3 PM.
+        #
+        # This is a soft floor — the hard EOD square-off at SQUAREOFF_TIME (3:15 PM)
+        # is always the last resort. FORCE_EXIT_TIME is simply a smarter early exit.
+        if FORCE_EXIT_ENABLED:
+            now_ist = datetime.now(IST).time()
+            if now_ist >= FORCE_EXIT_TIME:
+                logger.info(
+                    f"Force exit triggered | {symbol} | "
+                    f"time={now_ist.strftime('%H:%M')} IST ≥ "
+                    f"{FORCE_EXIT_TIME.strftime('%H:%M')} cutoff | "
+                    f"price=₹{current_price:.2f}"
+                )
+                return self._close_trade(
+                    trade, current_price,
+                    f"Force exit at {FORCE_EXIT_TIME.strftime('%H:%M')} IST "
+                    f"(price=₹{current_price:.2f})"
+                )
 
         # ── Trailing stop: update SL before checking exit conditions ──
         # The trail may move the stop_loss upward (BUY) or downward (SELL),
