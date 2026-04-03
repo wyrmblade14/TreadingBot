@@ -287,6 +287,44 @@ class TelegramNotifier:
             f"Watchlist  {watchlist_size} NIFTY50 symbols"
         )
 
+    def notify_premarket_catalysts(
+        self,
+        bullish: list,
+        bearish: list,
+    ) -> None:
+        """Pre-market catalyst briefing — top event-driven stocks for the day.
+
+        Args:
+            bullish: list of CatalystResult with direction == BULLISH_CATALYST
+            bearish: list of CatalystResult with direction == BEARISH_CATALYST
+        """
+        if not bullish and not bearish:
+            return
+        if not self._once_today("catalysts"):
+            return
+
+        lines = ["📋 <b>Pre-Market Catalysts</b>"]
+
+        if bullish:
+            lines.append("")
+            lines.append("📈 <b>BULLISH</b> (prefer BUY entries):")
+            for r in bullish:
+                lines.append(
+                    f"  <b>{_h(r.symbol)}</b>  <i>{_h(r.reason)}</i>  "
+                    f"<code>{int(r.confidence * 100)}%</code>"
+                )
+
+        if bearish:
+            lines.append("")
+            lines.append("📉 <b>BEARISH</b> (skip BUY entries):")
+            for r in bearish:
+                lines.append(
+                    f"  <b>{_h(r.symbol)}</b>  <i>{_h(r.reason)}</i>  "
+                    f"<code>{int(r.confidence * 100)}%</code>"
+                )
+
+        self.send("\n".join(lines))
+
     def notify_bot_stopped(self) -> None:
         """Alert: scheduler stopped."""
         self.send("⏹ <b>TreadingBot Stopped</b> — all positions squared off.")

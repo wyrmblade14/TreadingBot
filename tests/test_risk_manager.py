@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 import pytest
 
+from analysis.fundamental_analyst import FundamentalJudgment
 from risk.position_sizer import calculate_quantity
 from risk.risk_manager import RiskManager, RiskState
 from strategies.base_strategy import Action, Signal
@@ -248,3 +249,123 @@ class TestRiskManager:
         assert not rm.state.trading_halted
         assert rm.state.daily_pnl == 0
         assert rm.state.consecutive_losses == 0
+
+
+# ── Rule 11: Earnings blackout ────────────────────────────────────────
+
+
+class TestRule11EarningsBlackout:
+    """
+    Tests for Rule 11 — no entries within the earnings blackout window.
+
+    The autouse mock_fundamentals fixture in conftest.py patches
+    is_earnings_blackout to return False by default, so only the tests
+    that explicitly override it will see a blackout.
+    """
+
+    def test_rule11_blocks_when_in_blackout(self):
+        """Overriding the autouse fixture to return True → signal is rejected with 'blackout'."""
+        with patch("data.fundamentals.fundamentals_cache") as mock_fc:
+            mock_fc.is_earnings_blackout.return_value = True
+            sig = make_signal()
+            rm = RiskManager(capital=CAPITAL)
+            with patch("risk.risk_manager.datetime") as mock_dt:
+                mock_dt.now.return_value = datetime.fromisoformat(MARKET_OPEN_TIME)
+                decision = rm.evaluate(sig)
+        assert decision.approved is False
+        assert "blackout" in decision.reason.lower()
+
+    def test_rule11_passes_when_not_in_blackout(self):
+        """Default autouse fixture returns False → valid signal is approved normally."""
+        sig = make_signal(entry=500, stop_loss=492, target=516)
+        rm = RiskManager(capital=CAPITAL)
+        with patch("risk.risk_manager.datetime") as mock_dt:
+            mock_dt.now.return_value = datetime.fromisoformat(MARKET_OPEN_TIME)
+            decision = rm.evaluate(sig)
+        assert decision.approved is True
+
+    def test_rule11_fails_open_on_exception(self):
+        """Exception inside is_earnings_blackout → trading continues (fail-open, not fail-closed)."""
+        with patch("data.fundamentals.FundamentalsCache.is_earnings_blackout", side_effect=Exception("data outage")):
+            sig = make_signal(entry=500, stop_loss=492, target=516)
+            rm = RiskManager(capital=CAPITAL)
+            with patch("risk.risk_manager.datetime") as mock_dt:
+                mock_dt.now.return_value = datetime.fromisoformat(MARKET_OPEN_TIME)
+                decision = rm.evaluate(sig)
+        assert decision.approved is True
+
+
+# ── Position Scaling (fundamental judgment) ───────────────────────────
+
+
+def _make_judgment(
+    bias: str = "NEUTRAL",
+    confidence: float = 0.7,
+    scale: float = 0.6,
+) -> FundamentalJudgment:
+    """Build a FundamentalJudgment for use in scaling tests."""
+    return FundamentalJudgment(
+        bias=bias,
+        confidence=confidence,
+        position_scale=scale,
+        key_strengths=[],
+        key_risks=[],
+        summary="test",
+        source="rule_based",
+    )
+
+
+class TestPositionScaling:
+    """
+    Tests for position_scale_factor() integration inside evaluate().
+
+    The RiskManager scales the 1% risk budget by the judgment's position_scale
+    before calculating quantity. A lower scale → fewer shares.
+    """
+
+    def test_full_scale_when_no_judgment(self):
+        """judgment=None → full 1% risk budget → quantity equals the baseline (125 shares)."""
+        sig = make_signal(entry=500, stop_loss=492, target=516)
+        rm = RiskManager(capital=CAPITAL)
+        with patch("risk.risk_manager.datetime") as mock_dt:
+            mock_dt.now.return_value = datetime.fromisoformat(MARKET_OPEN_TIME)
+            decision = rm.evaluate(sig, judgment=None)
+        assert decision.approved is True
+        # baseline: 1% of 1,00,000 = 1,000 / 8 (risk per share) = 125
+        assert decision.signal.quantity == 125
+
+    def test_reduced_scale_for_neutral_judgment(self):
+        """NEUTRAL judgment with scale=0.6 → quantity is ~60% of the baseline (125 × 0.6 = 75)."""
+        sig = make_signal(entry=500, stop_loss=492, target=516)
+        rm = RiskManager(capital=CAPITAL)
+        judgment = _make_judgment(bias="NEUTRAL", confidence=0.7, scale=0.6)
+        with patch("risk.risk_manager.datetime") as mock_dt:
+            mock_dt.now.return_value = datetime.fromisoformat(MARKET_OPEN_TIME)
+            decision = rm.evaluate(sig, judgment=judgment)
+        assert decision.approved is True
+        # 1% × 0.6 = 0.6% risk → 600 / 8 = 75 shares
+        assert decision.signal.quantity == 75
+
+    def test_minimal_scale_for_bearish_judgment(self):
+        """BEARISH judgment with scale=0.3 → quantity is ~30% of baseline (125 × 0.3 = 37)."""
+        sig = make_signal(entry=500, stop_loss=492, target=516)
+        rm = RiskManager(capital=CAPITAL)
+        judgment = _make_judgment(bias="BEARISH", confidence=0.8, scale=0.3)
+        with patch("risk.risk_manager.datetime") as mock_dt:
+            mock_dt.now.return_value = datetime.fromisoformat(MARKET_OPEN_TIME)
+            decision = rm.evaluate(sig, judgment=judgment)
+        assert decision.approved is True
+        # 1% × 0.3 = 0.3% risk → 300 / 8 = 37 shares
+        assert decision.signal.quantity == 37
+
+    def test_scale_zero_blocks_trade(self):
+        """Earnings blackout makes position_scale_factor return 0.0 → trade is rejected."""
+        with patch("data.fundamentals.fundamentals_cache") as mock_fc:
+            mock_fc.is_earnings_blackout.return_value = True
+            sig = make_signal(entry=500, stop_loss=492, target=516)
+            rm = RiskManager(capital=CAPITAL)
+            with patch("risk.risk_manager.datetime") as mock_dt:
+                mock_dt.now.return_value = datetime.fromisoformat(MARKET_OPEN_TIME)
+                # Rule 11 fires first (same blackout check), so approved=False regardless
+                decision = rm.evaluate(sig)
+        assert decision.approved is False

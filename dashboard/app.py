@@ -132,7 +132,7 @@ st.sidebar.markdown("---")
 
 page = st.sidebar.radio(
     "Navigate",
-    ["🏠 Home", "📓 Journal", "⚔️ Compare", "🔍 Signals", "📊 Backtest", "⏮ Replay", "🌐 Analysis", "🤖 Bot Monitor", "⚙️ Settings"],
+    ["🏠 Home", "📓 Journal", "⚔️ Compare", "🔍 Signals", "📊 Backtest", "⏮ Replay", "🌐 Analysis", "📊 Fundamentals", "🤖 Bot Monitor", "⚙️ Settings"],
     label_visibility="collapsed",
 )
 
@@ -166,6 +166,9 @@ elif page == "⏮ Replay":
     render()
 elif page == "🌐 Analysis":
     from dashboard.views.analysis import render
+    render()
+elif page == "📊 Fundamentals":
+    from dashboard.views.fundamentals import render
     render()
 elif page == "🤖 Bot Monitor":
     from dashboard.views.bot_control import render

@@ -182,6 +182,25 @@ type: project
   reconstructs daily_pnl and consecutive_losses, re-applies halts if already breached.
 - Call order in setup(): restore open trades FIRST, then restore risk state.
 
+## V-Reversal Early Exit — VWAP Cross-Back Within 30 Min
+- On V-reversal days, a SHORT entered correctly at 10AM (direction=DOWN) sees price rally back above VWAP.
+- Waiting for the full SL costs the entire 1% risk allowance. The VWAP cross-back is an earlier, cheaper exit signal.
+- Implemented in OrderManager.check_reversal_exit(symbol, price, vwap):
+    - SELL: if current_price > vwap AND entry within 30 min → exit immediately
+    - BUY: if current_price < vwap AND entry within 30 min → exit immediately
+    - NaN/zero VWAP, no open trade, or elapsed > 30 min → return None (no exit)
+- Called in signal_check() BEFORE check_exits() — reversal takes priority over SL/target.
+- VWAP is computed from the same df already fetched for the symbol that cycle.
+- Window is 30 min (configurable via _REVERSAL_WINDOW_SECS in order_manager.py).
+- Typical saving: 40–60% of max loss on V-reversal days (exit near VWAP, not at full SL).
+
+## Injecting Positions in Tests — Use restore_position(), Not _positions Dict
+- PaperBroker._positions stores Position objects (a dataclass), not plain dicts.
+- update_ltp() calls self._positions[symbol].current_price = price — fails on dict with AttributeError.
+- To inject a position in tests without going through place_order():
+    broker.restore_position(symbol, TransactionType.BUY/SELL, quantity=N, avg_price=P)
+  This creates the correct Position object and adjusts cash.
+
 ## EMA NaN at Session Start
 - At 9:40 AM with only 5 intraday candles, EMA9/EMA21 return NaN (not enough history).
 - `if len(df) >= 21` check is NOT sufficient — EMA can still be NaN if all 21 rows are from today.

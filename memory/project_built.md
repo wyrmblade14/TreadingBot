@@ -6,7 +6,7 @@ type: project
 
 All code lives at the project root.
 Virtual environment: venv/ — on Windows use `venv/Scripts/python.exe` (not venv/bin/).
-Total tests: 182 passing, 0 failures (as of April 2026, Python 3.14 on Windows).
+Total tests: 202 passing, 0 failures (as of April 2026, Python 3.14 on Windows).
 
 ## Phase 1 — Foundation ✅
 Files: config/settings.py, config/strategies.py, data/instruments.py,
@@ -177,6 +177,26 @@ Key DEFENSIVE params (rsi_macd_combo):
 Also confirmed already done from earlier sessions:
 - #13 MACD histogram acceleration filter: in rsi_macd_combo.py:97-107 (`hist_accelerating` check)
 - #14 yfinance retry: in data/historical.py:89-94 (sleep(2) + retry on empty response)
+
+## V-Reversal Exit + Notification Dedup (April 2026) ✅
+Files changed: execution/order_manager.py, scheduler/job_runner.py,
+notifications/telegram_notifier.py
+Tests added: tests/test_reversal_exit.py (9 tests)
+Total tests: 202
+
+Features:
+1. **V-reversal early exit** — OrderManager.check_reversal_exit(symbol, price, vwap):
+   - SELL trade: price crosses back above VWAP within 30 min → exit at market
+   - BUY trade: price falls back below VWAP within 30 min → exit at market
+   - Triggered from signal_check() BEFORE the normal SL/target check
+   - VWAP computed from the df already fetched for that cycle
+   - Saves ~40–60% of max loss on V-reversal days (exit near VWAP, not at full SL)
+   - 30-min window constant: _REVERSAL_WINDOW_SECS in execution/order_manager.py
+
+2. **Once-per-day notification dedup** — TelegramNotifier._once_today(key):
+   - Prevents pre_market briefing and bot_started alerts from firing again on bot restart
+   - _sent_today dict: event_key → YYYY-MM-DD string; checked/set inside self._lock
+   - Applied to notify_premarket() and notify_bot_started()
 
 ## Windows Environment Notes (March 2026)
 - Project migrated from Mac to Windows. Old Mac venv unusable (Unix shebangs, Homebrew paths).

@@ -83,10 +83,80 @@ _state: dict = {
     "vix":                None,
     "regime":             "Unknown",
     "direction":          "NEUTRAL",
+    "fundamental_health": "UNKNOWN",   # "STRONG" | "MIXED" | "WEAK" | "UNKNOWN"
     "consecutive_losses": 0,
     "day_pnl_pct":        0.0,
     "timestamp":          0.0,
 }
+
+
+# ── Fundamental health cache ───────────────────────────────────────────
+_FUNDAMENTAL_HEALTH_TTL = 3600   # 1 hour — refresh once an hour, not every minute
+
+_fundamental_health_cache: dict = {
+    "health":    "UNKNOWN",
+    "timestamp": 0.0,
+}
+
+
+def get_nifty50_fundamental_health() -> str:
+    """
+    Classify the aggregate fundamental health of NIFTY50 stocks.
+
+    Calls score_fundamentals() for all 50 NIFTY50 stocks, averages the scores,
+    and classifies:
+      avg >= 3.5 → "STRONG"   (most stocks are fundamentally above sector median)
+      avg <= 2.5 → "WEAK"     (most stocks are deteriorating vs sector peers)
+      else       → "MIXED"
+
+    Cached for 1 hour — called from refresh() which itself runs every 60s,
+    so this inner cache prevents hammering yfinance on 50 stocks per minute.
+
+    Returns "UNKNOWN" on any error (fail-open: don't change adaptive mode
+    when fundamentals data is unavailable).
+    """
+    global _fundamental_health_cache
+    now_ts = _time.monotonic()
+
+    if now_ts - _fundamental_health_cache["timestamp"] < _FUNDAMENTAL_HEALTH_TTL:
+        return _fundamental_health_cache["health"]
+
+    try:
+        from analysis.fundamental_filter import score_fundamentals
+        from data.instruments import NIFTY50_INSTRUMENTS
+
+        scores = []
+        for inst in NIFTY50_INSTRUMENTS:
+            try:
+                result = score_fundamentals(inst.kite_symbol)
+                scores.append(result.score)
+            except Exception:
+                continue  # skip symbols that fail — don't abort the whole scan
+
+        if len(scores) < 10:   # need at least 10 stocks to make a judgement
+            _fundamental_health_cache = {"health": "UNKNOWN", "timestamp": now_ts}
+            return "UNKNOWN"
+
+        avg = sum(scores) / len(scores)
+
+        if avg >= 3.5:
+            health = "STRONG"
+        elif avg <= 2.5:
+            health = "WEAK"
+        else:
+            health = "MIXED"
+
+        _fundamental_health_cache = {"health": health, "timestamp": now_ts}
+        logger.debug(
+            f"NIFTY50 fundamental health: {health} "
+            f"(avg score={avg:.2f} across {len(scores)} stocks)"
+        )
+        return health
+
+    except Exception as exc:
+        logger.debug(f"Fundamental health check failed: {exc} — returning UNKNOWN")
+        _fundamental_health_cache = {"health": "UNKNOWN", "timestamp": now_ts}
+        return "UNKNOWN"
 
 
 # ── Public API ─────────────────────────────────────────────────────────
@@ -206,6 +276,26 @@ def refresh(
                 reasons.append(
                     f"Time={now_ist.strftime('%H:%M')} (post-1:30 PM — choppy close)"
                 )
+        except Exception:
+            pass
+
+    # ── Signal 5: Fundamental Regime ─────────────────────────────────
+    # If the majority of NIFTY50 stocks are fundamentally deteriorating,
+    # shift to DEFENSIVE even if price-based signals look fine.
+    # (Example: earnings miss season — bad results across the index even
+    # though VIX and ADX haven't reacted yet.)
+    if new_mode == AdaptiveMode.NORMAL:
+        try:
+            health = get_nifty50_fundamental_health()
+            _state["fundamental_health"] = health
+            if health == "WEAK":
+                new_mode = AdaptiveMode.DEFENSIVE
+                reasons.append(
+                    f"Fundamental health=WEAK "
+                    f"(avg NIFTY50 score ≤2.5 — broad earnings deterioration)"
+                )
+            elif health != "UNKNOWN":
+                _state["fundamental_health"] = health
         except Exception:
             pass
 

@@ -52,6 +52,7 @@ from execution.order_manager import OrderManager
 from execution.portfolio import Portfolio
 from execution.trade_log import TradeLogger
 from risk.risk_manager import RiskManager
+from indicators.vwap import compute_vwap
 from strategies.base_strategy import Action, Signal
 from strategies.ema_crossover import EMACrossoverStrategy
 from strategies.rsi_macd_combo import RSIMACDStrategy
@@ -233,6 +234,23 @@ def pre_market_scan() -> None:
     except Exception as exc:
         logger.warning(f"VIX fetch failed: {exc}")
 
+    # ── Catalyst scan ─────────────────────────────────────────────────
+    # Check NSE announcements + news from yesterday for each watchlist symbol.
+    # Results are cached all day and used in signal_check() to skip conflicting entries.
+    try:
+        from analysis.catalyst_scanner import scan_all_catalysts as _catalyst_scan
+        _cat_summary = _catalyst_scan(_watchlist)
+        bull_syms = [r.symbol for r in _cat_summary.bullish[:3]]
+        bear_syms = [r.symbol for r in _cat_summary.bearish[:3]]
+        if bull_syms or bear_syms:
+            logger.info(f"Catalyst scan: BULLISH={bull_syms} | BEARISH={bear_syms}")
+        get_notifier().notify_premarket_catalysts(
+            bullish=_cat_summary.bullish[:3],
+            bearish=_cat_summary.bearish[:3],
+        )
+    except Exception as exc:
+        logger.warning(f"Catalyst scan failed: {exc}")
+
 
 def market_open() -> None:
     """09:15 — Market opens. Reset risk state and start Kite live tick feed."""
@@ -360,6 +378,37 @@ def signal_check() -> None:
             try:
                 if ltp:
                     _broker.update_ltp(kite_sym, ltp)
+
+                # ── V-reversal check (runs before SL/target) ──────────
+                # If price crosses back through VWAP within 30 min of a
+                # SELL entry (or below VWAP for a BUY), exit early.
+                # Saves ~50% of full SL on V-reversal days.
+                _closed_early = False
+                if df is not None and ltp:
+                    import math as _math
+                    _vwap_s = compute_vwap(df)
+                    _vwap_v = float(_vwap_s.iloc[-1]) if not _vwap_s.empty else float("nan")
+                    if not _math.isnan(_vwap_v):
+                        rev_pnl = _order_mgr.check_reversal_exit(kite_sym, ltp, _vwap_v)
+                        if rev_pnl is not None:
+                            _closed_early = True
+                            _risk_mgr.on_position_closed(kite_sym, rev_pnl)
+                            _day_pnl_rev = sum(
+                                t.get("net_pnl") or 0
+                                for t in (_trade_log.get_today_trades() if _trade_log else [])
+                            )
+                            get_notifier().notify_exit(
+                                symbol=kite_sym,
+                                action="EXIT",
+                                exit_price=ltp,
+                                pnl=rev_pnl,
+                                reason="V-reversal (VWAP cross-back)",
+                                day_pnl=_day_pnl_rev,
+                                consec_losses=_risk_mgr.state.consecutive_losses,
+                            )
+
+                # ── Normal SL / target check ──────────────────────────
+                if not _closed_early and ltp:
                     net_pnl = _order_mgr.check_exits(kite_sym, ltp)
                     if net_pnl is not None:
                         _risk_mgr.on_position_closed(kite_sym, net_pnl)
@@ -419,6 +468,83 @@ def signal_check() -> None:
                         f"SHORT_SELLING_ENABLED=False"
                     )
                     continue
+
+                # ── Catalyst filter + opportunity flip ────────────────
+                # When a signal opposes a high-confidence news catalyst, don't
+                # just skip it — flip it to trade WITH the catalyst instead.
+                #
+                # Logic (confidence thresholds):
+                #   ≥ 0.70: block the conflicting signal
+                #   ≥ 0.75: also flip to counter-direction to profit from the event
+                #
+                # Flip targets: 1.5% SL / 3.0% target = exactly 2:1 RR so the
+                # RiskManager's minimum-RR check always passes.
+                #
+                # Examples:
+                #   BEARISH catalyst (NCLT filing) + BUY signal
+                #     → flip to SHORT (sell) if SHORT_SELLING_ENABLED
+                #   BULLISH catalyst (dividend) + SELL signal
+                #     → flip to LONG (buy)
+                try:
+                    from analysis.catalyst_scanner import get_todays_catalysts as _gtc
+                    _cat = {r.symbol: r for r in (
+                        _gtc().bullish + _gtc().bearish
+                    )}.get(kite_sym)
+                    if _cat and _cat.confidence >= 0.7:
+                        if signal.action == Action.BUY and _cat.direction == "BEARISH_CATALYST":
+                            if SHORT_SELLING_ENABLED and _cat.confidence >= 0.75 and ltp:
+                                # Flip to a catalyst-driven short — ride the bad news down
+                                _sl  = round(ltp * 1.015, 2)   # 1.5% stop above entry
+                                _tgt = round(ltp * 0.970, 2)   # 3.0% target below (2:1 RR)
+                                signal = Signal(
+                                    symbol=kite_sym,
+                                    action=Action.SELL,
+                                    entry_price=ltp,
+                                    stop_loss=_sl,
+                                    target=_tgt,
+                                    strategy="catalyst_short",
+                                    reason=f"Catalyst flip: {_cat.reason}",
+                                )
+                                logger.info(
+                                    f"Catalyst flip BUY→SHORT [{kite_sym}]: {_cat.reason} "
+                                    f"(conf={_cat.confidence:.0%}) "
+                                    f"entry={ltp} sl={_sl} tgt={_tgt}"
+                                )
+                                # fall through to rm.evaluate() with the new SELL signal
+                            else:
+                                logger.info(
+                                    f"Skipping BUY [{kite_sym}]: BEARISH catalyst "
+                                    f"({_cat.reason}, conf={_cat.confidence:.0%})"
+                                )
+                                continue
+                        elif signal.action == Action.SELL and _cat.direction == "BULLISH_CATALYST":
+                            if ltp and _cat.confidence >= 0.75:
+                                # Flip to a catalyst-driven long — ride the good news up
+                                _sl  = round(ltp * 0.985, 2)   # 1.5% stop below entry
+                                _tgt = round(ltp * 1.030, 2)   # 3.0% target above (2:1 RR)
+                                signal = Signal(
+                                    symbol=kite_sym,
+                                    action=Action.BUY,
+                                    entry_price=ltp,
+                                    stop_loss=_sl,
+                                    target=_tgt,
+                                    strategy="catalyst_long",
+                                    reason=f"Catalyst flip: {_cat.reason}",
+                                )
+                                logger.info(
+                                    f"Catalyst flip SELL→BUY [{kite_sym}]: {_cat.reason} "
+                                    f"(conf={_cat.confidence:.0%}) "
+                                    f"entry={ltp} sl={_sl} tgt={_tgt}"
+                                )
+                                # fall through to rm.evaluate() with the new BUY signal
+                            else:
+                                logger.info(
+                                    f"Skipping SELL [{kite_sym}]: BULLISH catalyst "
+                                    f"({_cat.reason}, conf={_cat.confidence:.0%})"
+                                )
+                                continue
+                except Exception:
+                    pass  # fail-open — catalyst filter never blocks on data error
 
                 decision = _risk_mgr.evaluate(signal)
                 if not decision.approved:

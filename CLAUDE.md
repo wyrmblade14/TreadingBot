@@ -41,7 +41,9 @@ python scripts/run_bot.py               # start
 
 # Run a backtest from CLI
 python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --start 2024-01-01 --end 2024-12-31
-# --strategy options: ema_crossover | rsi_macd_combo | opening_range_breakout
+# --strategy options: ema_crossover | rsi_macd_combo | opening_range_breakout | bb_mean_reversion | vwap_bounce
+# --all-strategies: run all strategies sequentially
+# --walk-forward: walk-forward validation mode (add --train-months / --test-months)
 ```
 
 ## .env Variables
@@ -77,11 +79,18 @@ Market data → indicators/ → strategies/ → RiskManager.evaluate()
 | 5 Dashboard | ✅ Done | — | dashboard/app.py, dashboard/views/, analysis/ |
 | BB Mean Reversion | ✅ Done | 11 | strategies/bb_mean_reversion.py |
 | 6 Scheduler + Notifications | ✅ Done | — | scheduler/, notifications/ |
+| VIX Direction Bias | ✅ Done | — | data/india_vix.py, analysis/market_direction.py |
+| Adaptive Strategy Manager | ✅ Done | — | config/adaptive.py |
+| VWAP Bounce Strategy | ✅ Done | — | strategies/vwap_bounce.py |
+| V-Reversal Early Exit | ✅ Done | 9 | execution/order_manager.py (check_reversal_exit) |
+| Notification Dedup | ✅ Done | — | notifications/telegram_notifier.py (_once_today) |
+| Fundamental Analysis | ✅ Done | 34 | data/fundamentals.py, analysis/fundamental_filter.py, analysis/fundamental_analyst.py |
+| Pre-Market Catalyst Scanner | ✅ Done | 21 | data/news_catalyst.py, analysis/catalyst_scanner.py |
 | 6b Live Kite | 🔲 Deferred | — | data/market_feed.py, broker/kite_broker.py |
 | 7 Paper Period | 🔲 | — | 30+ trading days, win rate >45% |
 | 8 Go Live | 🔲 | — | `TRADING_MODE=live`, start ₹10k–₹20k |
 
-**Total tests: 113 passing, 0 failures**
+**Total tests: 257 passing, 0 failures**
 
 ## Key Constants (config/settings.py)
 ```
@@ -131,6 +140,9 @@ ta.volatility.AverageTrueRange(high, low, close, window=14).average_true_range()
 | `dashboard/views/` not `dashboard/pages/` | Streamlit auto-detects `pages/` folder and duplicates nav |
 | VWAP `_is_daily`: compare index to normalize() | floor("D") == normalize() always; must compare original to floor |
 | `TradeLogger` at module level in views | Streamlit reruns render() on every click — avoids repeated DB init |
+| `check_reversal_exit()` before `check_exits()` | Reversal fires first so price cross-back exits before SL is reached |
+| `_once_today(key)` in TelegramNotifier | Pre-market briefing + bot-started must not repeat on mid-session restart |
+| `restore_position()` in broker tests | `_positions` stores Position objects; injecting plain dicts breaks `update_ltp()` |
 
 ## Test Mock Pattern (RiskManager time gates)
 ```python

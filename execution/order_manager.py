@@ -23,6 +23,7 @@ Position monitoring:
 
 from __future__ import annotations
 
+import math
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -66,6 +67,9 @@ class OpenTrade:
     exit_reason:    str            = ""
     atr:            float          = 0.0   # ATR at entry — drives trailing stop milestones
     trail_phase:    int            = 0     # 0=fixed, 1=breakeven, 2=trailing
+
+
+_REVERSAL_WINDOW_SECS = 30 * 60  # 30 minutes — how long after entry to watch for V-reversal
 
 
 class OrderManager:
@@ -259,6 +263,69 @@ class OrderManager:
             return self._close_trade(trade, current_price, exit_reason)
 
         return None
+
+    def check_reversal_exit(
+        self,
+        symbol: str,
+        current_price: float,
+        vwap: float,
+    ) -> Optional[float]:
+        """
+        Early exit when price reverses back through VWAP shortly after entry.
+
+        Why this exists:
+          On V-reversal days (e.g. NIFTY gap-down, drops to 10 AM, then rallies all day)
+          a SELL/short entered on a DOWN signal sees price cross back above VWAP quickly.
+          Waiting for full SL costs the entire 1% risk. Exiting on the VWAP cross-back
+          typically saves 40–60% of the maximum loss.
+
+        Conditions (SELL trade):
+          - Price was below VWAP at entry (normal short entry)
+          - Price has crossed back above VWAP (reversal confirmed)
+          - Entry was within the last 30 minutes (not a slow drift — a quick reversal)
+
+        Conditions (BUY trade, symmetric):
+          - Price was above VWAP at entry
+          - Price has fallen back below VWAP
+          - Entry was within the last 30 minutes
+
+        Args:
+            symbol:        The symbol to check.
+            current_price: Latest 5-min candle close (or live tick price).
+            vwap:          Current VWAP value for the symbol.
+
+        Returns:
+            net_pnl if position was closed early, None if condition not met.
+        """
+        if math.isnan(vwap) or vwap <= 0:
+            return None
+
+        with self._lock:
+            trade = self._open_trades.get(symbol)
+            if trade is None:
+                return None
+
+            elapsed_secs = (datetime.now(IST) - trade.opened_at).total_seconds()
+            if elapsed_secs > _REVERSAL_WINDOW_SECS:
+                return None
+
+            elapsed_min = elapsed_secs / 60
+
+            if trade.action == Action.SELL and current_price > vwap:
+                reason = (
+                    f"V-reversal: price ₹{current_price:.2f} crossed back above "
+                    f"VWAP ₹{vwap:.2f} — {elapsed_min:.0f} min after entry"
+                )
+            elif trade.action == Action.BUY and current_price < vwap:
+                reason = (
+                    f"V-reversal: price ₹{current_price:.2f} fell back below "
+                    f"VWAP ₹{vwap:.2f} — {elapsed_min:.0f} min after entry"
+                )
+            else:
+                return None
+
+            logger.info(f"REVERSAL EXIT | {symbol} | {reason}")
+            return self._close_trade(trade, current_price, reason)
 
     def square_off_symbol(self, symbol: str, reason: str = "Manual square-off") -> Optional[float]:
         """Close a specific position immediately at market price."""

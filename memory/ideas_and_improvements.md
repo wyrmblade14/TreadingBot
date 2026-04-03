@@ -56,9 +56,10 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 47 | Intraday direction detector (analysis/market_direction.py) for VIX logic | M | M | Ph6 enh | DONE |
 | 48 | 15-day backtest script (scripts/backtest_15days.py) — multi-symbol, direction-aware | M | M | Ph4 enh | DONE |
 | 49 | NEUTRAL day sit-out: when direction unclear, skip both sides entirely | H | L | Ph6 enh | DONE |
-| 50 | Early reversal detection — exit short quickly if market V-reverses within 30 min | M | H | Future | Idea |
+| 50 | Early reversal detection — exit short quickly if market V-reverses within 30 min | M | H | Future | DONE |
 | 51 | Sector correlation filter — only trade stocks moving WITH NIFTY on up days | M | M | Future | Idea |
 | 52 | Per-day VIX history in backtest (fetch historical ^INDIAVIX for each day) | M | M | Ph4 enh | Idea |
+| 53 | Claude AI fundamental synthesis (FundamentalAnalyst) — position_scale from P/E + debt + margins + earnings growth | H | M | Future | DONE |
 
 ---
 
@@ -117,7 +118,11 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 
 **#49 NEUTRAL sit-out**: Direction check returns 4-tuple (skip_sells, skip_buys, eod_chg, bias_label). NEUT means both True = no trades at all. Previous default was "trade both sides on NEUT" which caused all losses in the 15-day test during a macro sell-off.
 
-**#50 Early reversal detection**: On a DN v day where a short is entered, if price rallies back above VWAP within 30 min of entry — exit at market. V-reversals (like 2026-04-02) can't be predicted but can be exited early at a smaller loss than full SL. Would save ~50% of the Rs2,987 loss on that day.
+**#50 Early reversal detection** ✅ DONE: `OrderManager.check_reversal_exit(symbol, price, vwap)`.
+- SELL: price crosses back above VWAP within 30 min → exit. BUY: price falls below VWAP within 30 min → exit.
+- Window: `_REVERSAL_WINDOW_SECS = 1800` (execution/order_manager.py).
+- Called in signal_check() BEFORE check_exits() — reversal takes priority over SL/target.
+- NaN/zero VWAP or window expired → returns None (no exit). 9 tests in tests/test_reversal_exit.py.
 
 **#51 Sector correlation filter**: On NIFTY UP days, some stocks still decline (sector rotation). Before entering VWAP bounce BUY, check stock's last 10 candles are mostly green (>60% green). Filters out laggard stocks that don't participate in the day's rally.
 

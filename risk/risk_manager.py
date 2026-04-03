@@ -5,7 +5,7 @@ Every signal from a strategy must pass through the Risk Manager before
 an order is placed. Think of it as a compliance officer who checks:
   "Is this trade safe given our current state?"
 
-The Risk Manager enforces 10 hardcoded rules. These are not optional.
+The Risk Manager enforces 11 hardcoded rules. These are not optional.
 They exist because most beginners lose money by:
   1. Risking too much on a single trade (FOMO — fear of missing out)
   2. Not cutting losses quickly (hope that it will recover)
@@ -15,7 +15,7 @@ They exist because most beginners lose money by:
 These rules are based on professional risk management principles adapted
 for the Indian retail intraday market.
 
-The 10 Rules:
+The 11 Rules:
 ──────────────────────────────────────────────────────────────────────
 Rule 1: Max 1% capital risk per trade
    → Position size is calculated so max loss = 1% of capital
@@ -46,6 +46,9 @@ Rule 9: No duplicate: only one position per symbol at a time
 
 Rule 10: Signal must be validated (prices must make mathematical sense)
    → Stop-loss must be below entry for BUY, above for SELL
+
+Rule 11: Earnings blackout — no entries within 3 days of earnings results
+   → Binary event risk: price can gap 5–8% in any direction on results
 ──────────────────────────────────────────────────────────────────────
 """
 
@@ -68,6 +71,10 @@ from config.settings import (
 )
 from risk.position_sizer import calculate_quantity
 from strategies.base_strategy import Action, Signal
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from analysis.fundamental_analyst import FundamentalJudgment
 
 try:
     from data.india_vix import get_vix_data as _get_vix_data
@@ -136,16 +143,19 @@ class RiskManager:
     def __init__(self, capital: float) -> None:
         self.state = RiskState(capital=capital, starting_capital=capital)
 
-    def evaluate(self, signal: Signal, now: Optional[datetime] = None) -> RiskDecision:
+    def evaluate(self, signal: Signal, now: Optional[datetime] = None, judgment: "Optional[FundamentalJudgment]" = None) -> RiskDecision:
         """
         Run all risk checks on a signal.
 
         Args:
-            signal: The trading signal to evaluate.
-            now:    Override "current time" for time-gate rules (Rules 5–7).
-                    Pass the candle timestamp during replay/backtesting so
-                    rules use candle time instead of wall-clock time.
-                    Defaults to datetime.now(IST) for live operation.
+            signal:   The trading signal to evaluate.
+            now:      Override "current time" for time-gate rules (Rules 5–7).
+                      Pass the candle timestamp during replay/backtesting so
+                      rules use candle time instead of wall-clock time.
+                      Defaults to datetime.now(IST) for live operation.
+            judgment: Optional FundamentalJudgment from FundamentalAnalyst.
+                      If provided, position size is scaled by fundamental quality.
+                      Defaults to None (full 1% position size, no scaling).
 
         Returns RiskDecision with approved=True only if ALL rules pass.
         """
@@ -236,11 +246,19 @@ class RiskManager:
                        f"sl={signal.stop_loss} target={signal.target}",
             )
 
-        # ── Rule 1: Calculate quantity (1% capital risk) ─────────────
+        # ── Rule 1: Calculate quantity (1% capital risk, scaled by fundamentals) ──
+        _scale = self.position_scale_factor(signal.symbol, judgment)
+        if _scale == 0.0:
+            return RiskDecision(
+                approved=False,
+                reason=f"{signal.symbol}: position scale is 0.0 (earnings blackout or extreme bearish risk).",
+            )
+        from config.settings import RISK_PER_TRADE_PCT
         quantity = calculate_quantity(
             capital=self.state.capital,
             entry_price=signal.entry_price,
             stop_loss=signal.stop_loss,
+            risk_pct=RISK_PER_TRADE_PCT * _scale,
         )
         if quantity <= 0:
             return RiskDecision(
@@ -258,6 +276,22 @@ class RiskManager:
                        f"minimum {MIN_REWARD_RISK_RATIO}x. "
                        f"Move target further or tighten stop-loss.",
             )
+
+        # ── Rule 11: Earnings blackout ───────────────────────────────
+        # If the company is reporting earnings within ±3 days, don't trade it.
+        # Earnings announcements cause large unpredictable gaps that no technical
+        # indicator can predict. The bot protects itself by standing aside.
+        # Fail-open: if fundamentals data is unavailable, trading continues normally.
+        try:
+            from data.fundamentals import fundamentals_cache as _fc
+            if _fc.is_earnings_blackout(signal.symbol):
+                return RiskDecision(
+                    approved=False,
+                    reason=f"{signal.symbol} is in earnings blackout window (±3 days). "
+                           f"No new entries near earnings — too much binary risk.",
+                )
+        except Exception:
+            pass  # Fail-open: data issue never blocks trading
 
         # ── All checks passed ────────────────────────────────────────
         logger.info(
@@ -379,3 +413,50 @@ class RiskManager:
         if now.time() >= NO_NEW_ENTRIES_TIME:
             return False
         return True
+
+    def position_scale_factor(
+        self,
+        symbol: str,
+        judgment: "FundamentalJudgment | None" = None,
+    ) -> float:
+        """
+        Return a position size scaling factor (0.0–1.0) based on fundamental quality.
+
+        This modulates how much of the standard 1% risk budget to use:
+          1.0 → full position (BULLISH fundamentals, high confidence)
+          0.6 → reduced position (NEUTRAL or mixed signals)
+          0.3 → minimal position (BEARISH fundamentals)
+          0.0 → blocked (earnings blackout — should already be caught by Rule 11)
+
+        Why scale rather than block?
+          Binary allow/block is too crude. A stock with mixed fundamentals is
+          still tradeable — just at lower size. Reducing size on uncertain setups
+          is how professional traders manage fundamental risk without missing trades.
+
+        Args:
+            symbol:   The Kite symbol being traded.
+            judgment: Optional FundamentalJudgment from FundamentalAnalyst.analyze().
+                      If None, returns 1.0 (full size — no penalty for missing data).
+
+        Returns:
+            Float in [0.0, 1.0].
+        """
+        # Double-check earnings blackout (Rule 11 should catch this first, but be safe)
+        try:
+            from data.fundamentals import fundamentals_cache as _fc
+            if _fc.is_earnings_blackout(symbol):
+                return 0.0
+        except Exception:
+            pass  # fail-open
+
+        if judgment is None:
+            return 1.0  # no data → don't penalise
+
+        if judgment.bias == "BULLISH" and judgment.confidence >= 0.6:
+            return 1.0
+        if judgment.bias == "NEUTRAL":
+            return 0.6
+        if judgment.bias == "BEARISH":
+            return 0.3
+        # Fallback: use the model's own position_scale recommendation
+        return max(0.3, min(1.0, judgment.position_scale))
