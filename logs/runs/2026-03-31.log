@@ -1,3 +1,7 @@
+
+============================================================
+  [merged from 2026-03-31_09-00-01.log]
+============================================================
 2026-03-31 09:00:03 IST | INFO     | PaperBroker initialised | capital=₹100,000 | leverage=5x MIS
 2026-03-31 09:00:03 IST | DEBUG    | Trade database ready at /Users/shubhambhosale/Repos/Personal/TreadingBot/logs/trades.db
 2026-03-31 09:00:03 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']

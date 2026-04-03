@@ -102,6 +102,50 @@ def _live_log_fragment() -> None:
 
     st.markdown("---")
 
+    # ── Adaptive Mode Panel ───────────────────────────────────────────
+    try:
+        from config.adaptive import get_state, AdaptiveMode
+        adp = get_state()
+        mode = adp.get("mode", AdaptiveMode.NORMAL)
+
+        if mode == AdaptiveMode.HALTED:
+            mode_colour = "#EF5350"
+            mode_icon   = "🔴"
+        elif mode == AdaptiveMode.DEFENSIVE:
+            mode_colour = "#FFB74D"
+            mode_icon   = "🟡"
+        else:
+            mode_colour = "#4CAF50"
+            mode_icon   = "🟢"
+
+        st.markdown(
+            f'<div style="background:#1e1e2e;border:1px solid {mode_colour};'
+            f'border-radius:8px;padding:12px 16px;margin-bottom:8px">'
+            f'<span style="color:{mode_colour};font-size:16px;font-weight:600">'
+            f'{mode_icon} Adaptive Mode: {mode}</span><br>'
+            f'<span style="color:#aaa;font-size:12px">{adp.get("reason","—")}</span>'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+        vix_val   = adp.get("vix")
+        regime    = adp.get("regime", "Unknown")
+        direction = adp.get("direction", "NEUTRAL")
+        losses    = adp.get("consecutive_losses", 0)
+        pnl_pct   = adp.get("day_pnl_pct", 0.0)
+
+        c1, c2, c3, c4, c5 = st.columns(5)
+        c1.metric("India VIX",      f"{vix_val:.1f}" if vix_val else "—")
+        c2.metric("Regime",         regime)
+        c3.metric("NIFTY Direction", direction)
+        c4.metric("Consec. Losses", str(losses))
+        c5.metric("Day P&L",        f"{pnl_pct:+.1%}" if pnl_pct else "0.0%",
+                  delta_color="inverse")
+    except Exception:
+        pass  # non-fatal — don't break the page if adaptive module not loaded yet
+
+    st.markdown("---")
+
     # ── Live log (auto-refreshing tail -f style) ──────────────────────
     active_log_path = status.get("log_path") if is_running else None
 

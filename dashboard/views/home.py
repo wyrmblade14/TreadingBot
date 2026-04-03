@@ -7,6 +7,8 @@ In paper mode, nothing here involves real money.
 
 from __future__ import annotations
 
+import time
+
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -16,6 +18,22 @@ from execution.trade_log import TradeLogger
 
 # Module-level singleton — created once per process, not on every page render
 _trade_log = TradeLogger()
+
+
+def _get_live_ltp(symbol: str) -> float | None:
+    """
+    Try to get a live price for symbol from available sources:
+      1. KiteTickerFeed WebSocket (fastest, < 1s lag)
+      2. Returns None if neither is available (market closed / feed not running)
+    """
+    try:
+        from data.kite_ticker import get_ticker_feed
+        ltp = get_ticker_feed().get_ltp(symbol)
+        if ltp:
+            return ltp
+    except Exception:
+        pass
+    return None
 
 
 def _pnl_colour(val: float) -> str:
@@ -116,30 +134,78 @@ def render() -> None:
     st.markdown("---")
 
     # ── Today's trades ────────────────────────────────────────────────
-    st.subheader("Today's Trades")
+    hdr_col, refresh_col, auto_col = st.columns([5, 1, 2])
+    hdr_col.subheader("Today's Trades")
+    refresh_clicked = refresh_col.button("🔄 Refresh", use_container_width=True)
+    auto_refresh    = auto_col.toggle("Auto-refresh (5s)", value=False)
 
     if not today_trades:
         st.info("No trades today. Market may be closed or no signals fired yet.")
     else:
+        open_count = sum(1 for t in today_trades if t["exit_price"] is None)
+        if open_count:
+            st.caption(f"⏳ {open_count} open position(s) — live prices from KiteTickerFeed")
+
         rows = []
         for t in today_trades:
-            pnl      = t["net_pnl"]
-            in_time  = t["timestamp"][11:16] if t.get("timestamp") else "—"
-            exit_ts  = t.get("exit_timestamp")
-            out_time = exit_ts[11:16] if exit_ts else "OPEN"
+            pnl        = t["net_pnl"]
+            is_open    = t["exit_price"] is None
+            in_time    = t["timestamp"][11:16]  if t.get("timestamp")       else "—"
+            exit_ts    = t.get("exit_timestamp")
+            out_time   = exit_ts[11:16]          if exit_ts                  else "OPEN"
+            entry      = float(t["entry_price"]) if t["entry_price"]         else 0.0
+            sl         = float(t["stop_loss"])   if t.get("stop_loss")       else 0.0
+            target     = float(t["target"])      if t.get("target")          else 0.0
+            is_buy     = t["action"] == "BUY"
+            qty        = int(t["quantity"])
+
+            if is_open:
+                ltp = _get_live_ltp(t["symbol"])
+            else:
+                ltp = None
+
+            # Unrealised P&L
+            if is_open and ltp:
+                unreal = (ltp - entry) * qty if is_buy else (entry - ltp) * qty
+                unreal_str = f"₹{unreal:+.0f}"
+                ltp_str    = f"₹{ltp:.2f}"
+                # Distance to SL / target as %
+                sl_dist    = abs(ltp - sl) / entry * 100 if sl else None
+                tgt_dist   = abs(target - ltp) / entry * 100 if target else None
+                sl_str     = f"{sl_dist:.1f}% away" if sl_dist is not None else "—"
+                tgt_str    = f"{tgt_dist:.1f}% away" if tgt_dist is not None else "—"
+                result     = "⏳ LIVE"
+            else:
+                unreal_str = "—"
+                ltp_str    = "—" if is_open else "—"
+                sl_str     = "—"
+                tgt_str    = "—"
+                result     = ("✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳")
+
             rows.append({
-                "Symbol":     t["symbol"],
-                "Strategy":   t["strategy"],
-                "Side":       t["action"],
-                "In":         in_time,
-                "Out":        out_time,
-                "Entry ₹":    f"{t['entry_price']:.2f}" if t["entry_price"] else "—",
-                "Exit ₹":     f"{t['exit_price']:.2f}"  if t["exit_price"]  else "—",
-                "Qty":        t["quantity"],
-                "P&L ₹":      f"{pnl:+.0f}" if pnl is not None else "—",
-                "Result":     ("✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳"),
+                "Symbol":       t["symbol"],
+                "Strategy":     t["strategy"],
+                "Side":         t["action"],
+                "In":           in_time,
+                "Out":          out_time,
+                "Entry ₹":      f"{entry:.2f}" if entry else "—",
+                "LTP ₹":        ltp_str,
+                "Exit ₹":       f"{t['exit_price']:.2f}" if t["exit_price"] else "—",
+                "Qty":          qty,
+                "SL dist.":     sl_str,
+                "Target dist.": tgt_str,
+                "Unreal. P&L":  unreal_str,
+                "Net P&L ₹":    f"{pnl:+.0f}" if pnl is not None else "—",
+                "Result":       result,
             })
+
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.caption(f"Last updated: {time.strftime('%H:%M:%S')} IST")
+
+    # Auto-refresh: sleep then rerun — only activates when toggled on
+    if auto_refresh:
+        time.sleep(5)
+        st.rerun()
 
     st.markdown("---")
 

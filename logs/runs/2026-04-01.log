@@ -1,3 +1,730 @@
+
+============================================================
+  [merged from 2026-04-01_08-55-01.log]
+============================================================
+2026-04-01 08:55:02 IST | INFO     | PaperBroker initialised | capital=₹100,000 | leverage=5x MIS
+2026-04-01 08:55:02 IST | DEBUG    | Trade database ready at W:\Projects\TreadingBot\logs\trades.db
+2026-04-01 08:55:02 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']
+2026-04-01 08:55:02 IST | INFO     | Telegram notifications enabled.
+2026-04-01 08:55:02 IST | INFO     | Bot started | paper mode | watchlist=10 symbols | capital=₹100,000
+2026-04-01 08:55:02 IST | INFO     | Press Ctrl+C to stop and square off all positions.
+2026-04-01 08:55:02 IST | INFO     | Dashboard: streamlit run dashboard/app.py
+2026-04-01 09:00:00 IST | INFO     | === PRE-MARKET SCAN (09:00 IST) ===
+2026-04-01 09:00:07 IST | INFO     | NIFTY50: 22331 (-2.14%) | A/D: 5/42 | Mood: BEARISH
+2026-04-01 09:00:07 IST | INFO     | Top gainers: ['HINDALCO', 'COALINDIA', 'ONGC']
+2026-04-01 09:15:00 IST | INFO     | RiskManager reset for new day. Capital: ₹100,000
+2026-04-01 09:15:00 IST | DEBUG    | Signal check @ 09:15
+2026-04-01 09:15:00 IST | INFO     | === MARKET OPEN (09:15 IST) === Capital: ₹100,000
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:15:00 IST | INFO     | Downloaded 75 5m candles for HDFCBANK.NS (2026-03-30 → 2026-03-30)
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:15:00 IST | INFO     | Downloaded 75 5m candles for KOTAKBANK.NS (2026-03-30 → 2026-03-30)
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:15:00 IST | INFO     | Downloaded 75 5m candles for ICICIBANK.NS (2026-03-30 → 2026-03-30)
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:15:00 IST | INFO     | Downloaded 75 5m candles for AXISBANK.NS (2026-03-30 → 2026-03-30)
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:15:00 IST | INFO     | Downloaded 75 5m candles for SBIN.NS (2026-03-30 → 2026-03-30)
+2026-04-01 09:15:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:15:03 IST | DEBUG    | No 5m data for BAJFINANCE: No data returned for 'BAJFINANCE.NS'. Check the symbol format (should end in .NS for NSE stocks).
+2026-04-01 09:15:03 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:15:03 IST | DEBUG    | No 5m data for BAJAJFINSV: No data returned for 'BAJAJFINSV.NS'. Check the symbol format (should end in .NS for NSE stocks).
+2026-04-01 09:15:03 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:15:03 IST | DEBUG    | No 5m data for SHRIRAMFIN: No data returned for 'SHRIRAMFIN.NS'. Check the symbol format (should end in .NS for NSE stocks).
+2026-04-01 09:15:03 IST | INFO     | Downloaded 1 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:15:05 IST | DEBUG    | No 5m data for TCS: No data returned for 'TCS.NS'. Check the symbol format (should end in .NS for NSE stocks).
+2026-04-01 09:15:05 IST | INFO     | EMA SELL | AXISBANK | price=1161.30
+2026-04-01 09:15:05 IST | DEBUG    | Skipping SELL signal [AXISBANK / ema_crossover]: no long position to close
+2026-04-01 09:20:00 IST | DEBUG    | Signal check @ 09:20
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:20:00 IST | INFO     | Downloaded 1 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:20:00 IST | INFO     | Downloaded 1 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:20:00 IST | INFO     | Downloaded 1 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:20:00 IST | INFO     | Downloaded 1 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:20:00 IST | INFO     | Downloaded 1 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:20:01 IST | INFO     | Downloaded 1 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:20:01 IST | INFO     | Downloaded 1 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:20:01 IST | INFO     | Downloaded 1 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:01 IST | INFO     | Downloaded 1 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:20:01 IST | INFO     | Downloaded 1 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:00 IST | DEBUG    | Signal check @ 09:25
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:25:00 IST | INFO     | Downloaded 2 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:25:00 IST | INFO     | Downloaded 2 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:25:00 IST | INFO     | Downloaded 2 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:25:00 IST | INFO     | Downloaded 2 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:25:00 IST | INFO     | Downloaded 2 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:25:01 IST | INFO     | Downloaded 2 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:25:01 IST | INFO     | Downloaded 2 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:25:01 IST | INFO     | Downloaded 2 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:01 IST | INFO     | Downloaded 2 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:25:01 IST | INFO     | Downloaded 2 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:00 IST | DEBUG    | Signal check @ 09:30
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:30:00 IST | INFO     | Downloaded 3 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:30:00 IST | INFO     | Downloaded 3 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:30:00 IST | INFO     | Downloaded 3 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:30:00 IST | INFO     | Downloaded 3 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:30:00 IST | INFO     | Downloaded 3 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:30:01 IST | INFO     | Downloaded 3 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:30:01 IST | INFO     | Downloaded 3 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:30:01 IST | INFO     | Downloaded 3 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:01 IST | INFO     | Downloaded 3 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:30:01 IST | INFO     | Downloaded 3 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:00 IST | DEBUG    | Signal check @ 09:35
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:35:00 IST | INFO     | Downloaded 4 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:35:00 IST | INFO     | Downloaded 4 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:35:00 IST | INFO     | Downloaded 4 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:35:00 IST | INFO     | Downloaded 4 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:35:00 IST | INFO     | Downloaded 4 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:35:01 IST | INFO     | Downloaded 4 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:35:01 IST | INFO     | Downloaded 4 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:35:01 IST | INFO     | Downloaded 4 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:01 IST | INFO     | Downloaded 4 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:35:01 IST | INFO     | Downloaded 4 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:00 IST | DEBUG    | Signal check @ 09:40
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:40:00 IST | INFO     | Downloaded 5 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:40:00 IST | INFO     | Downloaded 5 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:40:00 IST | INFO     | Downloaded 5 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:40:00 IST | INFO     | Downloaded 5 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:40:00 IST | INFO     | Downloaded 5 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:40:01 IST | INFO     | Downloaded 5 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:40:01 IST | INFO     | Downloaded 5 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:40:01 IST | INFO     | Downloaded 5 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:01 IST | INFO     | Downloaded 5 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:40:01 IST | INFO     | Downloaded 5 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:00 IST | DEBUG    | Signal check @ 09:45
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:45:00 IST | INFO     | Downloaded 6 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:45:00 IST | INFO     | Downloaded 6 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:45:00 IST | INFO     | Downloaded 6 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:45:00 IST | INFO     | Downloaded 6 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:45:00 IST | INFO     | Downloaded 6 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:45:01 IST | INFO     | Downloaded 6 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:45:01 IST | INFO     | Downloaded 6 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:45:01 IST | INFO     | Downloaded 6 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:01 IST | INFO     | Downloaded 6 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:45:01 IST | INFO     | Downloaded 6 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:00 IST | DEBUG    | Signal check @ 09:50
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:50:00 IST | INFO     | Downloaded 7 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:50:00 IST | INFO     | Downloaded 7 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:50:00 IST | INFO     | Downloaded 7 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:50:00 IST | INFO     | Downloaded 7 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:50:00 IST | INFO     | Downloaded 7 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:50:01 IST | INFO     | Downloaded 7 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:50:01 IST | INFO     | Downloaded 7 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:50:01 IST | INFO     | Downloaded 7 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:01 IST | INFO     | Downloaded 7 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:50:01 IST | INFO     | Downloaded 7 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:00 IST | DEBUG    | Signal check @ 09:55
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 09:55:00 IST | INFO     | Downloaded 8 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 09:55:00 IST | INFO     | Downloaded 8 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 09:55:00 IST | INFO     | Downloaded 8 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 09:55:00 IST | INFO     | Downloaded 8 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 09:55:00 IST | INFO     | Downloaded 8 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 09:55:01 IST | INFO     | Downloaded 8 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 09:55:01 IST | INFO     | Downloaded 8 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 09:55:01 IST | INFO     | Downloaded 8 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:01 IST | INFO     | Downloaded 8 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 09:55:01 IST | INFO     | Downloaded 8 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:00 IST | DEBUG    | Signal check @ 10:00
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:00:00 IST | INFO     | Downloaded 9 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:00:00 IST | INFO     | Downloaded 9 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:00:00 IST | INFO     | Downloaded 9 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:00:00 IST | INFO     | Downloaded 9 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:00:00 IST | INFO     | Downloaded 9 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:00:01 IST | INFO     | Downloaded 9 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:00:01 IST | INFO     | Downloaded 9 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:00:01 IST | INFO     | Downloaded 9 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:01 IST | INFO     | Downloaded 9 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:00:01 IST | INFO     | Downloaded 9 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:00 IST | DEBUG    | Signal check @ 10:05
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:05:00 IST | INFO     | Downloaded 10 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:05:00 IST | INFO     | Downloaded 10 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:05:00 IST | INFO     | Downloaded 10 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:05:00 IST | INFO     | Downloaded 10 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:05:00 IST | INFO     | Downloaded 10 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:05:01 IST | INFO     | Downloaded 10 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:05:01 IST | INFO     | Downloaded 10 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:05:01 IST | INFO     | Downloaded 10 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:01 IST | INFO     | Downloaded 10 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:01 IST | INFO     | Downloaded 10 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:05:01 IST | DEBUG    | ORB BUY breakout | close=1204.60 above orb_high=1203.60
+2026-04-01 10:05:01 IST | INFO     | ORB BUY | AXISBANK | price=1204.60 orb_high=1203.60 orb_low=1187.70 sl=1187.70 target=1238.40
+2026-04-01 10:05:01 IST | DEBUG    | PositionSizer | capital=100000 entry=1204.60 sl=1187.70 risk_per_share=16.90 rupees_at_risk=1000 qty=59
+2026-04-01 10:05:01 IST | INFO     | Risk APPROVED | [opening_range_breakout] BUY AXISBANK entry=1204.60 sl=1187.70 target=1238.40 qty=59 RR=2.00x | daily_pnl=0 open_positions=0
+2026-04-01 10:05:01 IST | INFO     | OrderManager: Placing BUY order | 59×AXISBANK @ ~₹1204.60
+2026-04-01 10:05:01 IST | DEBUG    | Brokerage breakdown | BUY 59@1205.33 turnover=71114 | brokerage=20.00 stt=0.0000 exchange=2.3112 gst=4.0160 sebi=0.0711 stamp=2.1334 | total=28.53
+2026-04-01 10:05:01 IST | DEBUG    | Brokerage breakdown | BUY 59@1205.33 turnover=71114 | brokerage=20.00 stt=0.0000 exchange=2.3112 gst=4.0160 sebi=0.0711 stamp=2.1334 | total=28.53
+2026-04-01 10:05:01 IST | INFO     | Order FILLED | BUY 59 AXISBANK @ ₹1205.33 | brokerage=₹28.53 | cash=₹85,749
+2026-04-01 10:05:01 IST | INFO     | TradeLog ENTRY #6 | BUY 59×AXISBANK @ ₹1205.33 | sl=1187.70 target=1238.40 strategy=opening_range_breakout
+2026-04-01 10:05:01 IST | INFO     | Trade opened #6 | BUY 59×AXISBANK @ ₹1205.33 | sl=₹1187.70 target=₹1238.40
+2026-04-01 10:05:01 IST | INFO     | ORDER PLACED | AXISBANK | BUY | strategy=opening_range_breakout | entry=1204.60 | sl=1187.70 | target=1238.40
+2026-04-01 10:05:01 IST | DEBUG    | ORB BUY breakout | close=2468.30 above orb_high=2446.50
+2026-04-01 10:05:01 IST | INFO     | ORB BUY | TCS | price=2468.30 orb_high=2446.50 orb_low=2410.10 sl=2410.10 target=2584.70
+2026-04-01 10:05:01 IST | DEBUG    | PositionSizer | capital=85749 entry=2468.30 sl=2410.10 risk_per_share=58.20 rupees_at_risk=857 qty=14
+2026-04-01 10:05:01 IST | INFO     | Risk APPROVED | [opening_range_breakout] BUY TCS entry=2468.30 sl=2410.10 target=2584.70 qty=14 RR=2.00x | daily_pnl=0 open_positions=1
+2026-04-01 10:05:01 IST | INFO     | OrderManager: Placing BUY order | 14×TCS @ ~₹2468.30
+2026-04-01 10:05:01 IST | DEBUG    | Brokerage breakdown | BUY 14@2470.35 turnover=34585 | brokerage=20.00 stt=0.0000 exchange=1.1240 gst=3.8023 sebi=0.0346 stamp=1.0375 | total=26.00
+2026-04-01 10:05:01 IST | DEBUG    | Brokerage breakdown | BUY 14@2470.35 turnover=34585 | brokerage=20.00 stt=0.0000 exchange=1.1240 gst=3.8023 sebi=0.0346 stamp=1.0375 | total=26.00
+2026-04-01 10:05:01 IST | INFO     | Order FILLED | BUY 14 TCS @ ₹2470.35 | brokerage=₹26.00 | cash=₹78,806
+2026-04-01 10:05:01 IST | INFO     | TradeLog ENTRY #7 | BUY 14×TCS @ ₹2470.35 | sl=2410.10 target=2584.70 strategy=opening_range_breakout
+2026-04-01 10:05:01 IST | INFO     | Trade opened #7 | BUY 14×TCS @ ₹2470.35 | sl=₹2410.10 target=₹2584.70
+2026-04-01 10:05:01 IST | INFO     | ORDER PLACED | TCS | BUY | strategy=opening_range_breakout | entry=2468.30 | sl=2410.10 | target=2584.70
+2026-04-01 10:05:01 IST | DEBUG    | ORB BUY breakout | close=1301.00 above orb_high=1297.70
+2026-04-01 10:05:01 IST | INFO     | ORB BUY | INFY | price=1301.00 orb_high=1297.70 orb_low=1279.30 sl=1279.30 target=1344.40
+2026-04-01 10:05:01 IST | DEBUG    | PositionSizer | capital=78806 entry=1301.00 sl=1279.30 risk_per_share=21.70 rupees_at_risk=788 qty=36
+2026-04-01 10:05:01 IST | INFO     | Risk APPROVED | [opening_range_breakout] BUY INFY entry=1301.00 sl=1279.30 target=1344.40 qty=36 RR=2.00x | daily_pnl=0 open_positions=2
+2026-04-01 10:05:01 IST | INFO     | OrderManager: Placing BUY order | 36×INFY @ ~₹1301.00
+2026-04-01 10:05:01 IST | DEBUG    | Brokerage breakdown | BUY 36@1302.13 turnover=46877 | brokerage=20.00 stt=0.0000 exchange=1.5235 gst=3.8742 sebi=0.0469 stamp=1.4063 | total=26.85
+2026-04-01 10:05:01 IST | DEBUG    | Brokerage breakdown | BUY 36@1302.13 turnover=46877 | brokerage=20.00 stt=0.0000 exchange=1.5235 gst=3.8742 sebi=0.0469 stamp=1.4063 | total=26.85
+2026-04-01 10:05:01 IST | INFO     | Order FILLED | BUY 36 INFY @ ₹1302.13 | brokerage=₹26.85 | cash=₹69,403
+2026-04-01 10:05:01 IST | INFO     | TradeLog ENTRY #8 | BUY 36×INFY @ ₹1302.13 | sl=1279.30 target=1344.40 strategy=opening_range_breakout
+2026-04-01 10:05:01 IST | INFO     | Trade opened #8 | BUY 36×INFY @ ₹1302.13 | sl=₹1279.30 target=₹1344.40
+2026-04-01 10:05:01 IST | INFO     | ORDER PLACED | INFY | BUY | strategy=opening_range_breakout | entry=1301.00 | sl=1279.30 | target=1344.40
+2026-04-01 10:10:00 IST | DEBUG    | Signal check @ 10:10
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:10:00 IST | INFO     | Downloaded 11 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:10:00 IST | INFO     | Downloaded 11 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:10:00 IST | INFO     | Downloaded 11 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:10:00 IST | INFO     | Downloaded 11 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:10:00 IST | INFO     | Downloaded 11 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:10:01 IST | INFO     | Downloaded 11 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:10:01 IST | INFO     | Downloaded 11 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:10:01 IST | INFO     | Downloaded 11 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:01 IST | INFO     | Downloaded 11 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:10:01 IST | INFO     | Downloaded 11 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:00 IST | DEBUG    | Signal check @ 10:15
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:15:00 IST | INFO     | Downloaded 12 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:15:00 IST | INFO     | Downloaded 12 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:15:00 IST | INFO     | Downloaded 12 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:15:00 IST | INFO     | Downloaded 12 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:15:00 IST | INFO     | Downloaded 12 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:15:01 IST | INFO     | Downloaded 12 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:15:01 IST | INFO     | Downloaded 12 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:15:01 IST | INFO     | Downloaded 12 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:01 IST | INFO     | Downloaded 12 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:01 IST | INFO     | Downloaded 12 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:15:01 IST | DEBUG    | ORB SELL breakdown | close=1664.40 below orb_low=1665.60
+2026-04-01 10:15:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1664.40 orb_low=1665.60 sl=1682.70 target=1627.80
+2026-04-01 10:15:01 IST | DEBUG    | Skipping SELL signal [BAJAJFINSV / opening_range_breakout]: no long position to close
+2026-04-01 10:20:00 IST | DEBUG    | Signal check @ 10:20
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:20:00 IST | INFO     | Downloaded 13 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:20:00 IST | INFO     | Downloaded 13 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:20:00 IST | INFO     | Downloaded 13 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:20:00 IST | INFO     | Downloaded 13 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:20:00 IST | INFO     | Downloaded 13 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:20:01 IST | INFO     | Downloaded 13 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:20:01 IST | INFO     | Downloaded 13 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:20:01 IST | INFO     | Downloaded 13 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:01 IST | INFO     | Downloaded 13 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:01 IST | INFO     | Downloaded 13 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:20:01 IST | DEBUG    | ORB SELL breakdown | close=1003.10 below orb_low=1003.75
+2026-04-01 10:20:01 IST | INFO     | ORB SELL | SBIN | price=1003.10 orb_low=1003.75 sl=1014.15 target=981.00
+2026-04-01 10:20:01 IST | DEBUG    | Skipping SELL signal [SBIN / opening_range_breakout]: no long position to close
+2026-04-01 10:20:01 IST | DEBUG    | ORB SELL breakdown | close=1665.20 below orb_low=1665.60
+2026-04-01 10:20:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1665.20 orb_low=1665.60 sl=1682.70 target=1630.20
+2026-04-01 10:20:01 IST | DEBUG    | Skipping SELL signal [BAJAJFINSV / opening_range_breakout]: no long position to close
+2026-04-01 10:25:00 IST | DEBUG    | Signal check @ 10:25
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:25:00 IST | INFO     | Downloaded 14 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:25:00 IST | INFO     | Downloaded 14 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:25:00 IST | INFO     | Downloaded 14 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:25:00 IST | INFO     | Downloaded 14 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:25:00 IST | INFO     | Downloaded 14 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:25:01 IST | INFO     | Downloaded 14 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:25:01 IST | INFO     | Downloaded 14 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:25:01 IST | INFO     | Downloaded 14 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:01 IST | INFO     | Downloaded 14 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:01 IST | INFO     | Downloaded 14 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:25:01 IST | DEBUG    | ORB SELL breakdown | close=741.65 below orb_low=744.30
+2026-04-01 10:25:01 IST | INFO     | ORB SELL | HDFCBANK | price=741.65 orb_low=744.30 sl=755.80 target=713.35
+2026-04-01 10:25:01 IST | DEBUG    | Skipping SELL signal [HDFCBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:25:01 IST | DEBUG    | ORB SELL breakdown | close=1218.40 below orb_low=1219.30
+2026-04-01 10:25:01 IST | INFO     | ORB SELL | ICICIBANK | price=1218.40 orb_low=1219.30 sl=1233.90 target=1187.40
+2026-04-01 10:25:01 IST | DEBUG    | Skipping SELL signal [ICICIBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:25:01 IST | DEBUG    | ORB SELL breakdown | close=358.50 below orb_low=359.10
+2026-04-01 10:25:01 IST | DEBUG    | ORB SELL breakdown | close=1001.10 below orb_low=1003.75
+2026-04-01 10:25:01 IST | INFO     | ORB SELL | SBIN | price=1001.10 orb_low=1003.75 sl=1014.15 target=975.00
+2026-04-01 10:25:01 IST | DEBUG    | Skipping SELL signal [SBIN / opening_range_breakout]: no long position to close
+2026-04-01 10:25:01 IST | DEBUG    | ORB SELL breakdown | close=910.75 below orb_low=911.50
+2026-04-01 10:25:01 IST | INFO     | ORB SELL | SHRIRAMFIN | price=910.75 orb_low=911.50 sl=925.40 target=881.45
+2026-04-01 10:25:01 IST | DEBUG    | Skipping SELL signal [SHRIRAMFIN / opening_range_breakout]: no long position to close
+2026-04-01 10:30:00 IST | DEBUG    | Signal check @ 10:30
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:30:00 IST | INFO     | Downloaded 15 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:30:00 IST | INFO     | Downloaded 15 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:30:00 IST | INFO     | Downloaded 15 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:30:00 IST | INFO     | Downloaded 15 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:30:00 IST | INFO     | Downloaded 15 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:30:01 IST | INFO     | Downloaded 15 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:30:01 IST | INFO     | Downloaded 15 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:30:01 IST | INFO     | Downloaded 15 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:01 IST | INFO     | Downloaded 15 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:01 IST | INFO     | Downloaded 15 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:30:01 IST | DEBUG    | ORB SELL breakdown | close=740.90 below orb_low=744.30
+2026-04-01 10:30:01 IST | INFO     | ORB SELL | HDFCBANK | price=740.90 orb_low=744.30 sl=755.80 target=711.10
+2026-04-01 10:30:01 IST | DEBUG    | Skipping SELL signal [HDFCBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:30:01 IST | DEBUG    | ORB SELL breakdown | close=1217.00 below orb_low=1219.30
+2026-04-01 10:30:01 IST | INFO     | ORB SELL | ICICIBANK | price=1217.00 orb_low=1219.30 sl=1233.90 target=1183.20
+2026-04-01 10:30:01 IST | DEBUG    | Skipping SELL signal [ICICIBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:30:01 IST | DEBUG    | ORB SELL breakdown | close=358.15 below orb_low=359.10
+2026-04-01 10:30:01 IST | DEBUG    | ORB SELL breakdown | close=999.80 below orb_low=1003.75
+2026-04-01 10:30:01 IST | INFO     | ORB SELL | SBIN | price=999.80 orb_low=1003.75 sl=1014.15 target=971.10
+2026-04-01 10:30:01 IST | DEBUG    | Skipping SELL signal [SBIN / opening_range_breakout]: no long position to close
+2026-04-01 10:30:01 IST | DEBUG    | ORB SELL breakdown | close=1664.10 below orb_low=1665.60
+2026-04-01 10:30:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1664.10 orb_low=1665.60 sl=1682.70 target=1626.90
+2026-04-01 10:30:01 IST | DEBUG    | Skipping SELL signal [BAJAJFINSV / opening_range_breakout]: no long position to close
+2026-04-01 10:30:01 IST | DEBUG    | ORB SELL breakdown | close=908.00 below orb_low=911.50
+2026-04-01 10:30:01 IST | INFO     | ORB SELL | SHRIRAMFIN | price=908.00 orb_low=911.50 sl=925.40 target=873.20
+2026-04-01 10:30:01 IST | DEBUG    | Skipping SELL signal [SHRIRAMFIN / opening_range_breakout]: no long position to close
+2026-04-01 10:35:00 IST | DEBUG    | Signal check @ 10:35
+2026-04-01 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:35:00 IST | INFO     | Downloaded 16 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:35:00 IST | INFO     | Downloaded 16 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:35:00 IST | INFO     | Downloaded 16 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:35:00 IST | INFO     | Downloaded 16 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:35:01 IST | INFO     | Downloaded 16 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:35:01 IST | INFO     | Downloaded 16 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:35:01 IST | INFO     | Downloaded 16 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:35:01 IST | INFO     | Downloaded 16 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:01 IST | INFO     | Downloaded 16 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:01 IST | INFO     | Downloaded 16 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:35:01 IST | DEBUG    | ORB SELL breakdown | close=741.05 below orb_low=744.30
+2026-04-01 10:35:01 IST | INFO     | ORB SELL | HDFCBANK | price=741.05 orb_low=744.30 sl=755.80 target=711.55
+2026-04-01 10:35:01 IST | DEBUG    | Skipping SELL signal [HDFCBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:35:01 IST | DEBUG    | ORB SELL breakdown | close=1215.70 below orb_low=1219.30
+2026-04-01 10:35:01 IST | INFO     | ORB SELL | ICICIBANK | price=1215.70 orb_low=1219.30 sl=1233.90 target=1179.30
+2026-04-01 10:35:01 IST | DEBUG    | Skipping SELL signal [ICICIBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:35:01 IST | DEBUG    | ORB SELL breakdown | close=357.55 below orb_low=359.10
+2026-04-01 10:35:01 IST | DEBUG    | Brokerage breakdown | SELL 59@1185.66 turnover=69954 | brokerage=20.00 stt=17.4885 exchange=2.2735 gst=4.0092 sebi=0.0700 stamp=0.0000 | total=43.84
+2026-04-01 10:35:01 IST | INFO     | Order FILLED | SELL 59 AXISBANK @ ₹1185.66 | brokerage=₹43.84 | cash=₹82,422
+2026-04-01 10:35:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x21129d67490> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 10:35:01 IST | DEBUG    | ORB SELL breakdown | close=1002.00 below orb_low=1003.75
+2026-04-01 10:35:01 IST | INFO     | ORB SELL | SBIN | price=1002.00 orb_low=1003.75 sl=1014.15 target=977.70
+2026-04-01 10:35:01 IST | DEBUG    | Skipping SELL signal [SBIN / opening_range_breakout]: no long position to close
+2026-04-01 10:35:01 IST | DEBUG    | ORB SELL breakdown | close=1662.80 below orb_low=1665.60
+2026-04-01 10:35:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1662.80 orb_low=1665.60 sl=1682.70 target=1623.00
+2026-04-01 10:35:01 IST | DEBUG    | Skipping SELL signal [BAJAJFINSV / opening_range_breakout]: no long position to close
+2026-04-01 10:35:01 IST | DEBUG    | ORB SELL breakdown | close=908.35 below orb_low=911.50
+2026-04-01 10:35:01 IST | INFO     | ORB SELL | SHRIRAMFIN | price=908.35 orb_low=911.50 sl=925.40 target=874.25
+2026-04-01 10:35:01 IST | DEBUG    | Skipping SELL signal [SHRIRAMFIN / opening_range_breakout]: no long position to close
+2026-04-01 10:40:00 IST | DEBUG    | Signal check @ 10:40
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:40:00 IST | INFO     | Downloaded 17 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:40:00 IST | INFO     | Downloaded 17 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:40:00 IST | INFO     | Downloaded 17 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:40:00 IST | INFO     | Downloaded 17 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:40:00 IST | INFO     | Downloaded 17 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:40:01 IST | INFO     | Downloaded 17 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:40:01 IST | INFO     | Downloaded 17 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:40:01 IST | INFO     | Downloaded 17 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:01 IST | INFO     | Downloaded 17 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:01 IST | INFO     | Downloaded 17 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:40:01 IST | DEBUG    | ORB SELL breakdown | close=741.90 below orb_low=744.30
+2026-04-01 10:40:01 IST | INFO     | ORB SELL | HDFCBANK | price=741.90 orb_low=744.30 sl=755.80 target=714.10
+2026-04-01 10:40:01 IST | DEBUG    | Skipping SELL signal [HDFCBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:40:01 IST | DEBUG    | ORB SELL breakdown | close=1215.90 below orb_low=1219.30
+2026-04-01 10:40:01 IST | INFO     | ORB SELL | ICICIBANK | price=1215.90 orb_low=1219.30 sl=1233.90 target=1179.90
+2026-04-01 10:40:01 IST | DEBUG    | Skipping SELL signal [ICICIBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:40:01 IST | DEBUG    | ORB SELL breakdown | close=357.70 below orb_low=359.10
+2026-04-01 10:40:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=59
+2026-04-01 10:40:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x21129d669e0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 10:40:01 IST | DEBUG    | ORB SELL breakdown | close=1662.20 below orb_low=1665.60
+2026-04-01 10:40:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1662.20 orb_low=1665.60 sl=1682.70 target=1621.20
+2026-04-01 10:40:01 IST | DEBUG    | Skipping SELL signal [BAJAJFINSV / opening_range_breakout]: no long position to close
+2026-04-01 10:40:01 IST | DEBUG    | ORB SELL breakdown | close=906.90 below orb_low=911.50
+2026-04-01 10:40:01 IST | INFO     | ORB SELL | SHRIRAMFIN | price=906.90 orb_low=911.50 sl=925.40 target=869.90
+2026-04-01 10:40:01 IST | DEBUG    | Skipping SELL signal [SHRIRAMFIN / opening_range_breakout]: no long position to close
+2026-04-01 10:45:00 IST | DEBUG    | Signal check @ 10:45
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:45:00 IST | INFO     | Downloaded 18 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:45:00 IST | INFO     | Downloaded 18 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:45:00 IST | INFO     | Downloaded 18 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:45:00 IST | INFO     | Downloaded 18 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:45:00 IST | INFO     | Downloaded 18 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:45:01 IST | INFO     | Downloaded 18 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:45:01 IST | INFO     | Downloaded 18 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:45:01 IST | INFO     | Downloaded 18 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:01 IST | INFO     | Downloaded 18 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:01 IST | INFO     | Downloaded 18 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:45:01 IST | DEBUG    | ORB SELL breakdown | close=741.85 below orb_low=744.30
+2026-04-01 10:45:01 IST | INFO     | ORB SELL | HDFCBANK | price=741.85 orb_low=744.30 sl=755.80 target=713.95
+2026-04-01 10:45:01 IST | DEBUG    | Skipping SELL signal [HDFCBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:45:01 IST | DEBUG    | ORB SELL breakdown | close=1217.50 below orb_low=1219.30
+2026-04-01 10:45:01 IST | INFO     | ORB SELL | ICICIBANK | price=1217.50 orb_low=1219.30 sl=1233.90 target=1184.70
+2026-04-01 10:45:01 IST | DEBUG    | Skipping SELL signal [ICICIBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:45:01 IST | DEBUG    | ORB SELL breakdown | close=358.20 below orb_low=359.10
+2026-04-01 10:45:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=59
+2026-04-01 10:45:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x21129d8bd10> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 10:45:01 IST | DEBUG    | ORB SELL breakdown | close=1001.30 below orb_low=1003.75
+2026-04-01 10:45:01 IST | INFO     | ORB SELL | SBIN | price=1001.30 orb_low=1003.75 sl=1014.15 target=975.60
+2026-04-01 10:45:01 IST | DEBUG    | Skipping SELL signal [SBIN / opening_range_breakout]: no long position to close
+2026-04-01 10:45:01 IST | DEBUG    | ORB SELL breakdown | close=1661.10 below orb_low=1665.60
+2026-04-01 10:45:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1661.10 orb_low=1665.60 sl=1682.70 target=1617.90
+2026-04-01 10:45:01 IST | DEBUG    | Skipping SELL signal [BAJAJFINSV / opening_range_breakout]: no long position to close
+2026-04-01 10:45:01 IST | DEBUG    | ORB SELL breakdown | close=907.90 below orb_low=911.50
+2026-04-01 10:45:01 IST | INFO     | ORB SELL | SHRIRAMFIN | price=907.90 orb_low=911.50 sl=925.40 target=872.90
+2026-04-01 10:45:01 IST | DEBUG    | Skipping SELL signal [SHRIRAMFIN / opening_range_breakout]: no long position to close
+2026-04-01 10:50:00 IST | DEBUG    | Signal check @ 10:50
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:50:00 IST | INFO     | Downloaded 19 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:50:00 IST | INFO     | Downloaded 19 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:50:00 IST | INFO     | Downloaded 19 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:50:00 IST | INFO     | Downloaded 19 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:50:00 IST | INFO     | Downloaded 19 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:50:01 IST | INFO     | Downloaded 19 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:50:01 IST | INFO     | Downloaded 19 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:50:01 IST | INFO     | Downloaded 19 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:01 IST | INFO     | Downloaded 19 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:01 IST | INFO     | Downloaded 19 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:50:01 IST | DEBUG    | ORB SELL breakdown | close=741.80 below orb_low=744.30
+2026-04-01 10:50:01 IST | INFO     | ORB SELL | HDFCBANK | price=741.80 orb_low=744.30 sl=755.80 target=713.80
+2026-04-01 10:50:01 IST | DEBUG    | Skipping SELL signal [HDFCBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:50:01 IST | DEBUG    | ORB SELL breakdown | close=1217.80 below orb_low=1219.30
+2026-04-01 10:50:01 IST | INFO     | ORB SELL | ICICIBANK | price=1217.80 orb_low=1219.30 sl=1233.90 target=1185.60
+2026-04-01 10:50:01 IST | DEBUG    | Skipping SELL signal [ICICIBANK / opening_range_breakout]: no long position to close
+2026-04-01 10:50:01 IST | DEBUG    | ORB SELL breakdown | close=357.90 below orb_low=359.10
+2026-04-01 10:50:01 IST | DEBUG    | ORB SELL breakdown | close=1001.40 below orb_low=1003.75
+2026-04-01 10:50:01 IST | INFO     | ORB SELL | SBIN | price=1001.40 orb_low=1003.75 sl=1014.15 target=975.90
+2026-04-01 10:50:01 IST | DEBUG    | Skipping SELL signal [SBIN / opening_range_breakout]: no long position to close
+2026-04-01 10:50:01 IST | DEBUG    | ORB SELL breakdown | close=1663.00 below orb_low=1665.60
+2026-04-01 10:50:01 IST | INFO     | ORB SELL | BAJAJFINSV | price=1663.00 orb_low=1665.60 sl=1682.70 target=1623.60
+2026-04-01 10:50:01 IST | DEBUG    | Skipping SELL signal [BAJAJFINSV / opening_range_breakout]: no long position to close
+2026-04-01 10:50:01 IST | DEBUG    | ORB SELL breakdown | close=905.55 below orb_low=911.50
+2026-04-01 10:50:01 IST | INFO     | ORB SELL | SHRIRAMFIN | price=905.55 orb_low=911.50 sl=925.40 target=865.85
+2026-04-01 10:50:01 IST | DEBUG    | Skipping SELL signal [SHRIRAMFIN / opening_range_breakout]: no long position to close
+2026-04-01 10:55:00 IST | DEBUG    | Signal check @ 10:55
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 10:55:00 IST | INFO     | Downloaded 20 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 10:55:00 IST | INFO     | Downloaded 20 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 10:55:00 IST | INFO     | Downloaded 20 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 10:55:00 IST | INFO     | Downloaded 20 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 10:55:00 IST | INFO     | Downloaded 20 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 10:55:01 IST | INFO     | Downloaded 20 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 10:55:01 IST | INFO     | Downloaded 20 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 10:55:01 IST | INFO     | Downloaded 20 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:01 IST | INFO     | Downloaded 20 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 10:55:01 IST | INFO     | Downloaded 20 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:00 IST | DEBUG    | Signal check @ 11:00
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 11:00:00 IST | INFO     | Downloaded 21 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 11:00:00 IST | INFO     | Downloaded 21 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 11:00:00 IST | INFO     | Downloaded 21 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 11:00:00 IST | INFO     | Downloaded 21 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 11:00:00 IST | INFO     | Downloaded 21 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 11:00:01 IST | INFO     | Downloaded 21 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 11:00:01 IST | INFO     | Downloaded 21 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 11:00:01 IST | INFO     | Downloaded 21 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:01 IST | INFO     | Downloaded 21 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:01 IST | INFO     | Downloaded 21 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:00:01 IST | DEBUG    | ORB SELL breakdown | close=357.15 below orb_low=359.10
+2026-04-01 11:00:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=59
+2026-04-01 11:00:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x21129fa46b0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 11:05:00 IST | DEBUG    | Signal check @ 11:05
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 11:05:00 IST | INFO     | Downloaded 22 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 11:05:00 IST | INFO     | Downloaded 22 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 11:05:00 IST | INFO     | Downloaded 22 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 11:05:00 IST | INFO     | Downloaded 22 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 11:05:00 IST | INFO     | Downloaded 22 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 11:05:01 IST | INFO     | Downloaded 22 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 11:05:01 IST | INFO     | Downloaded 22 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 11:05:01 IST | INFO     | Downloaded 22 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:01 IST | INFO     | Downloaded 22 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:01 IST | INFO     | Downloaded 22 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:05:01 IST | DEBUG    | 2-lot fill | 40@1184.20 + 19@1182.88 -> avg 1183.78 (LTP 1184.60, impact 0.069%)
+2026-04-01 11:05:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=59
+2026-04-01 11:05:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x21129fa49e0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 11:10:00 IST | DEBUG    | Signal check @ 11:10
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 11:10:00 IST | INFO     | Downloaded 23 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 11:10:00 IST | INFO     | Downloaded 23 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 11:10:00 IST | INFO     | Downloaded 23 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 11:10:00 IST | INFO     | Downloaded 23 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 11:10:00 IST | INFO     | Downloaded 23 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 11:10:01 IST | INFO     | Downloaded 23 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 11:10:01 IST | INFO     | Downloaded 23 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 11:10:01 IST | INFO     | Downloaded 23 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:01 IST | INFO     | Downloaded 23 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:01 IST | INFO     | Downloaded 23 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:10:01 IST | DEBUG    | 2-lot fill | 42@1184.47 + 17@1182.20 -> avg 1183.82 (LTP 1185.00, impact 0.100%)
+2026-04-01 11:10:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=59
+2026-04-01 11:10:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x21129fc1150> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 11:15:00 IST | DEBUG    | Signal check @ 11:15
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 11:15:00 IST | INFO     | Downloaded 24 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 11:15:00 IST | INFO     | Downloaded 24 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 11:15:00 IST | INFO     | Downloaded 24 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 11:15:00 IST | INFO     | Downloaded 24 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 11:15:00 IST | INFO     | Downloaded 24 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:00 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 11:15:01 IST | INFO     | Downloaded 24 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 11:15:01 IST | INFO     | Downloaded 24 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 11:15:01 IST | INFO     | Downloaded 24 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:01 IST | INFO     | Downloaded 24 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:01 IST | INFO     | Downloaded 24 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:15:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=59
+2026-04-01 11:15:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x21129fc1450> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 11:20:00 IST | DEBUG    | Signal check @ 11:20
+2026-04-01 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+2026-04-01 11:20:00 IST | INFO     | Downloaded 25 5m candles for HDFCBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 11:20:00 IST | INFO     | Downloaded 25 5m candles for ICICIBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for SBIN.NS | period=1d
+2026-04-01 11:20:00 IST | INFO     | Downloaded 25 5m candles for KOTAKBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:00 IST | DEBUG    | Fetching 5m OHLCV for BAJFINANCE.NS | period=1d
+2026-04-01 11:20:01 IST | INFO     | Downloaded 25 5m candles for AXISBANK.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for BAJAJFINSV.NS | period=1d
+2026-04-01 11:20:01 IST | INFO     | Downloaded 25 5m candles for SBIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for SHRIRAMFIN.NS | period=1d
+2026-04-01 11:20:01 IST | INFO     | Downloaded 25 5m candles for BAJFINANCE.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for TCS.NS | period=1d
+2026-04-01 11:20:01 IST | INFO     | Downloaded 25 5m candles for BAJAJFINSV.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:01 IST | DEBUG    | Fetching 5m OHLCV for INFY.NS | period=1d
+2026-04-01 11:20:01 IST | INFO     | Downloaded 25 5m candles for SHRIRAMFIN.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:01 IST | INFO     | Downloaded 25 5m candles for TCS.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:01 IST | INFO     | Downloaded 25 5m candles for INFY.NS (2026-04-01 → 2026-04-01)
+2026-04-01 11:20:01 IST | WARNING  | Order REJECTED (oversell): AXISBANK hold=0 sell=59
+2026-04-01 11:20:01 IST | WARNING  | Exit check failed for AXISBANK: Instance <TradeRecord at 0x2112c18c230> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2026-04-01 11:24:43 IST | INFO     | Shutdown signal received — stopping bot...
+2026-04-01 11:24:43 IST | DEBUG    | Fetching 5m OHLCV for AXISBANK.NS | period=1d
+2026-04-01 11:24:43 IST | INFO     | Shutdown signal received — stopping bot...
+2026-04-01 11:25:00 IST | DEBUG    | Signal check @ 11:25
+2026-04-01 11:25:00 IST | DEBUG    | Fetching 5m OHLCV for HDFCBANK.NS | period=1d
+2026-04-01 11:25:00 IST | DEBUG    | Fetching 5m OHLCV for ICICIBANK.NS | period=1d
+2026-04-01 11:25:00 IST | DEBUG    | Fetching 5m OHLCV for KOTAKBANK.NS | period=1d
+
+============================================================
+  [merged from 2026-04-01_12-01-56.log]
+============================================================
 2026-04-01 12:01:57 IST | INFO     | PaperBroker initialised | capital=₹100,000 | leverage=5x MIS
 2026-04-01 12:01:57 IST | DEBUG    | Trade database ready at W:\Projects\TreadingBot\logs\trades.db
 2026-04-01 12:01:57 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']

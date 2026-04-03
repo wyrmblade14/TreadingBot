@@ -1,4 +1,0 @@
-2026-03-27 01:27:18 IST | INFO     | PaperBroker initialised | capital=₹100,000
-2026-03-27 01:27:18 IST | DEBUG    | Trade database ready at /Users/shubhambhosale/Repos/Personal/TreadingBot/logs/trades.db
-2026-03-27 01:27:18 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']
-2026-03-27 01:27:18 IST | INFO     | Telegram notifications enabled.

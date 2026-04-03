@@ -1,0 +1,50 @@
+2026-04-03 10:27:08 IST | INFO     | PaperBroker initialised | capital=₹100,000 | leverage=5x MIS
+2026-04-03 10:27:08 IST | DEBUG    | Trade database ready at C:\Users\shubh\TreadingBot\logs\trades.db
+2026-04-03 10:27:08 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout', 'vwap_bounce']
+2026-04-03 10:27:08 IST | DEBUG    | No open trades from previous session — clean start.
+2026-04-03 10:27:08 IST | INFO     | Telegram notifications enabled.
+2026-04-03 10:27:08 IST | INFO     | Bot started | paper mode | watchlist=10 symbols | capital=₹100,000
+2026-04-03 10:27:08 IST | INFO     | Press Ctrl+C to stop and square off all positions.
+2026-04-03 10:27:08 IST | INFO     | Dashboard: streamlit run dashboard/app.py
+2026-04-03 10:28:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:29:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:30:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:31:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:32:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:33:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:34:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:35:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:36:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:37:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:38:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:39:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:40:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:41:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:42:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:43:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:44:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:45:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:46:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:47:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:48:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:49:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:50:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:51:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:52:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:53:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:54:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:55:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:56:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:57:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:58:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 10:59:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:00:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:01:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:02:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:03:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:04:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:05:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:06:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:07:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:08:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:09:00 IST | INFO     | Today (2026-04-03) is a market holiday or weekend — skipping job.

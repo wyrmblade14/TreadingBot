@@ -197,12 +197,17 @@ class RiskManager:
                 if _vix["skip_all"]:
                     return RiskDecision(
                         approved=False,
-                        reason=f"India VIX={_vix['vix']:.1f} > 25 — extreme fear, all entries suppressed.",
+                        reason=f"India VIX={_vix['vix']:.1f} > 30 — extreme fear, all entries suppressed.",
                     )
-                if _vix["skip_buys"] and signal.action == Action.BUY:
+                if _vix.get("skip_buys") and signal.action == Action.BUY:
                     return RiskDecision(
                         approved=False,
-                        reason=f"India VIX={_vix['vix']:.1f} > 20 — elevated fear, BUY entries suppressed.",
+                        reason=f"India VIX={_vix['vix']:.1f} > 22 — NIFTY falling, BUY entries suppressed.",
+                    )
+                if _vix.get("skip_sells") and signal.action == Action.SELL:
+                    return RiskDecision(
+                        approved=False,
+                        reason=f"India VIX={_vix['vix']:.1f} > 22 — NIFTY rising, SELL/short entries suppressed.",
                     )
             except Exception:
                 pass  # Non-fatal: allow trading if VIX data unavailable
@@ -304,6 +309,56 @@ class RiskManager:
             logger.critical(
                 f"RiskManager: Daily loss limit hit (including unrealised). "
                 f"Halting trading."
+            )
+
+    def restore_daily_state(self, today_closed_trades: list[dict]) -> None:
+        """
+        Rebuild daily_pnl and consecutive_losses from today's closed trades.
+
+        Called on bot restart so circuit breakers survive process restarts.
+        Without this, restarting the bot after 3 losses resets the consecutive-
+        loss counter to 0, allowing the bot to trade right into a 4th, 5th, 6th
+        loss — exactly what happened on 2026-04-02 (8 losses, -₹6,348).
+
+        Args:
+            today_closed_trades: list of trade dicts from TradeLogger.get_today_trades()
+                                  filtered to only closed trades (net_pnl is not None).
+        """
+        if not today_closed_trades:
+            return
+
+        # Restore cumulative daily P&L
+        self.state.daily_pnl = sum(t.get("net_pnl") or 0.0 for t in today_closed_trades)
+
+        # Restore consecutive loss streak from the tail of today's trades
+        streak = 0
+        for t in reversed(today_closed_trades):
+            if (t.get("net_pnl") or 0.0) < 0:
+                streak += 1
+            else:
+                break   # streak broken by a win
+        self.state.consecutive_losses = streak
+
+        logger.info(
+            f"RiskManager restored | daily_pnl=₹{self.state.daily_pnl:.0f} | "
+            f"consecutive_losses={streak}"
+        )
+
+        # Re-apply halt if streak already hit the limit
+        if streak >= MAX_CONSECUTIVE_LOSSES:
+            self.state.halt_until = datetime.now(IST) + timedelta(hours=1)
+            logger.warning(
+                f"RiskManager: {streak} consecutive losses carried over from previous session — "
+                f"1-hour halt re-applied until {self.state.halt_until.strftime('%H:%M')} IST"
+            )
+
+        # Re-apply daily halt if loss limit already breached
+        if self.state.daily_loss_pct <= -MAX_DAILY_LOSS_PCT:
+            self.state.trading_halted = True
+            logger.critical(
+                f"RiskManager: daily loss limit already hit before restart "
+                f"(P&L=₹{self.state.daily_pnl:.0f}, {self.state.daily_loss_pct:.2%}). "
+                f"Trading halted for the rest of the day."
             )
 
     def new_day(self, capital: float) -> None:

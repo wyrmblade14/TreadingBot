@@ -131,6 +131,49 @@ Key facts:
 - `check_all_strategies()` returns sorted list (degraded first)
 - Bot Monitor page now shows "Strategy Health" panel: 3 metric cards (🔴/🟠/🟡/🟢)
 
+## 2026-04-02 Incident Response + System Upgrades ✅
+Files added/changed: strategies/rsi_macd_combo.py, strategies/vwap_bounce.py (new),
+config/strategies.py, config/adaptive.py (new), analysis/market_direction.py (new),
+data/india_vix.py, risk/risk_manager.py, scheduler/job_runner.py,
+dashboard/views/bot_control.py, dashboard/views/home.py, dashboard/views/journal.py,
+broker/paper_broker.py, execution/order_manager.py, execution/trade_log.py,
+scheduler/bot_controller.py, scripts/backtest_15days.py (new)
+Tests: 193 passing (net +11 from before session)
+
+What triggered this:
+- Bot ran 8 SELL trades on a TRENDING UP day (NIFTY +1.4%) — all losses — Rs6,348 loss
+- Root cause 1: no trend-direction awareness (shorted into uptrend)
+- Root cause 2: risk state (consecutive_losses, daily_pnl) reset on every restart
+- Bot was restarted 13+ times; each restart cleared the 3-consecutive-loss pause
+
+Fixes applied:
+1. rsi_macd_combo now has: EMA alignment gate, VWAP direction filter, RSI oversold gate,
+   min SL distance (max 1.5×ATR, 0.75% price), MACD histogram acceleration
+2. RiskManager.restore_daily_state() reads closed trades from DB on startup → halts survive restarts
+3. Open trade recovery on restart — positions reconstructed from DB, not lost
+4. VIX direction bias: india_vix._classify() now checks NIFTY intraday direction to decide
+   skip_sells vs skip_buys (not always skip_buys on elevated VIX)
+5. VWAP Bounce strategy (#5) — buys VWAP pullbacks on up days, confirmed cross entry
+6. AdaptiveStrategyManager — monitors VIX/regime/losses/time every 60s, adjusts rsi_macd_combo
+   params at runtime (NORMAL→DEFENSIVE→HALTED), strategies call _reload_params() per signal
+7. Intraday direction detector (analysis/market_direction.py) — 3-signal consensus from today's
+   candles only (gap vs prev_close, intraday pct at 10AM, green candle fraction 9:15-10:00)
+8. NEUT days → sit out entirely (both skip_sells=True and skip_buys=True)
+9. scripts/backtest_15days.py — multi-symbol direction-aware backtest for any strategy set
+10. Dashboard: adaptive mode panel (mode badge + VIX/regime/direction/losses/P&L), live P&L
+    in Today's Trades, historical journal with date filter + CSV export
+
+Key numbers from 2026-04-02 analysis:
+- Old bot (no filters): 156 signals/day on 10 symbols → total chaos
+- Normal (new filters): 2 signals → still losses on an up-day if direction wrong
+- DEFENSIVE (VIX direction bias): 0 signals → Rs 0 (safe but missed opportunity)
+- VIX direction bias + VWAP Bounce: 3 BUY signals → Rs +5,959 (3/3 wins, simulated)
+- 15-day backtest during tariff sell-off: Rs -545 (-0.55%) vs old bot Rs -6,348 just on day 1
+
+Key DEFENSIVE params (rsi_macd_combo):
+  rsi_buy_min: 45, rsi_buy_max: 60, rsi_sell_min: 50, rsi_exit: 85, min_sl_pct: 1.0%
+  (rsi_exit must be HIGHER in defensive to generate FEWER short signals, not lower)
+
 Also confirmed already done from earlier sessions:
 - #13 MACD histogram acceleration filter: in rsi_macd_combo.py:97-107 (`hist_accelerating` check)
 - #14 yfinance retry: in data/historical.py:89-94 (sleep(2) + retry on empty response)

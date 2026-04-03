@@ -47,11 +47,12 @@ VIX_EXTREME = 30.0   # Above this: extreme fear — suppress ALL entries
 _CACHE_TTL = 300   # 5 minutes
 
 _cache: dict = {
-    "vix":       None,
-    "level":     "normal",
-    "skip_buys": False,
-    "skip_all":  False,
-    "timestamp": 0.0,
+    "vix":        None,
+    "level":      "normal",
+    "skip_buys":  False,
+    "skip_sells": False,
+    "skip_all":   False,
+    "timestamp":  0.0,
 }
 
 
@@ -84,14 +85,15 @@ def get_vix_data() -> dict:
             return _safe_default()
 
         vix = float(df["Close"].iloc[-1])
-        level, skip_buys, skip_all = _classify(vix)
+        level, skip_buys, skip_sells, skip_all = _classify(vix)
 
         _cache.update({
-            "vix":       round(vix, 2),
-            "level":     level,
-            "skip_buys": skip_buys,
-            "skip_all":  skip_all,
-            "timestamp": now,
+            "vix":        round(vix, 2),
+            "level":      level,
+            "skip_buys":  skip_buys,
+            "skip_sells": skip_sells,
+            "skip_all":   skip_all,
+            "timestamp":  now,
         })
         logger.debug(f"IndiaVIX refreshed: {vix:.1f} ({level.upper()})")
         return dict(_cache)
@@ -101,15 +103,43 @@ def get_vix_data() -> dict:
         return _safe_default()
 
 
-def _classify(vix: float) -> tuple[str, bool, bool]:
-    """Return (level_str, skip_buys, skip_all) for a given VIX value."""
+def _classify(vix: float) -> tuple[str, bool, bool, bool]:
+    """
+    Return (level_str, skip_buys, skip_sells, skip_all) for a given VIX value.
+
+    VIX alone cannot tell us which direction to suppress — the market can be
+    fearful and still rally (e.g. short-squeeze days). We pair VIX with the
+    intraday NIFTY direction to target the right side:
+      - NIFTY UP day   → fear from sellers being squeezed → skip SELL entries
+      - NIFTY DOWN day → fear from buyers panicking out   → skip BUY entries
+      - NEUTRAL        → no directional read yet          → skip BUYs (conservative)
+
+    VIX > VIX_EXTREME overrides direction — suppress everything.
+    """
     if vix > VIX_EXTREME:
-        return "extreme", True, True
+        return "extreme", True, True, True
+
     if vix > VIX_HIGH:
-        return "high", True, False
+        # Elevated fear — use intraday direction to decide which side to suppress
+        try:
+            from analysis.market_direction import get_market_direction, MarketDirection
+            direction = get_market_direction()
+            if direction == MarketDirection.UP:
+                # Market going up despite fear → short-squeeze / relief rally
+                # Shorts are deadly; longs are fine
+                return "high", False, True, False
+            elif direction == MarketDirection.DOWN:
+                # Market falling despite/because of fear → panic selling
+                # Longs are dangerous; shorts may work
+                return "high", True, False, False
+        except Exception:
+            pass
+        # Neutral or unknown → conservative default: skip buys
+        return "high", True, False, False
+
     if vix < VIX_LOW:
-        return "low", False, False
-    return "normal", False, False
+        return "low", False, False, False
+    return "normal", False, False, False
 
 
 def _safe_default() -> dict:
@@ -117,4 +147,4 @@ def _safe_default() -> dict:
     if _cache["vix"] is not None:
         return dict(_cache)
     # No data at all — allow trading (fail-open: don't block on network issues)
-    return {"vix": 15.0, "level": "normal", "skip_buys": False, "skip_all": False}
+    return {"vix": 15.0, "level": "normal", "skip_buys": False, "skip_sells": False, "skip_all": False}

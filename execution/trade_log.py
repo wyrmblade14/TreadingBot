@@ -187,6 +187,16 @@ class TradeLogger:
         )
         return net_pnl
 
+    def get_open_trades_today(self) -> list[dict]:
+        """Return today's trades that are still open (exit_price IS NULL)."""
+        today = date.today().isoformat()
+        with SessionLocal() as session:
+            records = session.query(TradeRecord).filter(
+                TradeRecord.date == today,
+                TradeRecord.exit_price == None,  # noqa: E711
+            ).order_by(TradeRecord.timestamp).all()
+            return [_record_to_dict(r) for r in records]
+
     def get_today_trades(self) -> list[dict]:
         """Return all trades for today."""
         today = date.today().isoformat()

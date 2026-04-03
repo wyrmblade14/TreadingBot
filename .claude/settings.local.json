@@ -42,7 +42,9 @@
       "Bash(gh repo:*)",
       "Bash(venv/Scripts/python.exe -m pytest tests/test_strategies.py -v)",
       "Bash(venv/Scripts/python.exe -m pytest tests/ -v)",
-      "Bash(venv/Scripts/python.exe:*)"
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(kill 1518)",
+      "Bash(echo \"PID: $!\")"
     ]
   }
 }

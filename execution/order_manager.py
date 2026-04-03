@@ -23,6 +23,7 @@ Position monitoring:
 
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
@@ -87,6 +88,7 @@ class OrderManager:
         self._log          = trade_logger
         self._mode         = trading_mode
         self._open_trades: dict[str, OpenTrade] = {}  # symbol → OpenTrade
+        self._lock         = threading.RLock()         # guards _open_trades (tick + scheduler threads)
 
     def execute_signal(self, signal: Signal) -> bool:
         """
@@ -98,6 +100,11 @@ class OrderManager:
         Returns:
             True if order was placed and filled successfully, False otherwise.
         """
+        with self._lock:
+            return self._execute_signal_locked(signal)
+
+    def _execute_signal_locked(self, signal: Signal) -> bool:
+        """Inner implementation — must be called with self._lock held."""
         if signal.action == Action.HOLD:
             return False
 
@@ -171,7 +178,10 @@ class OrderManager:
         """
         Check if an open trade has hit its stop-loss or target.
 
-        Call this on every new candle for each symbol that has an open position.
+        Thread-safe: called from both the scheduler thread (signal_check) and
+        the WebSocket thread (tick exit monitoring). Uses an RLock internally.
+
+        Call this on every new candle or tick for each symbol that has an open position.
 
         Args:
             symbol:        The symbol to check
@@ -180,6 +190,11 @@ class OrderManager:
         Returns:
             net_pnl if position was closed, None if still open.
         """
+        with self._lock:
+            return self._check_exits_locked(symbol, current_price)
+
+    def _check_exits_locked(self, symbol: str, current_price: float) -> Optional[float]:
+        """Inner implementation — must be called with self._lock held."""
         trade = self._open_trades.get(symbol)
         if trade is None:
             return None
@@ -247,26 +262,28 @@ class OrderManager:
 
     def square_off_symbol(self, symbol: str, reason: str = "Manual square-off") -> Optional[float]:
         """Close a specific position immediately at market price."""
-        trade = self._open_trades.get(symbol)
-        if trade is None:
-            return None
-        ltp = self._broker.get_ltp(symbol)
-        return self._close_trade(trade, ltp, reason)
+        with self._lock:
+            trade = self._open_trades.get(symbol)
+            if trade is None:
+                return None
+            ltp = self._broker.get_ltp(symbol)
+            return self._close_trade(trade, ltp, reason)
 
     def square_off_all(self) -> dict[str, float]:
         """
         Close all open positions. Called at 3:15 PM for intraday square-off.
         Returns a dict of symbol → net_pnl for each closed trade.
         """
-        results = {}
-        for symbol in list(self._open_trades.keys()):
-            ltp = self._broker.get_ltp(symbol)
-            pnl = self._close_trade(
-                self._open_trades[symbol], ltp,
-                f"End-of-day square-off at {SQUAREOFF_TIME} IST"
-            )
-            results[symbol] = pnl or 0.0
-        return results
+        with self._lock:
+            results = {}
+            for symbol in list(self._open_trades.keys()):
+                ltp = self._broker.get_ltp(symbol)
+                pnl = self._close_trade(
+                    self._open_trades[symbol], ltp,
+                    f"End-of-day square-off at {SQUAREOFF_TIME} IST"
+                )
+                results[symbol] = pnl or 0.0
+            return results
 
     def _update_trailing_stop(self, trade: OpenTrade, current_price: float) -> None:
         """
@@ -385,6 +402,67 @@ class OrderManager:
             f"exit=₹{actual_exit:.2f} | {reason} | net_pnl=₹{net_pnl:.2f}"
         )
         return net_pnl
+
+    def restore_open_trade(self, record: dict) -> bool:
+        """
+        Reconstruct an OpenTrade from a trade log record and restore the
+        corresponding broker position.
+
+        Called during bot restart to pick up trades that were open when the
+        bot was stopped mid-session. The trade log is the source of truth —
+        any trade with exit_price=NULL is still open.
+
+        Args:
+            record: A dict from TradeLogger.get_open_trades_today()
+
+        Returns:
+            True if restored successfully, False if skipped (e.g. duplicate).
+        """
+        symbol = record["symbol"]
+        with self._lock:
+            if symbol in self._open_trades:
+                logger.warning(
+                    f"OrderManager.restore: {symbol} already tracked — skipping duplicate"
+                )
+                return False
+
+            action = Action.BUY if record["action"] == "BUY" else Action.SELL
+            entry_price = float(record["entry_price"])
+            stop_loss   = float(record["stop_loss"] or 0.0)
+            target      = float(record["target"] or 0.0)
+
+            sl_distance = abs(entry_price - stop_loss)
+            entry_atr   = sl_distance / 1.5 if sl_distance > 0 else entry_price * 0.005
+
+            self._open_trades[symbol] = OpenTrade(
+                trade_log_id=record["id"],
+                symbol=symbol,
+                action=action,
+                quantity=int(record["quantity"]),
+                entry_price=entry_price,
+                stop_loss=stop_loss,
+                target=target,
+                strategy=record.get("strategy", "unknown"),
+                entry_order_id=record.get("order_id", ""),
+                atr=round(entry_atr, 4),
+            )
+
+            # Restore broker position so cash balance is consistent
+            from broker.base_broker import TransactionType
+            tx = TransactionType.BUY if action == Action.BUY else TransactionType.SELL
+            self._broker.restore_position(
+                symbol=symbol,
+                transaction_type=tx,
+                quantity=int(record["quantity"]),
+                avg_price=entry_price,
+            )
+
+        logger.info(
+            f"Restored open trade #{record['id']} | {record['action']} "
+            f"{record['quantity']}×{symbol} @ ₹{entry_price:.2f} | "
+            f"sl=₹{stop_loss:.2f} target=₹{target:.2f} strategy={record.get('strategy')}"
+        )
+        return True
 
     @property
     def open_symbols(self) -> list[str]:

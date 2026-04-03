@@ -35,7 +35,10 @@ Exit rules:
 
 from __future__ import annotations
 
+import math
+
 import pandas as pd
+import ta
 from loguru import logger
 
 from analysis.regime_detector import get_current_regime, regime_allows_strategy
@@ -43,6 +46,7 @@ from config import strategies as cfg
 from config.settings import REGIME_FILTER_ENABLED
 from indicators.macd import MACDIndicator
 from indicators.rsi import RSIIndicator
+from indicators.vwap import compute_vwap
 from strategies.base_strategy import Action, BaseStrategy, Signal
 
 
@@ -56,9 +60,13 @@ class RSIMACDStrategy(BaseStrategy):
         super().__init__(name="rsi_macd_combo")
         params = cfg.STRATEGY_CONFIGS["rsi_macd_combo"]
 
-        self.rsi_buy_min = params["rsi_buy_min"]
-        self.rsi_buy_max = params["rsi_buy_max"]
-        self.rsi_exit    = params["rsi_exit"]
+        self.rsi_buy_min           = params["rsi_buy_min"]
+        self.rsi_buy_max           = params["rsi_buy_max"]
+        self.rsi_exit              = params["rsi_exit"]
+        self.rsi_sell_min          = params.get("rsi_sell_min", 40)
+        self.require_ema_alignment = params.get("require_ema_alignment", True)
+        self.use_vwap_filter       = params.get("use_vwap_filter", True)
+        self.min_sl_pct            = params.get("min_sl_pct", 0.0075)
 
         self._rsi  = RSIIndicator(
             period=params["rsi_period"],
@@ -70,6 +78,20 @@ class RSIMACDStrategy(BaseStrategy):
             signal=params["macd_signal"],
         )
 
+    def _reload_params(self) -> None:
+        """
+        Re-read parameters from cfg.STRATEGY_CONFIGS so that runtime changes
+        made by AdaptiveStrategyManager take effect without a bot restart.
+        """
+        params = cfg.STRATEGY_CONFIGS["rsi_macd_combo"]
+        self.rsi_buy_min           = params["rsi_buy_min"]
+        self.rsi_buy_max           = params["rsi_buy_max"]
+        self.rsi_exit              = params["rsi_exit"]
+        self.rsi_sell_min          = params.get("rsi_sell_min", 40)
+        self.require_ema_alignment = params.get("require_ema_alignment", True)
+        self.use_vwap_filter       = params.get("use_vwap_filter", True)
+        self.min_sl_pct            = params.get("min_sl_pct", 0.0075)
+
     def generate_signal(self, symbol: str, df: pd.DataFrame) -> Signal:
         """
         Analyse the latest candles and return a trading signal.
@@ -78,6 +100,9 @@ class RSIMACDStrategy(BaseStrategy):
             symbol: e.g. "TCS"
             df:     OHLCV DataFrame (needs at least 35 candles for MACD)
         """
+        # Pick up any live parameter adjustments from AdaptiveStrategyManager
+        self._reload_params()
+
         current_price = df["close"].iloc[-1]
 
         # ── Regime filter ─────────────────────────────────────────────
@@ -115,12 +140,61 @@ class RSIMACDStrategy(BaseStrategy):
             and hist_curr > hist_prev
         )
 
+        # ── EMA trend alignment ──────────────────────────────────────
+        # EMA9 vs EMA21 tells us the current short-term trend direction.
+        # In an uptrending stock (EMA9 > EMA21), MACD bearish crossovers are
+        # just pullback noise — they resolve upward and hit SL if shorted.
+        # Safety: if EMA can't be computed (< 21 candles), reject the signal —
+        # early-morning trades on thin data cause the most random losses.
+        ema_bullish = ema_bearish = True  # default: allow if filter disabled
+        if self.require_ema_alignment:
+            if len(df) < 21:
+                return self.hold_signal(symbol, current_price)
+            close = df["close"]
+            ema9_val  = ta.trend.EMAIndicator(close, window=9).ema_indicator().iloc[-1]
+            ema21_val = ta.trend.EMAIndicator(close, window=21).ema_indicator().iloc[-1]
+            if math.isnan(ema9_val) or math.isnan(ema21_val):
+                return self.hold_signal(symbol, current_price)
+            ema_bullish = float(ema9_val) > float(ema21_val)
+            ema_bearish = float(ema9_val) < float(ema21_val)
+
+        # ── VWAP direction filter ────────────────────────────────────
+        # VWAP (Volume-Weighted Average Price) is the institutional fair value
+        # for the day.  Retail price above VWAP = market willing to pay up →
+        # valid to short.  Price below VWAP = market already weak → shorting
+        # further weakness is low-quality; wait for a bounce first.
+        # Lesson from 2026-04-02: every single losing short was entered BELOW
+        # VWAP, meaning the stock had already fallen and was due for a bounce.
+        vwap_val = None
+        if self.use_vwap_filter:
+            try:
+                vwap_series = compute_vwap(df)
+                v = vwap_series.iloc[-1]
+                if not math.isnan(float(v)):
+                    vwap_val = float(v)
+            except Exception:
+                pass   # non-fatal: allow trade if VWAP unavailable
+
         # ── BUY signal ──────────────────────────────────────────────
-        # MACD just crossed up AND RSI is neutral AND histogram is accelerating
+        # MACD crossed up AND RSI neutral AND histogram accelerating
         if macd_signal == 1 and self.rsi_buy_min <= rsi_val <= self.rsi_buy_max and hist_accelerating:
-            atr       = self._compute_atr(df)
-            stop_loss = round(current_price - 1.5 * atr, 2)
-            target    = round(current_price + 3.0 * atr, 2)
+            if not ema_bullish:
+                logger.debug(f"RSI+MACD BUY skipped | {symbol} | EMA downtrend → no long")
+                return self.hold_signal(symbol, current_price)
+
+            # VWAP: only buy when price is below VWAP (buying relative weakness)
+            if vwap_val is not None and current_price > vwap_val:
+                logger.debug(
+                    f"RSI+MACD BUY skipped | {symbol} | price={current_price:.2f} > VWAP={vwap_val:.2f}"
+                )
+                return self.hold_signal(symbol, current_price)
+
+            atr = self._compute_atr(df)
+            # Minimum SL distance: at least min_sl_pct of price to avoid noise hits
+            sl_dist  = max(1.5 * atr, current_price * self.min_sl_pct)
+            tgt_dist = sl_dist * 2.0   # 2:1 reward:risk
+            stop_loss = round(current_price - sl_dist, 2)
+            target    = round(current_price + tgt_dist, 2)
 
             logger.info(
                 f"RSI+MACD BUY | {symbol} | price={current_price:.2f} "
@@ -139,8 +213,8 @@ class RSIMACDStrategy(BaseStrategy):
                 ),
             )
 
-        # ── SELL signal (exit) ───────────────────────────────────────
-        # MACD just crossed down OR RSI has become overbought
+        # ── SELL signal ─────────────────────────────────────────────
+        # MACD crossed down OR RSI overbought
         sell_reason = None
         if macd_signal == -1:
             sell_reason = f"MACD bearish crossover (MACD={macd_val:.4f} < Signal={signal_val:.4f})"
@@ -148,11 +222,36 @@ class RSIMACDStrategy(BaseStrategy):
             sell_reason = f"RSI overbought exit (RSI={rsi_val:.1f} >= {self.rsi_exit})"
 
         if sell_reason:
-            atr       = self._compute_atr(df)
-            stop_loss = round(current_price + 1.5 * atr, 2)
-            target    = round(current_price - 3.0 * atr, 2)
+            if not ema_bearish:
+                logger.debug(f"RSI+MACD SELL skipped | {symbol} | EMA uptrend → no short")
+                return self.hold_signal(symbol, current_price)
 
-            logger.info(f"RSI+MACD SELL | {symbol} | {sell_reason}")
+            # RSI oversold gate: if RSI already very low, stock has fallen hard
+            # and is primed for a bounce — entering a short here is chasing.
+            # ICICIBANK RSI=16.2, AXISBANK RSI=16.5 on 2026-04-02 were the clearest
+            # examples: both already crashed and promptly reversed upward.
+            if rsi_val < self.rsi_sell_min:
+                logger.debug(
+                    f"RSI+MACD SELL skipped | {symbol} | RSI={rsi_val:.1f} < {self.rsi_sell_min} "
+                    f"(already oversold — likely to bounce)"
+                )
+                return self.hold_signal(symbol, current_price)
+
+            # VWAP: only short when price is above VWAP (shorting relative strength)
+            if vwap_val is not None and current_price < vwap_val:
+                logger.debug(
+                    f"RSI+MACD SELL skipped | {symbol} | price={current_price:.2f} < VWAP={vwap_val:.2f} "
+                    f"(shorting below VWAP = chasing weakness)"
+                )
+                return self.hold_signal(symbol, current_price)
+
+            atr = self._compute_atr(df)
+            sl_dist  = max(1.5 * atr, current_price * self.min_sl_pct)
+            tgt_dist = sl_dist * 2.0
+            stop_loss = round(current_price + sl_dist, 2)
+            target    = round(current_price - tgt_dist, 2)
+
+            logger.info(f"RSI+MACD SELL | {symbol} | {sell_reason} | RSI={rsi_val:.1f}")
             return Signal(
                 symbol=symbol,
                 action=Action.SELL,

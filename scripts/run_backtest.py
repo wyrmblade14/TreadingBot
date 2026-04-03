@@ -33,12 +33,14 @@ from strategies.bb_mean_reversion import BBMeanReversionStrategy
 from strategies.ema_crossover import EMACrossoverStrategy
 from strategies.opening_range_breakout import ORBStrategy
 from strategies.rsi_macd_combo import RSIMACDStrategy
+from strategies.vwap_bounce import VWAPBounceStrategy
 
 STRATEGY_MAP = {
     "ema_crossover":          EMACrossoverStrategy,
     "rsi_macd_combo":         RSIMACDStrategy,
     "opening_range_breakout": ORBStrategy,
     "bb_mean_reversion":      BBMeanReversionStrategy,
+    "vwap_bounce":            VWAPBounceStrategy,
 }
 
 

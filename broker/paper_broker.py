@@ -491,6 +491,37 @@ class PaperBroker(BaseBroker):
 
     # ── Other interface methods ───────────────────────────────────────
 
+    def restore_position(
+        self,
+        symbol: str,
+        transaction_type: TransactionType,
+        quantity: int,
+        avg_price: float,
+    ) -> None:
+        """
+        Inject a position directly into broker state without placing an order.
+
+        Used on bot restart to reconstruct open positions from the trade log,
+        so the broker's cash balance and position map match the DB records.
+
+        Margin logic mirrors place_order:
+          BUY long  → margin = qty × price / leverage  (already deducted at entry)
+          SELL short → same margin requirement
+        """
+        margin = quantity * avg_price / INTRADAY_LEVERAGE
+        self._cash = max(0.0, self._cash - margin)
+        self._positions[symbol] = Position(
+            symbol=symbol,
+            quantity=quantity,
+            avg_price=avg_price,
+            current_price=avg_price,
+            transaction_type=transaction_type,
+        )
+        logger.info(
+            f"PaperBroker: restored {transaction_type.value} {quantity}×{symbol} "
+            f"@ ₹{avg_price:.2f} | margin blocked ₹{margin:.0f} | cash=₹{self._cash:,.0f}"
+        )
+
     def cancel_order(self, order_id: str) -> bool:
         order = self._orders.get(order_id)
         if order and order.status == OrderStatus.OPEN:

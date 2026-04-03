@@ -1,8 +1,0 @@
-2026-03-27 01:33:16 IST | INFO     | PaperBroker initialised | capital=₹100,000
-2026-03-27 01:33:16 IST | DEBUG    | Trade database ready at /Users/shubhambhosale/Repos/Personal/TreadingBot/logs/trades.db
-2026-03-27 01:33:16 IST | INFO     | Scheduler setup | capital=₹100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout']
-2026-03-27 01:33:16 IST | INFO     | Telegram notifications enabled.
-2026-03-27 01:33:16 IST | INFO     | Bot started | paper mode | watchlist=10 symbols | capital=₹100,000
-2026-03-27 01:33:16 IST | INFO     | Press Ctrl+C to stop and square off all positions.
-2026-03-27 01:33:16 IST | INFO     | Dashboard: streamlit run dashboard/app.py
-2026-03-27 01:48:28 IST | INFO     | Shutdown signal received — stopping bot...

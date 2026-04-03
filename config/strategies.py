@@ -38,6 +38,10 @@ STRATEGY_CONFIGS: dict = {
         "macd_fast": 12,
         "macd_slow": 26,
         "macd_signal": 9,
+        "require_ema_alignment": True,  # Only short when EMA9 < EMA21; only buy when EMA9 > EMA21
+        "use_vwap_filter": True,        # Only short above VWAP; only buy below VWAP
+        "rsi_sell_min": 40,             # Don't short if RSI < 40 — already oversold, expect bounce
+        "min_sl_pct": 0.0075,           # SL at least 0.75% from entry — prevents noise-hits on tight stops
     },
     "opening_range_breakout": {
         "enabled": True,
@@ -66,6 +70,23 @@ STRATEGY_CONFIGS: dict = {
         "gap_min_pct": 0.5,           # Minimum gap size in % (0.5% = 50 basis points)
         "volume_multiplier": 1.5,      # Breakout candle must have 1.5× avg volume
         "exit_time": "11:00",          # No new Gap & Go entries after 11:00 AM
+    },
+    "vwap_bounce": {
+        "enabled": True,
+        "name": "VWAP Bounce",
+        "description": (
+            "Buys when price pulls back to VWAP (institutional fair value) in an uptrend "
+            "(EMA9 > EMA21, RSI 35–65). Sells when price rejects at VWAP in a downtrend. "
+            "Best on trending days — suppressed in ranging markets where VWAP is crossed "
+            "repeatedly. The strategy that would have captured today's up-day opportunities "
+            "that all other strategies missed."
+        ),
+        "vwap_tolerance_pct": 0.003,  # price must be within 0.3% of VWAP
+        "rsi_period": 6,
+        "rsi_min": 35,                # RSI must be in neutral zone — not already overbought
+        "rsi_max": 65,
+        "volume_multiplier": 1.2,     # candle volume ≥ 1.2× 20-bar avg (institutional confirmation)
+        "min_sl_pct": 0.0075,         # SL at least 0.75% — avoids noise hits on tight stops
     },
     "bb_mean_reversion": {
         "enabled": True,

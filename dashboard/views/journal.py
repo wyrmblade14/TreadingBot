@@ -12,10 +12,12 @@ What you can do here:
   - Understand *why* the signal fired (the reason field from the strategy)
   - Spot patterns: which strategies win in the morning vs afternoon?
   - Review the time-of-day and strategy breakdown charts at the bottom
+  - Export all trades to CSV for external analysis
 """
 
 from __future__ import annotations
 
+import io
 from datetime import date, datetime, timedelta
 
 import pandas as pd
@@ -72,6 +74,20 @@ def _exit_type(trade: dict) -> str:
         if ep >= sl * 0.995:
             return "Stop-Loss ❌"
         return "Manual Exit"
+
+
+def _hold_minutes(trade: dict) -> int | None:
+    """Return hold duration in minutes (int), or None if unavailable."""
+    ts_in  = trade.get("timestamp")
+    ts_out = trade.get("exit_timestamp")
+    if not ts_in or not ts_out:
+        return None
+    try:
+        t_in  = datetime.fromisoformat(ts_in)
+        t_out = datetime.fromisoformat(ts_out)
+        return int((t_out - t_in).total_seconds() // 60)
+    except Exception:
+        return None
 
 
 def _hold_duration(trade: dict) -> str:
@@ -276,7 +292,7 @@ def render() -> None:
     st.title("📓 Trade Journal")
     st.caption("Every paper trade — read like a logbook. Review these to build conviction before going live.")
 
-    all_trades = _trade_log.get_all_trades(limit=500)
+    all_trades = _trade_log.get_all_trades(limit=2000)
 
     if not all_trades:
         st.info("No trades recorded yet. Start the bot in paper mode to populate the journal.")
@@ -293,7 +309,6 @@ def render() -> None:
             selected_strategy_label = st.selectbox("Strategy", strategy_options)
             selected_strategy = None
             if selected_strategy_label != "All Strategies":
-                # Reverse map friendly label → raw key
                 rev = {v: k for k, v in _STRATEGY_LABELS.items()}
                 selected_strategy = rev.get(selected_strategy_label, selected_strategy_label)
 
@@ -301,12 +316,22 @@ def render() -> None:
             result_filter = st.selectbox("Result", ["All", "Winners", "Losers", "Open"])
 
         with f3:
-            dates = sorted({t["date"] for t in all_trades if t.get("date")}, reverse=True)
-            date_options = ["All Dates"] + dates
-            selected_date = st.selectbox("Date", date_options)
+            # Date range: default to last 30 days
+            all_dates = sorted({t["date"] for t in all_trades if t.get("date")})
+            min_date  = date.fromisoformat(all_dates[0])  if all_dates else date.today()
+            max_date  = date.fromisoformat(all_dates[-1]) if all_dates else date.today()
+            date_from = st.date_input("From", value=min_date, min_value=min_date, max_value=max_date)
 
         with f4:
-            sort_by = st.selectbox("Sort by", ["Newest first", "Oldest first", "Best P&L", "Worst P&L"])
+            date_to  = st.date_input("To",   value=max_date, min_value=min_date, max_value=max_date)
+
+    sort_col, sym_col, _ = st.columns([2, 2, 4])
+    with sort_col:
+        sort_by = st.selectbox("Sort by", ["Newest first", "Oldest first", "Best P&L", "Worst P&L"])
+    with sym_col:
+        symbols = sorted({t["symbol"] for t in all_trades})
+        sym_options = ["All Symbols"] + symbols
+        selected_symbol = st.selectbox("Symbol", sym_options)
 
     # ── Apply filters ─────────────────────────────────────────────────
     trades = all_trades
@@ -314,8 +339,13 @@ def render() -> None:
     if selected_strategy:
         trades = [t for t in trades if t["strategy"] == selected_strategy]
 
-    if selected_date != "All Dates":
-        trades = [t for t in trades if t.get("date") == selected_date]
+    if selected_symbol != "All Symbols":
+        trades = [t for t in trades if t["symbol"] == selected_symbol]
+
+    trades = [
+        t for t in trades
+        if t.get("date") and date_from.isoformat() <= t["date"] <= date_to.isoformat()
+    ]
 
     if result_filter == "Winners":
         trades = [t for t in trades if (t.get("net_pnl") or 0) > 0]
@@ -357,157 +387,242 @@ def render() -> None:
 
     st.markdown("---")
 
-    # ── Trade entries (expandable cards) ─────────────────────────────
     if not trades:
         st.warning("No trades match your filters.")
         return
 
-    st.subheader(f"Trade Entries ({len(trades)})")
+    # ── CSV export ────────────────────────────────────────────────────
+    def _to_csv(trade_list: list[dict]) -> bytes:
+        df = pd.DataFrame([{
+            "Date":        t.get("date"),
+            "Entry Time":  (t.get("timestamp") or "")[:16].replace("T", " "),
+            "Exit Time":   (t.get("exit_timestamp") or "")[:16].replace("T", " ") or "Open",
+            "Symbol":      t["symbol"],
+            "Strategy":    t["strategy"],
+            "Side":        t["action"],
+            "Qty":         t["quantity"],
+            "Entry ₹":     t.get("entry_price"),
+            "Exit ₹":      t.get("exit_price"),
+            "Stop-Loss ₹": t.get("stop_loss"),
+            "Target ₹":    t.get("target"),
+            "Hold (min)":  _hold_minutes(t),
+            "Exit Type":   _exit_type(t),
+            "R Captured":  _rr_achieved(t),
+            "Gross P&L ₹": t.get("pnl"),
+            "Brokerage ₹": t.get("brokerage"),
+            "Net P&L ₹":   t.get("net_pnl"),
+            "Mode":        t.get("trading_mode", "paper"),
+            "Reason":      t.get("reason", ""),
+        } for t in trade_list])
+        buf = io.StringIO()
+        df.to_csv(buf, index=False)
+        return buf.getvalue().encode()
 
-    for trade in trades:
-        pnl      = trade.get("net_pnl")
-        symbol   = trade["symbol"]
-        strategy = _friendly_strategy(trade["strategy"])
-        side     = trade.get("action", "BUY")
-        date_str = trade.get("date", "")
-        in_time  = trade.get("timestamp", "")[:16].replace("T", " ") if trade.get("timestamp") else "—"
-        exit_typ = _exit_type(trade)
-        hold     = _hold_duration(trade)
-        rr       = _rr_achieved(trade)
+    exp_col, dl_col = st.columns([6, 2])
+    exp_col.subheader(f"Trade Entries ({len(trades)})")
+    dl_col.download_button(
+        label="⬇️ Export CSV",
+        data=_to_csv(trades),
+        file_name=f"trades_{date_from}_{date_to}.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
 
-        # ── Card header label ─────────────────────────────────────────
-        result_icon = "✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳"
-        pnl_str     = f"₹{pnl:+,.0f}" if pnl is not None else "Open"
-        header      = (
-            f"{result_icon}  **{symbol}** · {side} · {strategy} · "
-            f"{date_str} {in_time[-5:]}  →  **{pnl_str}**  ·  {exit_typ}  ·  held {hold}"
+    # ── Two-tab layout: Table View | Card View ────────────────────────
+    tab_table, tab_cards = st.tabs(["📊 Table View", "📝 Card View"])
+
+    with tab_table:
+        rows = []
+        for t in trades:
+            pnl       = t.get("net_pnl")
+            entry     = t.get("entry_price") or 0.0
+            sl        = t.get("stop_loss")   or 0.0
+            tgt       = t.get("target")      or 0.0
+            ep        = t.get("exit_price")
+            is_buy    = t.get("action") == "BUY"
+
+            # Actual risk per share, planned R:R, R captured
+            risk_per  = abs(entry - sl) if sl else 0.0
+            rr_plan   = abs(tgt - entry) / risk_per if risk_per > 0 and tgt else None
+            rr_actual = _rr_achieved(t)
+
+            rows.append({
+                "Date":        t.get("date", ""),
+                "Time":        (t.get("timestamp") or "")[:16][-5:],
+                "Symbol":      t["symbol"],
+                "Strategy":    _friendly_strategy(t["strategy"]),
+                "Side":        t.get("action", ""),
+                "Qty":         t.get("quantity", 0),
+                "Entry ₹":     round(entry, 2),
+                "SL ₹":        round(sl, 2)  if sl  else None,
+                "Target ₹":    round(tgt, 2) if tgt else None,
+                "Exit ₹":      round(ep, 2)  if ep  else None,
+                "Hold (min)":  _hold_minutes(t),
+                "Exit Type":   _exit_type(t),
+                "Plan R:R":    f"{rr_plan:.2f}:1" if rr_plan else "—",
+                "R Captured":  rr_actual,
+                "Net P&L ₹":   round(pnl, 2) if pnl is not None else None,
+                "Result":      ("✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳"),
+            })
+
+        df_table = pd.DataFrame(rows)
+        st.dataframe(
+            df_table,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Net P&L ₹": st.column_config.NumberColumn(format="₹%+.0f"),
+                "Entry ₹":   st.column_config.NumberColumn(format="₹%.2f"),
+                "SL ₹":      st.column_config.NumberColumn(format="₹%.2f"),
+                "Target ₹":  st.column_config.NumberColumn(format="₹%.2f"),
+                "Exit ₹":    st.column_config.NumberColumn(format="₹%.2f"),
+            },
+        )
+        st.caption(
+            f"{len(trades)} trades · "
+            f"from {date_from} to {date_to} · "
+            f"source: logs/trades.db"
         )
 
-        with st.expander(header, expanded=False):
-            col_left, col_right = st.columns([3, 2])
+    with tab_cards:
+        for trade in trades:
+            pnl      = trade.get("net_pnl")
+            symbol   = trade["symbol"]
+            strategy = _friendly_strategy(trade["strategy"])
+            side     = trade.get("action", "BUY")
+            date_str = trade.get("date", "")
+            in_time  = trade.get("timestamp", "")[:16].replace("T", " ") if trade.get("timestamp") else "—"
+            exit_typ = _exit_type(trade)
+            hold     = _hold_duration(trade)
+            rr       = _rr_achieved(trade)
 
-            with col_left:
-                # ── Setup ─────────────────────────────────────────────
-                st.markdown("**Setup**")
-                entry  = trade.get("entry_price")
-                sl     = trade.get("stop_loss")
-                tgt    = trade.get("target")
-                qty    = trade.get("quantity", 0)
-                ep     = trade.get("exit_price")
+            result_icon = "✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳"
+            pnl_str     = f"₹{pnl:+,.0f}" if pnl is not None else "Open"
+            header      = (
+                f"{result_icon}  **{symbol}** · {side} · {strategy} · "
+                f"{date_str} {in_time[-5:]}  →  **{pnl_str}**  ·  {exit_typ}  ·  held {hold}"
+            )
 
-                planned_risk   = abs(entry - sl) * qty if entry and sl else None
-                planned_reward = abs(tgt - entry) * qty if tgt and entry else None
-                planned_rr     = abs(tgt - entry) / abs(entry - sl) if tgt and entry and sl and abs(entry - sl) > 0 else None
+            with st.expander(header, expanded=False):
+                col_left, col_right = st.columns([3, 2])
 
-                setup_rows = {
-                    "Symbol":         symbol,
-                    "Side":           side,
-                    "Strategy":       strategy,
-                    "Entry price":    f"₹{entry:.2f}" if entry else "—",
-                    "Stop-loss":      f"₹{sl:.2f}" if sl else "—",
-                    "Target":         f"₹{tgt:.2f}" if tgt else "—",
-                    "Quantity":       str(qty),
-                    "Planned risk":   f"₹{planned_risk:,.0f}" if planned_risk else "—",
-                    "Planned reward": f"₹{planned_reward:,.0f}" if planned_reward else "—",
-                    "Planned R:R":    f"{planned_rr:.2f}:1" if planned_rr else "—",
-                }
-                for label, val in setup_rows.items():
-                    st.markdown(
-                        f"<div style='display:flex;justify-content:space-between;"
-                        f"padding:3px 0;border-bottom:1px solid #2a2d3e'>"
-                        f"<span style='color:#8b8fa8;font-size:0.85rem'>{label}</span>"
-                        f"<span style='font-size:0.85rem'>{val}</span></div>",
-                        unsafe_allow_html=True,
-                    )
+                with col_left:
+                    st.markdown("**Setup**")
+                    entry  = trade.get("entry_price")
+                    sl     = trade.get("stop_loss")
+                    tgt    = trade.get("target")
+                    qty    = trade.get("quantity", 0)
+                    ep     = trade.get("exit_price")
 
-                # ── Signal reason ─────────────────────────────────────
-                reason = trade.get("reason", "")
-                if reason:
-                    st.markdown("")
-                    st.markdown("**Why the bot entered**")
-                    st.markdown(
-                        f"<div style='background:#1a1d27;border-left:3px solid #4f6ef7;"
-                        f"padding:10px 14px;border-radius:0 6px 6px 0;"
-                        f"font-size:0.84rem;color:#c0c0d0;line-height:1.6'>{reason}</div>",
-                        unsafe_allow_html=True,
-                    )
+                    planned_risk   = abs(entry - sl) * qty if entry and sl else None
+                    planned_reward = abs(tgt - entry) * qty if tgt and entry else None
+                    planned_rr     = abs(tgt - entry) / abs(entry - sl) if tgt and entry and sl and abs(entry - sl) > 0 else None
 
-            with col_right:
-                # ── Outcome ───────────────────────────────────────────
-                st.markdown("**Outcome**")
-
-                exit_time = trade.get("exit_timestamp", "")
-                if exit_time:
-                    exit_time = exit_time[:16].replace("T", " ")
-                else:
-                    exit_time = "Still open"
-
-                outcome_colour = _pnl_colour(pnl)
-                outcome_rows = {
-                    "Exit price":     f"₹{ep:.2f}" if ep else "—",
-                    "Exit time":      exit_time,
-                    "Hold time":      hold,
-                    "Exit type":      exit_typ,
-                    "R captured":     rr,
-                    "Gross P&L":      f"₹{trade.get('pnl') or 0:+,.0f}",
-                    "Brokerage":      f"₹{trade.get('brokerage') or 0:.2f}",
-                }
-                for label, val in outcome_rows.items():
-                    st.markdown(
-                        f"<div style='display:flex;justify-content:space-between;"
-                        f"padding:3px 0;border-bottom:1px solid #2a2d3e'>"
-                        f"<span style='color:#8b8fa8;font-size:0.85rem'>{label}</span>"
-                        f"<span style='font-size:0.85rem'>{val}</span></div>",
-                        unsafe_allow_html=True,
-                    )
-
-                # ── Net P&L badge ─────────────────────────────────────
-                st.markdown("")
-                st.markdown(
-                    f"<div style='text-align:center;background:#1a1d27;"
-                    f"border:1px solid {outcome_colour};border-radius:10px;"
-                    f"padding:14px;margin-top:8px'>"
-                    f"<div style='font-size:0.75rem;color:#8b8fa8;text-transform:uppercase;"
-                    f"letter-spacing:0.08em'>Net P&L</div>"
-                    f"<div style='font-size:1.8rem;font-weight:700;color:{outcome_colour}'>"
-                    f"{'₹' + f'{pnl:+,.0f}' if pnl is not None else 'Open'}</div>"
-                    f"</div>",
-                    unsafe_allow_html=True,
-                )
-
-                # ── Mini price bar (entry / SL / target / exit) ───────
-                if entry and sl and tgt:
-                    lo = min(sl, entry, tgt, ep or entry) * 0.999
-                    hi = max(sl, entry, tgt, ep or entry) * 1.001
-                    fig_mini = go.Figure()
-
-                    def _hline(y, colour, label):
-                        fig_mini.add_hline(
-                            y=y, line_color=colour, line_width=1.5,
-                            annotation_text=label,
-                            annotation_position="right",
-                            annotation_font_size=9,
-                            annotation_font_color=colour,
+                    setup_rows = {
+                        "Symbol":         symbol,
+                        "Side":           side,
+                        "Strategy":       strategy,
+                        "Entry price":    f"₹{entry:.2f}" if entry else "—",
+                        "Stop-loss":      f"₹{sl:.2f}" if sl else "—",
+                        "Target":         f"₹{tgt:.2f}" if tgt else "—",
+                        "Quantity":       str(qty),
+                        "Planned risk":   f"₹{planned_risk:,.0f}" if planned_risk else "—",
+                        "Planned reward": f"₹{planned_reward:,.0f}" if planned_reward else "—",
+                        "Planned R:R":    f"{planned_rr:.2f}:1" if planned_rr else "—",
+                    }
+                    for label, val in setup_rows.items():
+                        st.markdown(
+                            f"<div style='display:flex;justify-content:space-between;"
+                            f"padding:3px 0;border-bottom:1px solid #2a2d3e'>"
+                            f"<span style='color:#8b8fa8;font-size:0.85rem'>{label}</span>"
+                            f"<span style='font-size:0.85rem'>{val}</span></div>",
+                            unsafe_allow_html=True,
                         )
 
-                    _hline(tgt, "#4caf50", f"Target ₹{tgt:.0f}")
-                    _hline(entry, "#4f6ef7", f"Entry ₹{entry:.0f}")
-                    if ep:
-                        _hline(ep, "#f7a84f", f"Exit ₹{ep:.0f}")
-                    _hline(sl, "#ef5350", f"SL ₹{sl:.0f}")
+                    reason = trade.get("reason", "")
+                    if reason:
+                        st.markdown("")
+                        st.markdown("**Why the bot entered**")
+                        st.markdown(
+                            f"<div style='background:#1a1d27;border-left:3px solid #4f6ef7;"
+                            f"padding:10px 14px;border-radius:0 6px 6px 0;"
+                            f"font-size:0.84rem;color:#c0c0d0;line-height:1.6'>{reason}</div>",
+                            unsafe_allow_html=True,
+                        )
 
-                    fig_mini.update_layout(
-                        template="plotly_dark",
-                        paper_bgcolor="#13151f",
-                        plot_bgcolor="#13151f",
-                        height=160,
-                        margin=dict(l=10, r=80, t=10, b=10),
-                        yaxis=dict(range=[lo, hi], gridcolor="#2a2d3e",
-                                   tickprefix="₹", showticklabels=False),
-                        xaxis=dict(visible=False),
-                        showlegend=False,
+                with col_right:
+                    st.markdown("**Outcome**")
+
+                    exit_time = trade.get("exit_timestamp", "")
+                    if exit_time:
+                        exit_time = exit_time[:16].replace("T", " ")
+                    else:
+                        exit_time = "Still open"
+
+                    outcome_colour = _pnl_colour(pnl)
+                    outcome_rows = {
+                        "Exit price":     f"₹{ep:.2f}" if ep else "—",
+                        "Exit time":      exit_time,
+                        "Hold time":      hold,
+                        "Exit type":      exit_typ,
+                        "R captured":     rr,
+                        "Gross P&L":      f"₹{trade.get('pnl') or 0:+,.0f}",
+                        "Brokerage":      f"₹{trade.get('brokerage') or 0:.2f}",
+                    }
+                    for label, val in outcome_rows.items():
+                        st.markdown(
+                            f"<div style='display:flex;justify-content:space-between;"
+                            f"padding:3px 0;border-bottom:1px solid #2a2d3e'>"
+                            f"<span style='color:#8b8fa8;font-size:0.85rem'>{label}</span>"
+                            f"<span style='font-size:0.85rem'>{val}</span></div>",
+                            unsafe_allow_html=True,
+                        )
+
+                    st.markdown("")
+                    st.markdown(
+                        f"<div style='text-align:center;background:#1a1d27;"
+                        f"border:1px solid {outcome_colour};border-radius:10px;"
+                        f"padding:14px;margin-top:8px'>"
+                        f"<div style='font-size:0.75rem;color:#8b8fa8;text-transform:uppercase;"
+                        f"letter-spacing:0.08em'>Net P&L</div>"
+                        f"<div style='font-size:1.8rem;font-weight:700;color:{outcome_colour}'>"
+                        f"{'₹' + f'{pnl:+,.0f}' if pnl is not None else 'Open'}</div>"
+                        f"</div>",
+                        unsafe_allow_html=True,
                     )
-                    st.plotly_chart(fig_mini, use_container_width=True)
+
+                    if entry and sl and tgt:
+                        lo = min(sl, entry, tgt, ep or entry) * 0.999
+                        hi = max(sl, entry, tgt, ep or entry) * 1.001
+                        fig_mini = go.Figure()
+
+                        def _hline(y, colour, label):
+                            fig_mini.add_hline(
+                                y=y, line_color=colour, line_width=1.5,
+                                annotation_text=label,
+                                annotation_position="right",
+                                annotation_font_size=9,
+                                annotation_font_color=colour,
+                            )
+
+                        _hline(tgt, "#4caf50", f"Target ₹{tgt:.0f}")
+                        _hline(entry, "#4f6ef7", f"Entry ₹{entry:.0f}")
+                        if ep:
+                            _hline(ep, "#f7a84f", f"Exit ₹{ep:.0f}")
+                        _hline(sl, "#ef5350", f"SL ₹{sl:.0f}")
+
+                        fig_mini.update_layout(
+                            template="plotly_dark",
+                            paper_bgcolor="#13151f",
+                            plot_bgcolor="#13151f",
+                            height=160,
+                            margin=dict(l=10, r=80, t=10, b=10),
+                            yaxis=dict(range=[lo, hi], gridcolor="#2a2d3e",
+                                       tickprefix="₹", showticklabels=False),
+                            xaxis=dict(visible=False),
+                            showlegend=False,
+                        )
+                        st.plotly_chart(fig_mini, use_container_width=True)
 
     # ── Analytics charts ──────────────────────────────────────────────
     if len(closed) >= 3:

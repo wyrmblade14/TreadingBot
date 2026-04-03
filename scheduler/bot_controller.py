@@ -103,13 +103,30 @@ class BotController:
             )
 
             _RUNS_DIR.mkdir(parents=True, exist_ok=True)
-            ts = datetime.now(IST).strftime("%Y-%m-%d_%H-%M-%S")
-            self._log_path = _RUNS_DIR / f"{ts}.log"
+            date_str = datetime.now(IST).strftime("%Y-%m-%d")
+            self._log_path = _RUNS_DIR / f"{date_str}.log"
+
+            # Merge any leftover timestamped log files from today into the day file,
+            # then delete them. This handles the case where the previous run was
+            # killed hard (SIGKILL / Task Manager) and couldn't clean up its sink.
+            import re as _re
+            _ts_pattern = _re.compile(rf"^{_re.escape(date_str)}_\d{{2}}-\d{{2}}-\d{{2}}\.log$")
+            for _old in sorted(_RUNS_DIR.iterdir()):
+                if _ts_pattern.match(_old.name):
+                    try:
+                        with open(self._log_path, "a", encoding="utf-8") as _out:
+                            _out.write(f"\n{'='*60}\n[merged from {_old.name}]\n{'='*60}\n")
+                            _out.write(_old.read_text(encoding="utf-8", errors="replace"))
+                        _old.unlink()
+                    except OSError:
+                        pass  # still locked — leave it, next restart will pick it up
+
             self._file_sink_id = logger.add(
                 str(self._log_path),
                 level="DEBUG",
                 format=_LOG_FMT,
                 encoding="utf-8",
+                mode="a",   # append — multiple restarts on the same day share one file
                 delay=False,
             )
 
@@ -126,7 +143,7 @@ class BotController:
 
             sched.add_job(pre_market_scan,  CronTrigger(day_of_week=weekdays, hour=9,      minute=0,    timezone=IST), id="pre_market_scan")
             sched.add_job(market_open,      CronTrigger(day_of_week=weekdays, hour=9,      minute=15,   timezone=IST), id="market_open")
-            sched.add_job(signal_check,     CronTrigger(day_of_week=weekdays, hour="9-14", minute="*/5",timezone=IST), id="signal_check")
+            sched.add_job(signal_check,     CronTrigger(day_of_week=weekdays, hour="9-14", minute="*/1",timezone=IST), id="signal_check")
             sched.add_job(stop_new_entries, CronTrigger(day_of_week=weekdays, hour=14,     minute=30,   timezone=IST), id="stop_new_entries")
             sched.add_job(square_off_all,   CronTrigger(day_of_week=weekdays, hour=15,     minute=15,   timezone=IST), id="square_off_all")
             sched.add_job(daily_report,     CronTrigger(day_of_week=weekdays, hour=15,     minute=30,   timezone=IST), id="daily_report")

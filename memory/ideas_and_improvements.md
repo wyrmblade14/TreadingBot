@@ -41,6 +41,24 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 32 | RSI period 14→6 for intraday sensitivity (5m charts) | M | L | Ph2 enh | DONE |
 | 33 | India VIX as market fear filter (VIX>20 suppress BUY, >25 all) | H | M | Ph6 enh | DONE |
 | 34 | ORB window widened 15→30 min (9:15–9:45 to avoid open chaos) | M | L | Ph2 enh | DONE |
+| 35 | Open trade recovery on restart (restore positions from DB) | H | M | Ph6 enh | DONE |
+| 36 | Risk state persistence across restarts (daily_pnl + consecutive_losses from DB) | H | M | Ph6 enh | DONE |
+| 37 | Live P&L in Today's Trades dashboard table (LTP + unrealised P&L) | M | M | Ph5 enh | DONE |
+| 38 | Historical trade analytics with date range filter + CSV export | M | M | Ph5 enh | DONE |
+| 39 | Single per-day log file (append on restart, merge old timestamped files) | M | L | Ph6 enh | DONE |
+| 40 | EMA trend alignment filter in rsi_macd_combo (block counter-trend signals) | H | L | Ph2 enh | DONE |
+| 41 | VWAP direction filter in rsi_macd_combo (only short above VWAP) | H | L | Ph2 enh | DONE |
+| 42 | RSI oversold gate on SELL signals (skip if RSI < 40 — already oversold) | H | L | Ph2 enh | DONE |
+| 43 | Minimum SL distance (max(1.5×ATR, 0.75% of price)) to prevent noise-hits | M | L | Ph2 enh | DONE |
+| 44 | AdaptiveStrategyManager — runtime param adjustment via VIX/regime/losses/time | H | H | Ph6 enh | DONE |
+| 45 | VIX direction bias — suppress correct side based on NIFTY intraday direction | H | M | Ph6 enh | DONE |
+| 46 | VWAP Bounce strategy (5th strategy — VWAP cross confirmation entry) | H | M | Ph2 enh | DONE |
+| 47 | Intraday direction detector (analysis/market_direction.py) for VIX logic | M | M | Ph6 enh | DONE |
+| 48 | 15-day backtest script (scripts/backtest_15days.py) — multi-symbol, direction-aware | M | M | Ph4 enh | DONE |
+| 49 | NEUTRAL day sit-out: when direction unclear, skip both sides entirely | H | L | Ph6 enh | DONE |
+| 50 | Early reversal detection — exit short quickly if market V-reverses within 30 min | M | H | Future | Idea |
+| 51 | Sector correlation filter — only trade stocks moving WITH NIFTY on up days | M | M | Future | Idea |
+| 52 | Per-day VIX history in backtest (fetch historical ^INDIAVIX for each day) | M | M | Ph4 enh | Idea |
 
 ---
 
@@ -90,6 +108,20 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 **#27 Per-strategy auto-disable**: Extend existing degradation detector (#7) to actually disable a strategy (not just alert) when its rolling 10-trade win rate drops below 35%. Prevents continuing to trade a broken strategy during a regime change.
 
 **#28 Best entry time analysis**: Analyse paper trade data to find which hours of day each strategy wins vs loses. If EMA signals before 10:30 AM show <35% win rate, add a time filter. Turns paper trading data into concrete rule refinements.
+
+**#44 Adaptive mode**: config/adaptive.py — `AdaptiveMode` enum (NORMAL/DEFENSIVE/HALTED). Runs every 60s from signal_check(). Checks VIX, regime (ADX), consecutive_losses, day_pnl_pct, time of day. Updates cfg.STRATEGY_CONFIGS["rsi_macd_combo"] in-place. Strategies call _reload_params() at start of generate_signal(). Dashboard shows live mode + reason + 5 metrics.
+
+**#45 VIX direction bias**: data/india_vix.py now returns skip_sells in addition to skip_buys. _classify() calls analysis/market_direction.py to get NIFTY intraday UP/DOWN/NEUTRAL. RiskManager checks both skip_sells (block SELL) and skip_buys (block BUY). Key lesson from 2026-04-02: VIX=25.4 + NIFTY UP → should block SHORTS, not LONGS.
+
+**#46 VWAP Bounce**: strategies/vwap_bounce.py. Entry: price cross of VWAP (was below, now above for BUY). Filters: EMA9>EMA21, RSI(6) 35-65, volume >= 1.2× avg, time 9:45-13:30. Uses df.index[-1] for time check (not datetime.now — so backtests work). DEFENSIVE rsi_exit=85 (not 72 — lower rsi_exit creates MORE shorts, not fewer).
+
+**#49 NEUTRAL sit-out**: Direction check returns 4-tuple (skip_sells, skip_buys, eod_chg, bias_label). NEUT means both True = no trades at all. Previous default was "trade both sides on NEUT" which caused all losses in the 15-day test during a macro sell-off.
+
+**#50 Early reversal detection**: On a DN v day where a short is entered, if price rallies back above VWAP within 30 min of entry — exit at market. V-reversals (like 2026-04-02) can't be predicted but can be exited early at a smaller loss than full SL. Would save ~50% of the Rs2,987 loss on that day.
+
+**#51 Sector correlation filter**: On NIFTY UP days, some stocks still decline (sector rotation). Before entering VWAP bounce BUY, check stock's last 10 candles are mostly green (>60% green). Filters out laggard stocks that don't participate in the day's rally.
+
+**#52 Historical VIX in backtest**: The 15-day backtest uses no VIX data — it tests direction logic only. Adding historical ^INDIAVIX per day would let the backtest simulate the full VIX suppression logic too. Fetch daily VIX close from yfinance at start, use it in simulate_day().
 
 ---
 
