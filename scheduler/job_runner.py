@@ -89,11 +89,18 @@ def _on_tick_exit(symbol: str, price: float) -> None:
     if pnl is not None and _risk_mgr is not None:
         _risk_mgr.on_position_closed(symbol, pnl)
         try:
+            _day_pnl_exit = sum(
+                t.get("net_pnl") or 0
+                for t in (_trade_log.get_today_trades() if _trade_log else [])
+            )
             get_notifier().notify_exit(
                 symbol=symbol,
                 action="EXIT",
-                price=price,
+                exit_price=price,
                 pnl=pnl,
+                reason="SL/target hit (tick)",
+                day_pnl=_day_pnl_exit,
+                consec_losses=_risk_mgr.state.consecutive_losses,
             )
         except Exception:
             pass
@@ -196,13 +203,33 @@ def pre_market_scan() -> None:
 
     try:
         from data.india_vix import get_vix_data
-        _vix = get_vix_data()
+        from analysis.market_direction import get_market_direction
+        from analysis.regime_detector import get_current_regime, get_regime_details
+        _vix  = get_vix_data()
+        _dir  = get_market_direction()
+        _reg  = get_current_regime()
+        _det  = get_regime_details()
         _status = (
             "ALL entries suppressed" if _vix["skip_all"]
-            else "BUY entries suppressed" if _vix["skip_buys"]
+            else "SELL entries suppressed" if _vix.get("skip_sells")
+            else "BUY entries suppressed"  if _vix["skip_buys"]
             else "Normal trading"
         )
         logger.info(f"India VIX: {_vix['vix']:.1f} ({_vix['level'].upper()}) | {_status}")
+        # Pre-market Telegram briefing
+        if overview:
+            get_notifier().notify_premarket(
+                nifty_price=overview.nifty_price,
+                nifty_chg=overview.nifty_change_pct,
+                vix=_vix.get("vix") or 15.0,
+                vix_level=_vix.get("level", "normal"),
+                regime=_reg.value if _reg else "Unknown",
+                adx=_det.get("adx", 0),
+                direction=_dir.value if _dir else "NEUTRAL",
+                skip_buys=_vix.get("skip_buys", False),
+                skip_sells=_vix.get("skip_sells", False),
+                skip_all=_vix.get("skip_all", False),
+            )
     except Exception as exc:
         logger.warning(f"VIX fetch failed: {exc}")
 
@@ -336,12 +363,18 @@ def signal_check() -> None:
                     net_pnl = _order_mgr.check_exits(kite_sym, ltp)
                     if net_pnl is not None:
                         _risk_mgr.on_position_closed(kite_sym, net_pnl)
+                        _day_pnl_now = sum(
+                            t.get("net_pnl") or 0
+                            for t in (_trade_log.get_today_trades() if _trade_log else [])
+                        )
                         get_notifier().notify_exit(
                             symbol=kite_sym,
-                            action="BUY/SELL",   # direction logged by order_mgr
+                            action="BUY/SELL",
                             exit_price=ltp,
                             pnl=net_pnl,
                             reason="SL/target hit",
+                            day_pnl=_day_pnl_now,
+                            consec_losses=_risk_mgr.state.consecutive_losses,
                         )
             except Exception as e:
                 logger.warning(f"Exit check failed for {kite_sym}: {e}")
@@ -405,6 +438,14 @@ def signal_check() -> None:
                         f"| sl={signal.stop_loss:.2f} "
                         f"| target={signal.target:.2f}"
                     )
+                    _today_trades = _trade_log.get_today_trades() if _trade_log else []
+                    _trade_num    = len(_today_trades) + 1
+                    _day_pnl      = sum(t.get("net_pnl") or 0 for t in _today_trades)
+                    try:
+                        from config.adaptive import get_current_mode
+                        _adp_mode = get_current_mode().value
+                    except Exception:
+                        _adp_mode = ""
                     get_notifier().notify_entry(
                         symbol=kite_sym,
                         action=signal.action.value,
@@ -413,6 +454,9 @@ def signal_check() -> None:
                         target=signal.target,
                         strategy=strategy.name,
                         qty=decision.signal.quantity or 0,
+                        trade_num=_trade_num,
+                        day_pnl=_day_pnl,
+                        adaptive_mode=_adp_mode,
                     )
                 break  # one signal per symbol per cycle (first strategy wins)
             except Exception as e:

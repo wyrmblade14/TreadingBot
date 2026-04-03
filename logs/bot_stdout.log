@@ -2202,3 +2202,12 @@ Connection closed: None - None
 2026-04-03 11:07:00.012 | INFO     | scheduler.job_runner:_is_market_day:174 - Today (2026-04-03) is a market holiday or weekend — skipping job.
 2026-04-03 11:08:00.011 | INFO     | scheduler.job_runner:_is_market_day:174 - Today (2026-04-03) is a market holiday or weekend — skipping job.
 2026-04-03 11:09:00.002 | INFO     | scheduler.job_runner:_is_market_day:174 - Today (2026-04-03) is a market holiday or weekend — skipping job.
+2026-04-03 11:56:28.477 | INFO     | __main__:main:52 - TreadingBot starting | mode=PAPER | no real money at risk
+2026-04-03 11:56:29.273 | INFO     | broker.paper_broker:__init__:214 - PaperBroker initialised | capital=\u20b9100,000 | leverage=5x MIS
+2026-04-03 11:56:29.275 | DEBUG    | execution.trade_log:init_db:87 - Trade database ready at C:\Users\shubh\TreadingBot\logs\trades.db
+2026-04-03 11:56:29.275 | INFO     | scheduler.job_runner:setup:142 - Scheduler setup | capital=\u20b9100,000 | watchlist=['HDFCBANK', 'ICICIBANK', 'KOTAKBANK', 'AXISBANK', 'SBIN', 'BAJFINANCE', 'BAJAJFINSV', 'SHRIRAMFIN', 'TCS', 'INFY'] | strategies=['ema_crossover', 'rsi_macd_combo', 'opening_range_breakout', 'vwap_bounce']
+2026-04-03 11:56:29.279 | DEBUG    | scheduler.job_runner:setup:165 - No open trades from previous session — clean start.
+2026-04-03 11:56:29.282 | INFO     | notifications.telegram_notifier:__init__:77 - Telegram notifications enabled.
+2026-04-03 11:56:29.283 | INFO     | __main__:main:70 - Bot started | paper mode | watchlist=10 symbols | capital=\u20b9100,000
+2026-04-03 11:56:29.283 | INFO     | __main__:main:71 - Press Ctrl+C to stop and square off all positions.
+2026-04-03 11:56:29.283 | INFO     | __main__:main:72 - Dashboard: streamlit run dashboard/app.py

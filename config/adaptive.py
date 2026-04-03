@@ -219,8 +219,17 @@ def refresh(
 
     if old_mode != new_mode:
         logger.info(
-            f"AdaptiveMode CHANGED: {old_mode.value} → {new_mode.value} | {reason_str}"
+            f"AdaptiveMode CHANGED: {old_mode.value} -> {new_mode.value} | {reason_str}"
         )
+        try:
+            from notifications.telegram_notifier import get_notifier
+            get_notifier().notify_adaptive_change(
+                old_mode=old_mode.value,
+                new_mode=new_mode.value,
+                reason=reason_str,
+            )
+        except Exception:
+            pass
     else:
         logger.debug(f"AdaptiveMode: {new_mode.value} | {reason_str}")
 
