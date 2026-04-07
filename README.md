@@ -23,7 +23,15 @@ Runs in **paper trading mode** by default — no real money at risk until you're
 git clone <repo>
 cd TreadingBot
 python -m venv venv
+
+# Activate the virtual environment:
+# Mac/Linux:
 source venv/bin/activate
+# Windows (Command Prompt):
+# venv\Scripts\activate
+# Windows (PowerShell):
+# venv\Scripts\Activate.ps1
+
 pip install -r requirements.txt
 
 # 2. Configure
@@ -150,6 +158,20 @@ python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --star
 
 Or use the **Backtest** page in the dashboard for an interactive UI with equity curve and drawdown shading.
 
+---
+
+## Scheduling (optional)
+
+Auto-start the bot on weekdays at 09:00 IST:
+
+```bash
+python scripts/schedule_bot.py --install   # Mac/Linux: cron | Windows: Task Scheduler
+python scripts/schedule_bot.py --status    # verify it's installed
+python scripts/schedule_bot.py --remove    # uninstall
+```
+
+> **Windows note:** `--install` creates a Windows Task Scheduler entry via `schtasks`. Run from an Administrator prompt if you see access-denied errors.
+
 Data intervals selected automatically:
 - ≤55 days → 5-minute candles
 - ≤700 days → 1-hour candles
@@ -189,7 +211,10 @@ Before switching `TRADING_MODE=live`:
 ## Tests
 
 ```bash
+# Mac/Linux:
 source venv/bin/activate
+# Windows: venv\Scripts\activate
+
 python -m pytest tests/ -v
-# 113 passed
+# 257 passed
 ```

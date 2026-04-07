@@ -23,6 +23,7 @@ The log is append-only. We never delete or modify past trades.
 from __future__ import annotations
 
 import os
+import sys
 from datetime import datetime, date
 from pathlib import Path
 
@@ -38,7 +39,8 @@ from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 DB_PATH = Path(__file__).parent.parent / "logs" / "trades.db"
 DB_PATH.parent.mkdir(exist_ok=True)
 
-engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
+_db_path = DB_PATH.resolve().as_posix() if sys.platform == "win32" else str(DB_PATH)
+engine = create_engine(f"sqlite:///{_db_path}", echo=False)
 SessionLocal = sessionmaker(bind=engine)
 
 
