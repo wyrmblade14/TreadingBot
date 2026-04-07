@@ -19,6 +19,8 @@ env/
 .venv/
 
 # Logs and data
+logs/*.log
+logs/**/*.log
 logs/*.json
 data/historical/*.csv
 data/historical/*.parquet

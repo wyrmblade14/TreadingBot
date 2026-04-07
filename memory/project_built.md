@@ -4,9 +4,24 @@ description: Completed phases of the TreadingBot — modules, files, test counts
 type: project
 ---
 
-All code lives at the project root.
-Virtual environment: venv/ — on Windows use `venv/Scripts/python.exe` (not venv/bin/).
-Total tests: 202 passing, 0 failures (as of April 2026, Python 3.14 on Windows).
+All code lives at the project root, grouped by domain package:
+`data/`, `indicators/`, `strategies/`, `risk/`, `broker/`, `execution/`,
+`analysis/`, `scheduler/`, `dashboard/`, `backtesting/`, `notifications/`,
+`monitoring/`, `scripts/`, and `tests/`.
+
+Virtual environment: `venv/`.
+- macOS/Linux: `source venv/bin/activate`
+- Windows: `venv/Scripts/python.exe` (not `venv/bin/`)
+
+Current test status: 272 passing, 0 failures (April 2026, Python 3.14).
+
+Current architecture boundaries:
+- `analysis/` owns market/fundamental/catalyst/regime scoring and stock-universe selection.
+- `scheduler/watchlist.py` owns daily bot watchlist selection and fundamental judgment lookup.
+- `scheduler/job_runner.py` owns timed trading-day jobs only.
+- `risk/risk_manager.py` remains the mandatory approval gate and position-size scaler.
+- `execution/order_manager.py` owns entry/exit lifecycle and V-reversal exits.
+- `broker/paper_broker.py` owns paper fills, margin, short support, slippage, and costs.
 
 ## Phase 1 — Foundation ✅
 Files: config/settings.py, config/strategies.py, data/instruments.py,
@@ -24,14 +39,14 @@ Key facts:
 Files: strategies/base_strategy.py, strategies/ema_crossover.py,
 strategies/rsi_macd_combo.py, strategies/opening_range_breakout.py,
 risk/risk_manager.py, risk/position_sizer.py, risk/circuit_breaker.py
-Tests: tests/test_strategies.py (22 tests), tests/test_risk_manager.py (22 tests)
+Tests: tests/test_strategies.py, tests/test_risk_manager.py
 
 Key facts:
 - Signal dataclass has is_valid(), reward_risk_ratio, total_risk properties
 - ORB strategy uses ATR fallback for target when price already exceeds ORB projection
 - RiskManager has RiskState dataclass tracking daily_pnl, consecutive_losses, halt_until
 - Position sizing: qty = floor((capital × 0.01) / abs(entry - stop_loss))
-- 10 hardcoded risk rules; RiskManager.evaluate() is the mandatory approval gate
+- RiskManager.evaluate() is the mandatory approval gate for all new entries
 - RiskManager.new_day(capital) resets daily state — capital arg is required
 - reward_risk_ratio check uses round(..., 2) to avoid float precision rejections
 
@@ -43,7 +58,7 @@ Tests: tests/test_paper_broker.py (23 tests)
 Key facts:
 - BaseBroker abstract interface: paper and live brokers are interchangeable
 - PaperBroker simulates ALL Zerodha costs: ₹20 brokerage + STT + exchange + GST + SEBI + stamp duty
-- Default slippage: 0.1% on market orders
+- Default slippage: 0.2% per side on market orders
 - Trade log stored in logs/trades.db (SQLite, created on first run)
 - TradeLogger has get_today_trades(), get_daily_pnl(), get_strategy_summary() query methods
 - OrderManager auto-squares-off all positions at 3:15 PM IST
@@ -62,7 +77,7 @@ Key facts:
 - PerformanceMetrics: win_rate, profit_factor, expectancy, Sharpe (simplified), max_drawdown
 - generate_report() writes self-contained Plotly HTML (no internet needed to view)
 - CLI: `python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --start 2023-01-01 --end 2024-12-31`
-- `--all-strategies` flag runs all 3 strategies on same symbol for comparison
+- `--all-strategies` flag runs every configured strategy on the same symbol for comparison
 
 ## Phase 5 — Streamlit Dashboard ✅
 Files: analysis/market_overview.py, analysis/stock_scanner.py,
@@ -85,13 +100,14 @@ Key facts:
 - VIRTUAL_CAPITAL is the config constant for starting capital (not INITIAL_CAPITAL)
 
 ## Phase 6 — Scheduler + Notifications ✅
-Files: scheduler/job_runner.py, scheduler/bot_controller.py,
-notifications/telegram_notifier.py, data/nse_holidays.py
+Files: scheduler/job_runner.py, scheduler/watchlist.py, scheduler/bot_controller.py,
+scheduler/bot_state.py, notifications/telegram_notifier.py, data/nse_holidays.py
 
 Key facts:
 - APScheduler BackgroundScheduler (NOT BlockingScheduler — that freezes Streamlit)
 - 7 IST-scheduled jobs: pre_market_scan (9:00), market_open (9:15), signal_check (9:20–14:25 every 5m),
   stop_new_entries (14:30), square_off_all (15:15), daily_report (15:30), auto_shutdown (15:35)
+- scheduler/watchlist.py selects the daily fundamentals-ranked NIFTY50 watchlist and fails open to static first-N if fundamentals data is unavailable
 - signal_check fetches all symbols in parallel via ThreadPoolExecutor(max_workers=3)
   — max_workers=3 intentionally low to avoid yfinance rate-limiting
 - NSE holiday calendar 2024–2026 in data/nse_holidays.py; _is_market_day() checked at start of every job
@@ -100,8 +116,9 @@ Key facts:
 - Bot self-terminates at 15:35 via auto_shutdown() — no manual intervention needed
 
 ## Phase 6b — Live Kite (Deferred) 🔲
-Files: data/market_feed.py (stub), broker/kite_broker.py (stub)
-- KiteTicker WebSocket + candle builder + reconnection logic (not yet implemented)
+Built so far: data/kite_auth.py, data/kite_feed.py, data/kite_ticker.py
+Still deferred: broker/kite_broker.py live order execution and daily re-auth UI helper.
+- KiteTicker WebSocket + candle builder exists and is used by job_runner when Kite is available
 - Daily re-auth required: Kite access_token expires every day at midnight (SEBI rule)
 
 ## Intraday Short Selling ✅ (April 2026)
@@ -138,7 +155,7 @@ data/india_vix.py, risk/risk_manager.py, scheduler/job_runner.py,
 dashboard/views/bot_control.py, dashboard/views/home.py, dashboard/views/journal.py,
 broker/paper_broker.py, execution/order_manager.py, execution/trade_log.py,
 scheduler/bot_controller.py, scripts/backtest_15days.py (new)
-Tests: 193 passing (net +11 from before session)
+Tests at that point: 193 passing (net +11 from before session)
 
 What triggered this:
 - Bot ran 8 SELL trades on a TRENDING UP day (NIFTY +1.4%) — all losses — Rs6,348 loss
@@ -182,7 +199,7 @@ Also confirmed already done from earlier sessions:
 Files changed: execution/order_manager.py, scheduler/job_runner.py,
 notifications/telegram_notifier.py
 Tests added: tests/test_reversal_exit.py (9 tests)
-Total tests: 202
+Tests at that point: 202
 
 Features:
 1. **V-reversal early exit** — OrderManager.check_reversal_exit(symbol, price, vwap):
@@ -210,3 +227,20 @@ Features:
 
 **Why:** User is a stock market beginner who wants paper trading first for safety.
 **How to apply:** Always confirm TRADING_MODE=paper before any live suggestions. Never suggest live trading until 30+ days paper trading with positive results.
+
+## Fundamentals Watchlist + Structure Refactor (April 2026) ✅
+Files added/changed: analysis/fundamental_selector.py, scheduler/watchlist.py,
+scheduler/job_runner.py, tests/test_fundamental_selector.py,
+tests/test_scheduler_watchlist.py, README.md, memory/*.md.
+
+Key facts:
+- Bot no longer blindly scans the first N NIFTY50 symbols. It selects a daily
+  fundamentals-ranked watchlist before trading.
+- analysis/fundamental_selector.py ranks by sector-relative FundamentalScore,
+  avoids earnings blackout names when alternatives exist, caps sector concentration,
+  and fails open if yfinance fundamentals data is unavailable.
+- scheduler/watchlist.py owns DailyWatchlist, static fallback selection,
+  fundamental selection, and per-symbol FundamentalJudgment lookup.
+- scheduler/job_runner.py now stays focused on scheduled jobs and passes
+  FundamentalJudgment into RiskManager.evaluate() for size scaling.
+- Full suite after refactor: 272 passed, 1 Loguru deprecation warning.

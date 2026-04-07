@@ -60,6 +60,9 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 51 | Sector correlation filter — only trade stocks moving WITH NIFTY on up days | M | M | Future | Idea |
 | 52 | Per-day VIX history in backtest (fetch historical ^INDIAVIX for each day) | M | M | Ph4 enh | Idea |
 | 53 | Claude AI fundamental synthesis (FundamentalAnalyst) — position_scale from P/E + debt + margins + earnings growth | H | M | Future | DONE |
+| 54 | Kite login environment preflight (detect wrong venv Python / missing deps) | M | L | Ph6b ops | Idea |
+| 55 | Fundamentals-ranked bot watchlist — select trade universe from sector-relative fundamental scores before signal scan | H | M | Ph6 enh | DONE |
+| 56 | Scheduler watchlist module refactor — keep job_runner focused on timed jobs, move universe selection to scheduler/watchlist.py | M | L | Structure | DONE |
 
 ---
 
@@ -81,7 +84,7 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 
 **#14 yfinance retry**: When `ticker.history()` returns None (rate-limited), retry once after 2 seconds before returning None. Reduces missed signals during parallel fetches.
 
-**#15 Bollinger Band Mean Reversion**: Buy when price touches lower band + RSI < 35, targeting the mean (middle band). Adds counter-trend diversity — current 3 strategies are all momentum, so they all fail together in choppy markets.
+**#15 Bollinger Band Mean Reversion**: Buy when price touches lower band + RSI < 35, targeting the mean (middle band). Adds counter-trend diversity — the main intraday strategies are mostly momentum, so they can fail together in choppy markets.
   ⚠️ Backtested RELIANCE Jul–Dec 2025: win rate 47.8%, profit factor 0.70, −2% return. Root cause: EOD square-off cuts trades before the middle-band target is reached — this is a multi-day reversion strategy, not intraday. Needs swing trading mode (overnight holds) to work properly. Deferred to future phase.
 
 **#16 Gap & Go**: Enter stocks that open >0.5% above previous close with a volume surge in the first 15 minutes. Reuses ORB infrastructure. Classic intraday pattern, strong on NIFTY50 large caps.
@@ -98,7 +101,7 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 
 **#22 Trade Journal view**: New dashboard page. Each closed paper trade shown with: strategy that fired, entry time, signal confidence indicators at entry, NIFTY trend at the time, and outcome. Readable like a logbook. Single biggest confidence builder before going live.
 
-**#23 Strategy head-to-head panel**: Dashboard panel showing live win rate, avg P&L per trade, and Sharpe for all 3 strategies side by side — updated from actual paper trade data in real time. No need to run separate backtests to compare.
+**#23 Strategy head-to-head panel**: Dashboard panel showing live win rate, avg P&L per trade, and Sharpe for strategies side by side — updated from actual paper trade data in real time. No need to run separate backtests to compare.
 
 **#24 Signal confidence score**: Each signal on the Signals page shows a score 0–5: one point each for trend aligned, volume confirmed, VWAP confirmed, RSI not extreme, MACD direction matches. Visual bar or colour indicator. No logic changes — pure visibility.
 
@@ -127,6 +130,12 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 **#51 Sector correlation filter**: On NIFTY UP days, some stocks still decline (sector rotation). Before entering VWAP bounce BUY, check stock's last 10 candles are mostly green (>60% green). Filters out laggard stocks that don't participate in the day's rally.
 
 **#52 Historical VIX in backtest**: The 15-day backtest uses no VIX data — it tests direction logic only. Adding historical ^INDIAVIX per day would let the backtest simulate the full VIX suppression logic too. Fetch daily VIX close from yfinance at start, use it in simulate_day().
+
+**#54 Kite login preflight**: `scripts/kite_login.py` can fail with confusing import errors when `.venv/bin/python` points at a different Python than `.venv/bin/pip` installed packages for. Add a small startup diagnostic that prints the interpreter, Python version, and the exact `pip install -r requirements.txt` / venv recreation command when imports fail.
+
+**#55 Fundamentals-ranked bot watchlist** ✅ DONE: `analysis/fundamental_selector.py` ranks the NIFTY50 with existing `score_fundamentals()`, avoids earnings-blackout names when alternatives exist, caps sector concentration, and fails open to the static NIFTY50 order when fundamentals data is unavailable. `scheduler/job_runner.py` now uses that selector at setup and pre-market refresh, then passes a per-symbol `FundamentalJudgment` into `RiskManager.evaluate()` so position sizing reflects company quality.
+
+**#56 Scheduler watchlist refactor** ✅ DONE: `scheduler/watchlist.py` now owns `DailyWatchlist`, static fallback selection, fundamentals-ranked daily selection, and cached fundamental judgment lookup. `scheduler/job_runner.py` remains the timed-job orchestrator. Added `tests/test_scheduler_watchlist.py`. Full suite after refactor: 272 passed, 1 Loguru deprecation warning.
 
 ---
 

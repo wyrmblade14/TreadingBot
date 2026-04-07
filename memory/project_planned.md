@@ -7,19 +7,28 @@ type: project
 ## Phase 4 — Backtesting Engine ✅ DONE
 ## Phase 5 — Streamlit Dashboard ✅ DONE
 
-## Phase 6 — Live Kite Integration (NEXT)
-Files to build: data/market_feed.py (KiteTicker WebSocket + candle builder),
-broker/kite_broker.py (live order execution), scheduler/job_runner.py (APScheduler IST jobs),
-scripts/run_bot.py (main entry point)
+## Phase 6 — Scheduler + Notifications ✅ DONE
+Built: scheduler/job_runner.py, scheduler/bot_controller.py, scheduler/watchlist.py,
+notifications/telegram_notifier.py, data/nse_holidays.py.
 
-KiteTicker needs reconnection logic (WebSocket drops regularly)
-Daily re-auth required: access_token expires every day (SEBI rule)
-Auth flow: visit login URL → extract request_token from redirect → exchange for access_token
-APScheduler jobs: pre_market_scan (9:00), start_trading (9:15), process_signals (every 5min),
-  stop_new_entries (14:30), square_off_all (15:15), daily_report (15:30)
+Current bot run flow:
+1. Select a fundamentals-ranked daily NIFTY50 watchlist via scheduler/watchlist.py.
+2. Run pre-market market breadth, VIX/direction/regime, and catalyst scans.
+3. Fetch 5-minute candles from Kite where available, otherwise yfinance fallback.
+4. Run strategies, catalyst/fundamental filters, RiskManager, OrderManager, PaperBroker.
+5. Square off before close and send Telegram EOD report.
+
+## Phase 6b — Live Kite Broker (Deferred / Next)
+Already built: data/kite_auth.py, data/kite_feed.py, data/kite_ticker.py live tick feed.
+
+Remaining:
+- broker/kite_broker.py for real Zerodha order execution behind BaseBroker.
+- Streamlit daily re-auth helper because Kite access_token expires daily (SEBI rule).
+- GTT/OCO protective orders so stops survive crashes in live mode.
+- Paper + live parallel comparison mode before any real-money go-live.
 
 ## Phase 7 — Paper Trading Period
-Not code — operational phase: run paper trading 30+ days with live Kite data feed
+Operational phase: run paper trading 30+ trading days with the current structured bot.
 Go-live criteria: win rate >45%, understand every trade, positive net P&L after costs
 
 ## Phase 8 — Go Live

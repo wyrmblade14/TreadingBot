@@ -12,3 +12,5 @@ Key traits:
 - Prefers Python
 - Wants to start safely with paper trading before risking real money
 - Open to recommendations on best practices
+- Wants the repository kept clean and well-structured, with memory files updated when architecture or trading logic changes
+- Needs beginner-friendly explanations when introducing fundamentals, catalysts, risk filters, or any live-trading concept
