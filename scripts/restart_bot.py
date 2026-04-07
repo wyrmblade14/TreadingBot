@@ -17,22 +17,23 @@ import time
 from pathlib import Path
 
 ROOT       = Path(__file__).resolve().parent.parent
-PYTHON     = ROOT / "venv" / "Scripts" / "python.exe"
+PYTHON     = (
+    ROOT / "venv" / "Scripts" / "python.exe"
+    if sys.platform == "win32"
+    else ROOT / "venv" / "bin" / "python"
+)
 BOT_SCRIPT = ROOT / "scripts" / "run_bot.py"
 LOG_FILE   = ROOT / "logs" / "bot_stdout.log"
 STATE_FILE = ROOT / "logs" / "bot_state.json"
 
+# Import cross-platform pid helpers from bot_state
+sys.path.insert(0, str(ROOT))
+from scheduler import bot_state as _bot_state
+
 
 def _is_alive(pid: int) -> bool:
-    """Check if a process is alive (Windows-compatible)."""
-    try:
-        result = subprocess.run(
-            ["tasklist", "/FI", f"PID eq {pid}", "/NH", "/FO", "CSV"],
-            capture_output=True, text=True,
-        )
-        return str(pid) in result.stdout
-    except Exception:
-        return False
+    """Check if a process is alive (cross-platform)."""
+    return _bot_state._pid_alive(pid)
 
 
 def _running_pid() -> int | None:
@@ -40,7 +41,7 @@ def _running_pid() -> int | None:
     if not STATE_FILE.exists():
         return None
     try:
-        data = json.loads(STATE_FILE.read_text())
+        data = json.loads(STATE_FILE.read_text(encoding="utf-8"))
         pid  = int(data.get("pid", 0))
         if pid <= 0:
             return None
@@ -55,18 +56,20 @@ def _stop() -> None:
         print("No running bot found — starting fresh.")
         return
     print(f"Stopping bot (PID {pid})...")
-    try:
-        os.kill(pid, signal.SIGTERM)
-        for _ in range(10):
-            time.sleep(0.5)
-            if not _is_alive(pid):
-                break
+    _bot_state.stop_remote(pid)
+    for _ in range(10):
+        time.sleep(0.5)
+        if not _is_alive(pid):
+            break
+    else:
+        # Force kill if graceful stop timed out
+        if sys.platform == "win32":
+            subprocess.run(["taskkill", "/F", "/PID", str(pid)], capture_output=True)
         else:
-            # Force kill on Windows via taskkill
-            subprocess.run(["taskkill", "/F", "/PID", str(pid)],
-                           capture_output=True)
-    except Exception:
-        pass
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except Exception:
+                pass
     STATE_FILE.unlink(missing_ok=True)
     print("Bot stopped.")
 
@@ -84,7 +87,10 @@ def _start() -> None:
     time.sleep(4)
     if _running_pid():
         print(f"Bot running (PID {proc.pid})")
-        print(f"Logs: tail -f {LOG_FILE}")
+        if sys.platform == "win32":
+            print(f'Logs: Get-Content -Wait "{LOG_FILE}"')
+        else:
+            print(f"Logs: tail -f {LOG_FILE}")
     else:
         print("WARNING: Bot may have failed to start — check logs:")
         print(f"  {LOG_FILE}")

@@ -39,7 +39,7 @@ def write(
         "capital":        capital,
         "started_at":     started_at,
         "log_path":       log_path,
-    }))
+    }), encoding="utf-8")
 
 
 def read() -> Optional[dict]:
