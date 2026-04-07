@@ -63,6 +63,7 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 54 | Kite login environment preflight (detect wrong venv Python / missing deps) | M | L | Ph6b ops | Idea |
 | 55 | Fundamentals-ranked bot watchlist — select trade universe from sector-relative fundamental scores before signal scan | H | M | Ph6 enh | DONE |
 | 56 | Scheduler watchlist module refactor — keep job_runner focused on timed jobs, move universe selection to scheduler/watchlist.py | M | L | Structure | DONE |
+| 57 | Kite feed symbol/timezone cleanup — replace stale TATAMOTORS mapping and normalise Kite candle datetimes for pandas | H | L | Ph6b ops | DONE |
 
 ---
 
@@ -136,6 +137,8 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 **#55 Fundamentals-ranked bot watchlist** ✅ DONE: `analysis/fundamental_selector.py` ranks the NIFTY50 with existing `score_fundamentals()`, avoids earnings-blackout names when alternatives exist, caps sector concentration, and fails open to the static NIFTY50 order when fundamentals data is unavailable. `scheduler/job_runner.py` now uses that selector at setup and pre-market refresh, then passes a per-symbol `FundamentalJudgment` into `RiskManager.evaluate()` so position sizing reflects company quality.
 
 **#56 Scheduler watchlist refactor** ✅ DONE: `scheduler/watchlist.py` now owns `DailyWatchlist`, static fallback selection, fundamentals-ranked daily selection, and cached fundamental judgment lookup. `scheduler/job_runner.py` remains the timed-job orchestrator. Added `tests/test_scheduler_watchlist.py`. Full suite after refactor: 272 passed, 1 Loguru deprecation warning.
+
+**#57 Kite feed symbol/timezone cleanup** ✅ DONE: Logs showed repeated `Kite: no token found for ['TATAMOTORS']`, `No 5m data for TATAMOTORS.NS`, and Kite REST fallback errors with `NoneType.timezone`. `data/instruments.py` now uses `TMPV` / `TMPV.NS` for Tata Motors Passenger Vehicles after the demerger. `data/kite_feed.py` normalises Kite candle `date` values to stdlib `ZoneInfo("Asia/Kolkata")` before building the pandas DataFrame, avoiding pandas/Python 3.14 failures on pytz-aware Kite datetimes. Added `tests/test_kite_feed.py`.
 
 ---
 

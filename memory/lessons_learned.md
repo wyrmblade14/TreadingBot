@@ -225,3 +225,14 @@ type: project
   - `analysis/fundamental_selector.py`: pure ranking/selection rules for fundamentals.
   - `risk/risk_manager.py`: final approval, sizing, VIX/blackout gates.
 - When adding new pre-trade intelligence, put scoring/ranking in `analysis/`, scheduler glue in `scheduler/watchlist.py`, and only call it from `job_runner.py`.
+
+## Kite Feed: Stale Symbols and pytz Datetimes
+- A Kite warning like `Kite: no token found for ['SYMBOL']` means `kite.instruments("NSE")`
+  did not contain an exact `tradingsymbol` match. Check for NSE symbol changes before
+  assuming Kite is down.
+- 2026-04-07 case: Tata Motors demerger made `TATAMOTORS` stale for this watchlist.
+  Use `TMPV` / `TMPV.NS` for Tata Motors Passenger Vehicles.
+- Kite historical candles can return pytz-aware datetimes. pandas on Python 3.14 can fail
+  while building a DataFrame from those with `'NoneType' object has no attribute 'timezone'`.
+- Fix in `data/kite_feed.py`: normalise each Kite record's `date` to stdlib
+  `ZoneInfo("Asia/Kolkata")` before `pd.DataFrame(records)`.

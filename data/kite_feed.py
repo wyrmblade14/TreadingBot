@@ -42,6 +42,7 @@ from __future__ import annotations
 import threading
 from datetime import datetime, timedelta
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from loguru import logger
@@ -54,6 +55,23 @@ from data.kite_auth import get_kite_client
 # Populated lazily on first use; lives for the process lifetime.
 _token_cache: dict[str, int] = {}
 _token_lock  = threading.Lock()
+_PANDAS_IST = ZoneInfo("Asia/Kolkata")
+
+
+def _normalise_record_datetime(value: object) -> object:
+    """
+    Convert Kite candle timestamps to pandas-safe ZoneInfo datetimes.
+
+    Kite returns pytz-aware datetimes. pandas on Python 3.14 can fail while
+    constructing a DataFrame from those with:
+      AttributeError: 'NoneType' object has no attribute 'timezone'
+    Normalising to stdlib zoneinfo before DataFrame construction avoids that.
+    """
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            return value.replace(tzinfo=_PANDAS_IST)
+        return value.astimezone(_PANDAS_IST)
+    return value
 
 
 def _load_instrument_tokens(kite, symbols: list[str]) -> dict[str, int]:
@@ -142,16 +160,22 @@ def fetch_kite_ohlcv(
         logger.debug(f"Kite: no data returned for {kite_symbol}")
         return None
 
-    df = pd.DataFrame(records)
+    normalised_records = []
+    for record in records:
+        row = dict(record)
+        row["date"] = _normalise_record_datetime(row.get("date"))
+        normalised_records.append(row)
+
+    df = pd.DataFrame(normalised_records)
     # Kite returns columns: date, open, high, low, close, volume
     df = df.rename(columns={"date": "datetime"})
     df = df.set_index("datetime")
 
     # Ensure IST timezone
-    if df.index.tzinfo is None:
-        df.index = df.index.tz_localize(IST)
+    if df.index.tz is None:
+        df.index = df.index.tz_localize(_PANDAS_IST)
     else:
-        df.index = df.index.tz_convert(IST)
+        df.index = df.index.tz_convert(_PANDAS_IST)
 
     df = df[["open", "high", "low", "close", "volume"]].copy()
     df = df.sort_index()
