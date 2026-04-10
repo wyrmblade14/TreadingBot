@@ -8,8 +8,9 @@
 #   3. We capture stdout+stderr to a dated log in logs/cron/.
 #
 # Cron entry (install via: python scripts/schedule_bot.py --install):
-#   30 3 * * 1-5 /Users/shubhambhosale/Repos/Personal/TreadingBot/scripts/start_bot.sh
-#   (03:30 UTC = 09:00 IST)
+#   45 8 * * 1-5 /path/to/TreadingBot/scripts/start_bot.sh   # IST system
+#   15 3 * * 1-5 /path/to/TreadingBot/scripts/start_bot.sh   # UTC system
+#   (08:45 IST = 03:15 UTC)
 # ──────────────────────────────────────────────────────────────────────
 
 set -e
