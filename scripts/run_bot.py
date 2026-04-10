@@ -11,7 +11,7 @@ What this does:
 
 Usage:
     python scripts/run_bot.py                    # start (paper mode)
-    python scripts/run_bot.py --watchlist 5      # scan only first 5 NIFTY50 symbols
+    python scripts/run_bot.py --watchlist 5      # select top 5 fundamental candidates
     python scripts/run_bot.py --capital 50000    # custom starting capital
     python scripts/run_bot.py --dry-run          # print schedule and exit
 
@@ -42,7 +42,7 @@ def main() -> None:
         epilog=__doc__,
     )
     parser.add_argument("--watchlist", default=10, type=int,
-                        help="Number of NIFTY50 symbols to scan (default: 10)")
+                        help="Number of fundamentals-ranked NIFTY50 symbols to scan (default: 10)")
     parser.add_argument("--capital",   default=VIRTUAL_CAPITAL, type=float,
                         help=f"Starting paper capital in INR (default: ₹{VIRTUAL_CAPITAL:,.0f})")
     parser.add_argument("--dry-run",   action="store_true",

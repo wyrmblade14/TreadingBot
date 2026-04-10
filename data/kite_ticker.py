@@ -37,6 +37,7 @@ import threading
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from loguru import logger
@@ -49,6 +50,7 @@ from data.kite_auth import get_kite_client, is_kite_available
 # Strategies always receive 5-minute candles (resampled from these bars).
 # Smaller value = more granular price history, but more memory per symbol.
 TICK_CANDLE_SECONDS = 5   # 5-second bars — resampled to 5m for strategies
+_PANDAS_IST = ZoneInfo("Asia/Kolkata")
 
 
 class _TickCandle:
@@ -86,7 +88,14 @@ def _bucket_ts(ts: datetime, seconds: int) -> datetime:
     """Round a timestamp DOWN to the nearest N-second bucket."""
     epoch = ts.timestamp()
     bucketed = (epoch // seconds) * seconds
-    return datetime.fromtimestamp(bucketed, tz=ts.tzinfo)
+    return datetime.fromtimestamp(bucketed, tz=_PANDAS_IST)
+
+
+def _normalise_ts_for_pandas(ts: datetime) -> datetime:
+    """Return a ZoneInfo timestamp; pandas 3.0 trips over pytz tzinfo on Python 3.14."""
+    if ts.tzinfo is None:
+        return ts.replace(tzinfo=_PANDAS_IST)
+    return ts.astimezone(_PANDAS_IST)
 
 
 class KiteTickerFeed:
@@ -207,7 +216,7 @@ class KiteTickerFeed:
 
         rows = list(closed)
         if current is not None:
-            rows.append({"ts": current.ts, **current.to_row()})
+            rows.append({"ts": _normalise_ts_for_pandas(current.ts), **current.to_row()})
 
         if not rows and base is None:
             return None
@@ -217,7 +226,9 @@ class KiteTickerFeed:
             live_df = live_df.set_index("ts")
             live_df.index.name = None
             if live_df.index.tzinfo is None:
-                live_df.index = live_df.index.tz_localize(IST)
+                live_df.index = live_df.index.tz_localize(_PANDAS_IST)
+            else:
+                live_df.index = live_df.index.tz_convert(_PANDAS_IST)
             if base is not None:
                 # Drop any historical candles that overlap with live data
                 cutoff = live_df.index[0]
@@ -263,16 +274,16 @@ class KiteTickerFeed:
         # Build live 5s DataFrame
         rows = closed[:]
         if current is not None:
-            rows.append({"ts": current.ts, **current.to_row()})
+            rows.append({"ts": _normalise_ts_for_pandas(current.ts), **current.to_row()})
 
         if not rows:
             return base  # no live ticks yet — return historical only
 
         live_5s = pd.DataFrame(rows).set_index("ts")
         if live_5s.index.tzinfo is None:
-            live_5s.index = live_5s.index.tz_localize(IST)
+            live_5s.index = live_5s.index.tz_localize(_PANDAS_IST)
         else:
-            live_5s.index = live_5s.index.tz_convert(IST)
+            live_5s.index = live_5s.index.tz_convert(_PANDAS_IST)
 
         # Resample 5s → 5m: open=first tick, high=max, low=min,
         #                    close=last tick, volume=sum
@@ -304,7 +315,7 @@ class KiteTickerFeed:
         logger.info(f"KiteTickerFeed connected | subscribed to {len(tokens)} symbols")
 
     def _on_ticks(self, ws, ticks: list[dict]) -> None:
-        now = datetime.now(IST)
+        now = datetime.now(_PANDAS_IST)
         with self._lock:
             for tick in ticks:
                 token = tick.get("instrument_token")
@@ -339,7 +350,7 @@ class KiteTickerFeed:
                     candle.update(price, volume)
                 else:
                     # New bucket — close current candle, start new one
-                    self._completed[sym].append({"ts": candle.ts, **candle.to_row()})
+                    self._completed[sym].append({"ts": _normalise_ts_for_pandas(candle.ts), **candle.to_row()})
                     self._live_candles[sym] = _TickCandle(price, volume, bucket)
 
     def _on_close(self, ws, code, reason) -> None:

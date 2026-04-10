@@ -7,9 +7,9 @@ Runs in **paper trading mode** by default — no real money at risk until you're
 
 ## What it does
 
-- Scans all 50 NIFTY50 stocks every 5 minutes during market hours
-- Runs 3 strategies (EMA Crossover, RSI+MACD, Opening Range Breakout)
-- Filters every signal through a 10-rule risk manager before placing any order
+- Selects a fundamentals-ranked NIFTY50 watchlist before trading, then scans it every 5 minutes
+- Runs multiple strategies (EMA Crossover, RSI+MACD, Opening Range Breakout, VWAP Bounce)
+- Filters every signal through a mandatory risk manager before placing any order
 - Simulates Zerodha brokerage costs accurately (₹20 + STT + exchange + GST)
 - Sends trade alerts to your phone via Telegram
 - Backtests any strategy on historical data with a full equity curve
@@ -45,6 +45,8 @@ streamlit run dashboard/app.py
 # 4. Or run the bot from terminal
 python scripts/run_bot.py --dry-run     # preview schedule
 python scripts/run_bot.py               # start paper trading
+# Optional: choose how many fundamentals-ranked NIFTY50 stocks to scan
+python scripts/run_bot.py --watchlist 10
 ```
 
 ---
@@ -60,22 +62,30 @@ TreadingBot/
 ├── data/
 │   ├── instruments.py       # NIFTY50 symbol list + Kite↔yfinance mapping
 │   ├── historical.py        # fetch_ohlcv() — downloads OHLCV from yfinance
+│   ├── fundamentals.py      # Cached yfinance fundamental metrics + earnings dates
+│   ├── news_catalyst.py     # NSE announcements + yfinance news fallback
+│   ├── kite_auth.py         # Zerodha Kite auth helpers
+│   ├── kite_feed.py         # Kite REST OHLCV fetches
+│   ├── kite_ticker.py       # Kite WebSocket live tick feed + 5m candle builder
 │   └── nse_holidays.py      # NSE holiday calendar 2024–2026
 │
 ├── indicators/
 │   ├── ema.py               # EMA 9/21/50 with volume average
 │   ├── rsi.py               # RSI(14)
 │   ├── macd.py              # MACD(12,26,9)
-│   ├── orb.py               # Opening Range (9:15–9:30 AM) high/low
+│   ├── orb.py               # Opening Range (9:15–9:45 AM) high/low
 │   └── vwap.py              # VWAP — resets per trading day
 │
 ├── strategies/
 │   ├── ema_crossover.py     # EMA 9/21 crossover + trend + volume + VWAP filter
 │   ├── rsi_macd_combo.py    # RSI oversold/overbought + MACD crossover
-│   └── opening_range_breakout.py  # ORB breakout + volume + VWAP filter
+│   ├── opening_range_breakout.py  # ORB breakout + volume + VWAP filter
+│   ├── vwap_bounce.py       # VWAP cross confirmation entry
+│   ├── gap_and_go.py        # Morning gap strategy
+│   └── bb_mean_reversion.py # Mean reversion strategy, better for swing mode
 │
 ├── risk/
-│   ├── risk_manager.py      # 10 hardcoded rules — mandatory approval gate
+│   ├── risk_manager.py      # Mandatory safety gates and position-size scaling
 │   └── position_sizer.py    # qty = floor((capital × 1%) / risk_per_share)
 │
 ├── broker/
@@ -93,15 +103,23 @@ TreadingBot/
 │   └── report.py            # Plotly HTML equity curve + trade markers
 │
 ├── scheduler/
-│   ├── job_runner.py        # 6 IST-scheduled APScheduler jobs
-│   └── bot_controller.py    # Singleton — start/stop/status for dashboard
+│   ├── job_runner.py        # IST-scheduled APScheduler trading-day jobs
+│   ├── watchlist.py         # Daily fundamentals-ranked watchlist selection
+│   ├── bot_controller.py    # Singleton — start/stop/status for dashboard
+│   └── bot_state.py         # Shared process state file for CLI/UI sync
 │
 ├── notifications/
 │   └── telegram_notifier.py # Phone alerts for trades, daily report, bot events
 │
 ├── analysis/
 │   ├── stock_scanner.py     # Scans all NIFTY50 for active signals
-│   └── market_overview.py   # NIFTY50 breadth, advance/decline, top movers
+│   ├── market_overview.py   # NIFTY50 breadth, advance/decline, top movers
+│   ├── fundamental_filter.py    # Sector-relative 0–5 fundamental scoring
+│   ├── fundamental_selector.py  # Fundamentals-ranked trade universe selection
+│   ├── fundamental_analyst.py   # AI/rule-based fundamental judgment for sizing
+│   ├── catalyst_scanner.py      # Pre-market catalyst summary
+│   ├── market_direction.py      # Intraday NIFTY direction
+│   └── regime_detector.py       # Trending/ranging/volatile market regime
 │
 ├── dashboard/
 │   ├── app.py               # Streamlit entry point
@@ -110,15 +128,21 @@ TreadingBot/
 │       ├── signals.py       # Live signal scanner with charts
 │       ├── backtest.py      # Interactive backtest runner + equity curve
 │       ├── analysis.py      # Market breadth, sector overview
+│       ├── fundamentals.py  # Fundamental scorecard and AI/rule-based analysis
+│       ├── journal.py       # Historical trade analytics
+│       ├── comparison.py    # Strategy head-to-head comparison
+│       ├── replay.py        # Day replay tooling
 │       ├── bot_control.py   # Start/stop bot, activity log, next job schedule
 │       └── settings.py      # Read-only config view + go-live guide
 │
 ├── scripts/
 │   ├── run_bot.py           # CLI entry point for the scheduler
 │   ├── run_backtest.py      # CLI for running backtests
-│   └── run_dashboard.py     # Convenience launcher for Streamlit
+│   ├── run_dashboard.py     # Convenience launcher for Streamlit
+│   ├── run_replay.py        # Replay one market day
+│   └── schedule_bot.py      # Cron/Task Scheduler installer
 │
-└── tests/                   # 113 tests, 0 failures
+└── tests/                   # 272 tests, 0 failures
 ```
 
 ---
@@ -129,13 +153,14 @@ TreadingBot/
 |---|---|---|
 | EMA Crossover | EMA 9 crosses EMA 21 | Above EMA 50 (trend) + volume + VWAP |
 | RSI+MACD Combo | MACD crossover when RSI confirms | RSI not overbought/oversold |
-| Opening Range Breakout | Close above/below 9:15–9:30 range | Volume spike + VWAP |
+| Opening Range Breakout | Close above/below 9:15–9:45 range | Volume spike + VWAP |
+| VWAP Bounce | Price crosses VWAP after a pullback | EMA alignment + RSI + volume + time filter |
 
 All signals pass through the **RiskManager** before any order is placed.
 
 ---
 
-## Risk Rules (all hardcoded)
+## Risk Gates
 
 1. Max 1% of capital at risk per trade
 2. Stop-loss required on every trade
@@ -147,6 +172,8 @@ All signals pass through the **RiskManager** before any order is placed.
 8. Max 3 open positions at once
 9. No duplicate symbols (no averaging down)
 10. Signal sanity check: SL < entry < target (BUY)
+11. Earnings blackout window blocks new entries
+12. India VIX / market-direction safety filters suppress unsafe sides
 
 ---
 
@@ -216,5 +243,5 @@ source venv/bin/activate
 # Windows: venv\Scripts\activate
 
 python -m pytest tests/ -v
-# 257 passed
+# 272 passed
 ```

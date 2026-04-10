@@ -59,7 +59,7 @@ NIFTY50_INSTRUMENTS: list[Instrument] = [
 
     # ── Automotive ──────────────────────────────────────────────────
     Instrument("MARUTI",        "MARUTI.NS",        "Maruti Suzuki",            "Automotive"),
-    Instrument("TATAMOTORS",    "TATAMOTORS.NS",    "Tata Motors",              "Automotive"),
+    Instrument("TMPV",          "TMPV.NS",          "Tata Motors Passenger Vehicles", "Automotive"),
     Instrument("M&M",           "M&M.NS",           "Mahindra & Mahindra",      "Automotive"),
     Instrument("EICHERMOT",     "EICHERMOT.NS",     "Eicher Motors",            "Automotive"),
     Instrument("HEROMOTOCO",    "HEROMOTOCO.NS",    "Hero MotoCorp",            "Automotive"),

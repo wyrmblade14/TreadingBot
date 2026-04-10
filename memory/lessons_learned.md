@@ -206,3 +206,33 @@ type: project
 - `if len(df) >= 21` check is NOT sufficient — EMA can still be NaN if all 21 rows are from today.
 - Fix: always check `if math.isnan(ema9_val)` after computing EMA, return hold_signal if NaN.
 - This applies to any indicator with a warm-up period (MACD, ATR, etc.).
+
+## Fundamentals Watchlist Must Fail Open
+- Fundamentals data comes from yfinance/Yahoo and can fail independently of market candle data.
+- Do not stop the paper bot just because fundamentals are unavailable.
+- Correct design:
+  1. Rank by `analysis.fundamental_selector.select_fundamental_watchlist()`.
+  2. Prefer non-blackout, higher FundamentalScore stocks with sector diversification.
+  3. If ranking fails or returns nothing, fall back to the old static first-N NIFTY50 order.
+  4. Let RiskManager remain the final earnings-blackout and quantity-sizing gate.
+- Implemented wrapper: `scheduler/watchlist.py::select_daily_watchlist()`.
+
+## Keep Job Runner as Orchestrator, Not Domain Logic
+- `scheduler/job_runner.py` was becoming a large mixed-responsibility module.
+- Boundary after April 2026 refactor:
+  - `scheduler/job_runner.py`: APScheduler job functions, market-day checks, data fetch loop, strategy execution orchestration.
+  - `scheduler/watchlist.py`: daily watchlist selection and fundamental judgment lookup.
+  - `analysis/fundamental_selector.py`: pure ranking/selection rules for fundamentals.
+  - `risk/risk_manager.py`: final approval, sizing, VIX/blackout gates.
+- When adding new pre-trade intelligence, put scoring/ranking in `analysis/`, scheduler glue in `scheduler/watchlist.py`, and only call it from `job_runner.py`.
+
+## Kite Feed: Stale Symbols and pytz Datetimes
+- A Kite warning like `Kite: no token found for ['SYMBOL']` means `kite.instruments("NSE")`
+  did not contain an exact `tradingsymbol` match. Check for NSE symbol changes before
+  assuming Kite is down.
+- 2026-04-07 case: Tata Motors demerger made `TATAMOTORS` stale for this watchlist.
+  Use `TMPV` / `TMPV.NS` for Tata Motors Passenger Vehicles.
+- Kite historical candles can return pytz-aware datetimes. pandas on Python 3.14 can fail
+  while building a DataFrame from those with `'NoneType' object has no attribute 'timezone'`.
+- Fix in `data/kite_feed.py`: normalise each Kite record's `date` to stdlib
+  `ZoneInfo("Asia/Kolkata")` before `pd.DataFrame(records)`.

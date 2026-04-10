@@ -19,7 +19,7 @@ Daily schedule:
 
 Usage:
   python scripts/run_bot.py
-  python scripts/run_bot.py --watchlist 10   # scan first N NIFTY50 symbols
+  python scripts/run_bot.py --watchlist 10   # select top N fundamental candidates
   python scripts/run_bot.py --dry-run        # print schedule, don't start
 """
 
@@ -44,7 +44,7 @@ from config.settings import (
     MARKET_OPEN, SHORT_SELLING_ENABLED, SQUAREOFF_TIME,
 )
 from data.historical import fetch_ohlcv
-from data.instruments import NIFTY50_INSTRUMENTS, KITE_TO_YF
+from data.instruments import KITE_TO_YF
 from data.kite_auth import is_kite_available
 from data.kite_feed import fetch_kite_ohlcv
 from data.kite_ticker import get_ticker_feed
@@ -52,6 +52,11 @@ from execution.order_manager import OrderManager
 from execution.portfolio import Portfolio
 from execution.trade_log import TradeLogger
 from risk.risk_manager import RiskManager
+from scheduler.watchlist import (
+    DailyWatchlist,
+    get_fundamental_judgment,
+    select_daily_watchlist,
+)
 from indicators.vwap import compute_vwap
 from strategies.base_strategy import Action, Signal
 from strategies.ema_crossover import EMACrossoverStrategy
@@ -68,6 +73,7 @@ _trade_log:   Optional[TradeLogger]   = None
 _portfolio:   Optional[Portfolio]     = None
 _strategies:  list                    = []
 _watchlist:   list[str]               = []
+_watchlist_selection: Optional[DailyWatchlist] = None
 _new_entries_allowed: bool            = True
 _scheduler:   Optional[BlockingScheduler] = None
 
@@ -113,13 +119,33 @@ def _on_tick_exit(symbol: str, price: float) -> None:
 _last_signal_key: set[tuple] = set()
 
 
+def _refresh_daily_watchlist(watchlist_size: int | None = None) -> None:
+    """Refresh the in-memory watchlist from current fundamental rankings."""
+    global _watchlist, _watchlist_selection
+
+    size = watchlist_size if watchlist_size is not None else (len(_watchlist) or 10)
+    selection = select_daily_watchlist(size)
+    if not selection.symbols:
+        _watchlist_selection = selection
+        _watchlist = []
+        return
+
+    if _watchlist and selection.symbols != _watchlist:
+        logger.info(
+            f"Watchlist refreshed ({selection.source}) | old={_watchlist} | "
+            f"new={selection.symbols}"
+        )
+    _watchlist_selection = selection
+    _watchlist = selection.symbols
+
+
 def setup(watchlist_size: int = 10, capital: float = VIRTUAL_CAPITAL) -> None:
     """
     Initialise all singletons before the scheduler starts.
 
     Args:
-        watchlist_size: How many NIFTY50 symbols to scan each cycle.
-                        Fewer = faster (each needs a yfinance fetch).
+        watchlist_size: How many fundamentally ranked NIFTY50 symbols to scan.
+                        Fewer = faster (each needs market-data fetches).
         capital:        Starting paper capital in INR.
     """
     global _broker, _risk_mgr, _order_mgr, _trade_log, _portfolio
@@ -138,7 +164,7 @@ def setup(watchlist_size: int = 10, capital: float = VIRTUAL_CAPITAL) -> None:
         VWAPBounceStrategy(),
     ]
 
-    _watchlist = [i.kite_symbol for i in NIFTY50_INSTRUMENTS[:watchlist_size]]
+    _refresh_daily_watchlist(watchlist_size)
 
     logger.info(
         f"Scheduler setup | capital=₹{capital:,.0f} "
@@ -190,6 +216,12 @@ def pre_market_scan() -> None:
         return
     _data_src = "Kite Connect (NSE live)" if is_kite_available() else "yfinance (fallback)"
     logger.info(f"=== PRE-MARKET SCAN (09:00 IST) === | Data source: {_data_src}")
+
+    # Re-rank the daily scan universe before catalysts and technical signals.
+    # Fundamentals are slow-moving, so this runs once pre-market and then the
+    # selected watchlist is reused throughout the session.
+    _refresh_daily_watchlist()
+
     overview = get_nifty_overview(top_n=3)
     if overview:
         logger.info(
@@ -546,7 +578,39 @@ def signal_check() -> None:
                 except Exception:
                     pass  # fail-open — catalyst filter never blocks on data error
 
-                decision = _risk_mgr.evaluate(signal)
+                # ── Fundamental judgment for sizing + conflict check ─────
+                # Fundamental analysis does not replace the technical strategy.
+                # It only changes how aggressively we trade the signal:
+                #   - weak/mixed fundamentals -> RiskManager scales size down
+                #   - high-confidence conflict -> skip the signal
+                #
+                # Rule-based judgments use confidence=0.5, so the hard skip below
+                # only triggers when the AI analyst is confident, while sizing still
+                # works with the deterministic fallback.
+                _judgment = get_fundamental_judgment(kite_sym)
+                if _judgment is not None and not signal.strategy.startswith("catalyst_"):
+                    if (
+                        signal.action == Action.BUY
+                        and _judgment.bias == "BEARISH"
+                        and _judgment.confidence >= 0.6
+                    ):
+                        logger.info(
+                            f"Skipping BUY [{kite_sym}]: high-confidence bearish "
+                            f"fundamentals ({_judgment.summary})"
+                        )
+                        continue
+                    if (
+                        signal.action == Action.SELL
+                        and _judgment.bias == "BULLISH"
+                        and _judgment.confidence >= 0.7
+                    ):
+                        logger.info(
+                            f"Skipping SELL [{kite_sym}]: high-confidence bullish "
+                            f"fundamentals ({_judgment.summary})"
+                        )
+                        continue
+
+                decision = _risk_mgr.evaluate(signal, judgment=_judgment)
                 if not decision.approved:
                     logger.debug(
                         f"Signal rejected [{kite_sym} / {strategy.name}]: "

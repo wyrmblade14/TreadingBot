@@ -1,0 +1,65 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# TreadingBot — docker-compose
+#
+# Services:
+#   bot        — Paper trading bot (APScheduler, 08:45–15:35 IST)
+#   dashboard  — Streamlit UI at http://localhost:8501
+#   watchdog   — Crash recovery (restarts bot if it dies, max 3x/day)
+#
+# Weekly backtest (Saturday 10:00 IST) is triggered from the HOST crontab:
+#   0 10 * * 6 docker compose -f /path/to/docker-compose.yml run --rm bot \
+#               python scripts/scheduled_backtest.py >> /path/to/logs/backtest_weekly.log 2>&1
+#
+# Usage:
+#   docker-compose up -d            # start all services
+#   docker-compose logs -f bot      # follow bot logs
+#   docker-compose down             # stop all
+#
+# Setup:
+#   1. Copy .env.example to .env and fill in your values
+#   2. docker-compose up -d
+#   3. Add the weekly backtest cron line above to your host crontab
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  bot:
+    build: .
+    container_name: treadingbot_bot
+    command: python scripts/run_bot.py
+    env_file: .env
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    # Bot manages its own IST-scheduled jobs internally via APScheduler.
+    # It auto-starts at 09:00 IST and auto-shuts at 15:35 IST.
+    # Use the host crontab / Task Scheduler to start this container daily.
+
+  dashboard:
+    build: .
+    container_name: treadingbot_dashboard
+    command: >
+      python -m streamlit run dashboard/app.py
+      --server.address 0.0.0.0
+      --server.port 8501
+      --server.headless true
+    env_file: .env
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  watchdog:
+    build: .
+    container_name: treadingbot_watchdog
+    command: python scripts/watchdog.py
+    env_file: .env
+    volumes:
+      - ./logs:/app/logs
+    # Watchdog shares the logs volume to read bot_state.json.
+    # It loops inside its own process until 15:40 IST then exits.
+    # docker restart policy brings it back next morning.
+    restart: unless-stopped
+    depends_on:
+      - bot

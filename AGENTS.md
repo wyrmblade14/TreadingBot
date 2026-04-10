@@ -30,6 +30,7 @@
 
 ## Architecture Flow
 ```
+Fundamentals/catalysts → scheduler/watchlist.py
 Market data → indicators/ → strategies/ → RiskManager.evaluate()
                                                     ↓ approved
                                          OrderManager.execute_signal()
@@ -49,22 +50,23 @@ Market data → indicators/ → strategies/ → RiskManager.evaluate()
 | 3 Paper Trading | ✅ Done | 23 | broker/, execution/ |
 | 4 Backtesting | ✅ Done | 21 | backtesting/engine.py, performance.py, report.py |
 | 5 Dashboard | ✅ Done | — | dashboard/app.py, dashboard/views/, analysis/ |
-| 6 Scheduler + Notifications | ✅ Done | — | scheduler/, notifications/ |
-| 6b Live Kite | 🔲 Deferred | — | data/market_feed.py, broker/kite_broker.py |
+| 6 Scheduler + Notifications | ✅ Done | — | scheduler/job_runner.py, scheduler/watchlist.py, notifications/ |
+| Fundamentals Watchlist | ✅ Done | 15 | analysis/fundamental_selector.py, scheduler/watchlist.py |
+| 6b Live Kite | 🔲 Deferred | — | data/kite_auth.py, data/kite_feed.py, data/kite_ticker.py, broker/kite_broker.py |
 | 7 Paper Period | 🔲 | — | 30+ trading days, win rate >45% |
 | 8 Go Live | 🔲 | — | `TRADING_MODE=live`, start ₹10k–₹20k |
 
-**Total tests: 113 passing, 0 failures**
+**Total tests: 272 passing, 0 failures**
 
 ## Key Constants (config/settings.py)
 ```
 Market: 9:15–15:30 IST | Blackout: <9:20 | No new entries: >14:30 | Square-off: 15:15
 Risk: 1%/trade | Daily loss halt: 3% | Max positions: 3 | Min RR: 2:1 | Consec losses halt: 3→1hr
 Zerodha costs: ₹20/order + STT 0.025% sell + exchange 0.00325% + GST 18% + SEBI ₹10/cr + stamp 0.003% buy
-Slippage: 0.1% | Virtual capital: ₹1,00,000
+Slippage: 0.2%/side | Virtual capital: ₹1,00,000
 ```
 
-## Risk Rules (risk/risk_manager.py — all 10 hardcoded)
+## Risk Gates (risk/risk_manager.py)
 1. qty = floor((capital×1%) / risk_per_share)
 2. Stop-loss required on every trade
 3. Min 2:1 reward:risk
@@ -75,6 +77,8 @@ Slippage: 0.1% | Virtual capital: ₹1,00,000
 8. Max 3 open positions
 9. No duplicate symbol (no averaging down)
 10. Signal sanity: SL < entry < target (BUY)
+11. Earnings blackout blocks new entries
+12. VIX/direction safety suppresses unsafe sides
 
 ## Symbol Formats
 - Kite Connect: `"RELIANCE"` — no suffix
@@ -102,18 +106,19 @@ with patch("risk.risk_manager.datetime") as mock_dt:
 
 ## Phase 5 — Dashboard (DONE)
 - Streamlit at `localhost:8501` — run `streamlit run dashboard/app.py`
-- Pages: Home, Signals, Backtest, Analysis, Bot Control, Settings
+- Pages: Home, Journal, Compare, Signals, Backtest, Replay, Analysis, Fundamentals, Bot Monitor, Settings
 - Views in `dashboard/views/` (NOT `pages/` — Streamlit auto-detects that folder)
 
 ## Phase 6 — Scheduler + Notifications (DONE, live Kite deferred)
 - `scheduler/job_runner.py`: APScheduler IST jobs (9:00 pre-market → 15:30 report)
+- `scheduler/watchlist.py`: fundamentals-ranked daily watchlist + static fallback + fundamental judgment lookup
 - `scheduler/bot_controller.py`: BackgroundScheduler singleton, start/stop/event-log for UI
 - `notifications/telegram_notifier.py`: trade alerts + daily report to Telegram
 - `data/nse_holidays.py`: NSE holiday calendar 2024–2026
 
 ## Phase 6b — Live Kite (Deferred)
-- `data/market_feed.py`: KiteTicker WebSocket + candle builder + reconnection logic
-- `broker/kite_broker.py`: live order execution
+- `data/kite_auth.py`, `data/kite_feed.py`, `data/kite_ticker.py`: built Kite auth/feed/ticker pieces
+- `broker/kite_broker.py`: deferred live order execution
 - Daily re-auth: access_token expires daily (SEBI rule) — needs Streamlit helper
 
 ## Memory Files
