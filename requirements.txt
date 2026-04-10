@@ -21,8 +21,9 @@ python-dotenv==1.0.1        # Load .env files for API keys
 loguru==0.7.2               # Structured, coloured logging
 
 # ── Database ─────────────────────────────────────────────────────────
-sqlalchemy>=2.0.36          # ORM for SQLite trade log (>=2.0.36 for Python 3.14 compat)
-# sqlite3 is built-in to Python — no install needed
+sqlalchemy>=2.0.36          # ORM for the trade log (>=2.0.36 for Python 3.14 compat)
+psycopg2-binary>=2.9.9      # PostgreSQL driver — "binary" variant needs no pg_config at build time
+# sqlite3 is built-in to Python — kept as test/local fallback
 
 # ── Testing ──────────────────────────────────────────────────────────
 pytest==8.1.1

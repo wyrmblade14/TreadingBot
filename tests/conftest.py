@@ -39,3 +39,27 @@ def mock_fundamentals():
     with patch("data.fundamentals.fundamentals_cache") as mock_fc:
         mock_fc.is_earnings_blackout.return_value = False
         yield mock_fc
+
+
+@pytest.fixture(autouse=True)
+def isolated_test_db(tmp_path, monkeypatch):
+    """Point every test at a fresh SQLite DB in a temp directory.
+
+    Tests never touch logs/trades.db and never require PostgreSQL to be running.
+    Each test gets an empty database so there is no cross-test state pollution.
+    """
+    test_db = tmp_path / "test_trades.db"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{test_db}")
+
+    import execution.trade_log as tl
+    from sqlalchemy import create_engine as _ce
+    from sqlalchemy.orm import sessionmaker as _sm
+
+    test_engine = _ce(f"sqlite:///{test_db}", echo=False)
+    tl.engine = test_engine
+    tl.SessionLocal = _sm(bind=test_engine)
+    tl.Base.metadata.create_all(test_engine)
+
+    yield
+
+    test_engine.dispose()

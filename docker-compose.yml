@@ -23,6 +23,25 @@
 
 services:
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: treadingbot_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   bot:
     build: .
     container_name: treadingbot_bot
@@ -31,6 +50,9 @@ services:
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     # Bot manages its own IST-scheduled jobs internally via APScheduler.
     # It auto-starts at 09:00 IST and auto-shuts at 15:35 IST.
     # Use the host crontab / Task Scheduler to start this container daily.
@@ -49,6 +71,9 @@ services:
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   watchdog:
     build: .
@@ -62,4 +87,10 @@ services:
     # docker restart policy brings it back next morning.
     restart: unless-stopped
     depends_on:
-      - bot
+      postgres:
+        condition: service_healthy
+      bot:
+        condition: service_started
+
+volumes:
+  postgres_data:   # Docker manages this — data survives container restarts; only lost with "down -v"

@@ -44,6 +44,24 @@ python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --star
 # --strategy options: ema_crossover | rsi_macd_combo | opening_range_breakout | bb_mean_reversion | vwap_bounce
 # --all-strategies: run all strategies sequentially
 # --walk-forward: walk-forward validation mode (add --train-months / --test-months)
+
+# Run a full portfolio simulation (last N trading days, all strategies, shared capital)
+python scripts/run_simulation.py
+python scripts/run_simulation.py --days 20 --symbols RELIANCE TCS INFY
+
+# Manage bot process lifecycle
+python scripts/restart_bot.py start
+python scripts/restart_bot.py stop
+python scripts/restart_bot.py restart
+
+# Crash watchdog (launched automatically by cron alongside the bot; exits at 15:40 IST)
+python scripts/watchdog.py          # normal run
+python scripts/watchdog.py --once   # single check (testing)
+
+# Install auto-start cron/Task Scheduler entry (weekdays 09:00 IST)
+python scripts/schedule_bot.py --install
+python scripts/schedule_bot.py --status
+python scripts/schedule_bot.py --remove
 ```
 
 ## .env Variables
@@ -88,6 +106,10 @@ Market data → indicators/ → strategies/ → RiskManager.evaluate()
 | Fundamental Analysis | ✅ Done | 34 | data/fundamentals.py, analysis/fundamental_filter.py, analysis/fundamental_analyst.py |
 | Fundamentals Watchlist | ✅ Done | 15 | analysis/fundamental_selector.py, scheduler/watchlist.py |
 | Pre-Market Catalyst Scanner | ✅ Done | 21 | data/news_catalyst.py, analysis/catalyst_scanner.py |
+| Regime Detector | ✅ Done | — | analysis/regime_detector.py (Trending/Ranging/Volatile) |
+| Strategy Degradation Monitor | ✅ Done | — | monitoring/degradation.py (check_all_strategies) |
+| Gap & Go Strategy | ✅ Done | — | strategies/gap_and_go.py — not yet in run_backtest.py STRATEGY_MAP |
+| Crash Watchdog | ✅ Done | — | scripts/watchdog.py (08:45–15:40 IST, max restarts/day) |
 | 6b Live Kite | 🔲 Deferred | — | data/kite_auth.py, data/kite_feed.py, data/kite_ticker.py, broker/kite_broker.py |
 | 7 Paper Period | 🔲 | — | 30+ trading days, win rate >45% |
 | 8 Go Live | 🔲 | — | `TRADING_MODE=live`, start ₹10k–₹20k |
@@ -177,6 +199,10 @@ with patch("risk.risk_manager.datetime") as mock_dt:
 - `data/kite_auth.py`, `data/kite_feed.py`, `data/kite_ticker.py`: built Kite auth/feed/ticker pieces
 - `broker/kite_broker.py`: deferred live order execution
 - Daily re-auth: access_token expires daily (SEBI rule) — needs Streamlit helper
+
+## Learning Files
+- `learning/backtest_analysis.md` — backtest run notes and findings
+- `learning/strategy_notes.md` — per-strategy observations from paper trading
 
 ## Memory Files
 - `memory/MEMORY.md` — index

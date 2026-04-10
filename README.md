@@ -222,6 +222,33 @@ Leave blank to disable — the bot works normally without it.
 
 ---
 
+## Daily Kite Token Refresh (when using live trading)
+
+Zerodha requires a fresh access token every day (SEBI rule). Run this each morning **before 9:00 AM IST**, on your machine (not inside Docker):
+
+```bash
+python scripts/kite_login.py
+```
+
+It walks you through three steps:
+1. Opens a login URL — paste it into your browser
+2. You log in with your Zerodha credentials
+3. Paste the redirect URL back into the terminal — the script writes the new token to `.env` automatically
+
+Then start (or restart) Docker so the containers pick up the new token:
+
+```bash
+# If Docker isn't running yet:
+docker-compose up -d
+
+# If Docker is already running:
+docker-compose restart bot
+```
+
+> **Note:** If `KITE_API_KEY` is not set, the bot falls back to yfinance for data — but for accurate real-time prices during paper trading you should still set up the Kite token daily.
+
+---
+
 ## Go-Live Checklist
 
 Before switching `TRADING_MODE=live`:

@@ -14,8 +14,8 @@ Why log trades?
     - What time of day produces the best trades?
     - Which stocks work best with each strategy?
 
-Database: SQLite (built into Python, no server needed)
-Location: logs/trades.db
+Database: PostgreSQL (Docker service). Falls back to SQLite (logs/trades.db) when DATABASE_URL
+is not set — used for local dev and tests so they never need a running Postgres instance.
 
 The log is append-only. We never delete or modify past trades.
 """
@@ -23,24 +23,29 @@ The log is append-only. We never delete or modify past trades.
 from __future__ import annotations
 
 import os
-import sys
 from datetime import datetime, date
 from pathlib import Path
 
 from loguru import logger
 from sqlalchemy import (
-    Column, DateTime, Float, Integer, String, Text, create_engine, text
+    Column, DateTime, Float, Integer, String, Text, create_engine, inspect, text
 )
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 
 # ── Database setup ────────────────────────────────────────────────────
 
-DB_PATH = Path(__file__).parent.parent / "logs" / "trades.db"
-DB_PATH.parent.mkdir(exist_ok=True)
+_DEFAULT_SQLITE = "sqlite:///" + str(
+    Path(__file__).parent.parent / "logs" / "trades.db"
+)
+_DB_URL = os.environ.get("DATABASE_URL", _DEFAULT_SQLITE)
 
-_db_path = DB_PATH.resolve().as_posix() if sys.platform == "win32" else str(DB_PATH)
-engine = create_engine(f"sqlite:///{_db_path}", echo=False)
+# Ensure logs/ directory exists (only relevant for the SQLite fallback)
+if _DB_URL.startswith("sqlite"):
+    _sqlite_path = Path(_DB_URL.replace("sqlite:///", ""))
+    _sqlite_path.parent.mkdir(exist_ok=True)
+
+engine = create_engine(_DB_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine)
 
 
@@ -74,19 +79,21 @@ class TradeRecord(Base):
 
 def init_db() -> None:
     """Create tables if they don't exist. Safe to call multiple times."""
-    is_new = not DB_PATH.exists()
+    inspector = inspect(engine)
+    is_new = not inspector.has_table("trades")
     Base.metadata.create_all(engine)
     if is_new:
-        logger.info(f"Trade database created at {DB_PATH}")
+        logger.info(f"Trade database initialised ({_DB_URL.split('@')[-1]})")
     else:
-        # Add exit_timestamp column to existing databases that predate this field
-        with engine.connect() as conn:
-            cols = [row[1] for row in conn.execute(text("PRAGMA table_info(trades)")).fetchall()]
-            if "exit_timestamp" not in cols:
-                conn.execute(text("ALTER TABLE trades ADD COLUMN exit_timestamp DATETIME"))
+        # Add exit_timestamp column to databases that predate this field.
+        # inspect() is database-agnostic — works on PostgreSQL and SQLite.
+        existing_cols = [col["name"] for col in inspector.get_columns("trades")]
+        if "exit_timestamp" not in existing_cols:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE trades ADD COLUMN exit_timestamp TIMESTAMP"))
                 conn.commit()
-                logger.info("Trade database migrated: added exit_timestamp column")
-        logger.debug(f"Trade database ready at {DB_PATH}")
+            logger.info("Trade database migrated: added exit_timestamp column")
+        logger.debug(f"Trade database ready ({_DB_URL.split('@')[-1]})")
 
 
 class TradeLogger:
