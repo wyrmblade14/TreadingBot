@@ -201,3 +201,55 @@ class TestCatalystFilter:
             result = f.evaluate(_make_signal(), _make_context())
         # CatalystFilter catches its own exceptions and returns PASS
         assert result.verdict == "PASS"
+
+
+# ── Task 5 tests ──────────────────────────────────────────────────────
+
+from execution.signal_pipeline import FundamentalsFilter
+
+
+def _make_judgment(bias: str, confidence: float, summary: str = "test") -> MagicMock:
+    j = MagicMock()
+    j.bias = bias
+    j.confidence = confidence
+    j.summary = summary
+    return j
+
+
+class TestFundamentalsFilter:
+    def test_no_judgment_passes(self):
+        f = FundamentalsFilter()
+        with patch("execution.signal_pipeline.get_fundamental_judgment",
+                   return_value=None):
+            result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "PASS"
+
+    def test_bearish_judgment_rejects_buy_at_threshold(self):
+        f = FundamentalsFilter()
+        with patch("execution.signal_pipeline.get_fundamental_judgment",
+                   return_value=_make_judgment("BEARISH", 0.65)):
+            result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "REJECT"
+        assert "fundamentals" in result.reason
+
+    def test_bearish_judgment_below_threshold_passes_buy(self):
+        f = FundamentalsFilter()
+        with patch("execution.signal_pipeline.get_fundamental_judgment",
+                   return_value=_make_judgment("BEARISH", 0.55)):
+            result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "PASS"
+
+    def test_bullish_judgment_rejects_sell_at_threshold(self):
+        f = FundamentalsFilter()
+        with patch("execution.signal_pipeline.get_fundamental_judgment",
+                   return_value=_make_judgment("BULLISH", 0.75)):
+            result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert result.verdict == "REJECT"
+
+    def test_catalyst_signal_skips_fundamentals_check(self):
+        f = FundamentalsFilter()
+        sig = _make_signal(action=Action.BUY, strategy="catalyst_long")
+        with patch("execution.signal_pipeline.get_fundamental_judgment",
+                   return_value=_make_judgment("BEARISH", 0.90)):
+            result = f.evaluate(sig, _make_context())
+        assert result.verdict == "PASS"

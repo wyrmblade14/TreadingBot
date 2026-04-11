@@ -24,6 +24,7 @@ from loguru import logger
 
 from analysis.catalyst_scanner import get_todays_catalysts
 from config.settings import SHORT_SELLING_ENABLED
+from scheduler.watchlist import get_fundamental_judgment
 from strategies.base_strategy import Action, Signal
 
 
@@ -239,4 +240,46 @@ class CatalystFilter(SignalFilter):
                 reason=f"catalyst conflict: {cat.reason} ({cat.confidence:.0%})",
             )
 
+        return FilterResult(verdict="PASS")
+
+
+class FundamentalsFilter(SignalFilter):
+    """
+    Block signals that conflict with high-confidence fundamental analysis.
+
+    Thresholds (different per direction — shorts need higher conviction):
+      BUY vs BEARISH bias: confidence ≥ 0.60 → reject
+      SELL vs BULLISH bias: confidence ≥ 0.70 → reject
+
+    Catalyst-sourced signals (strategy starts with "catalyst_") bypass
+    this check — the catalyst already overrides the technical signal.
+    """
+    name = "fund"
+
+    def evaluate(self, signal: Signal, context: FilterContext) -> FilterResult:
+        if signal.strategy.startswith("catalyst_"):
+            return FilterResult(verdict="PASS")
+
+        judgment = get_fundamental_judgment(context.symbol)
+        if judgment is None:
+            return FilterResult(verdict="PASS")
+
+        if (
+            signal.action == Action.BUY
+            and judgment.bias == "BEARISH"
+            and judgment.confidence >= 0.6
+        ):
+            return FilterResult(
+                verdict="REJECT",
+                reason=f"fundamentals: {judgment.summary}",
+            )
+        if (
+            signal.action == Action.SELL
+            and judgment.bias == "BULLISH"
+            and judgment.confidence >= 0.7
+        ):
+            return FilterResult(
+                verdict="REJECT",
+                reason=f"fundamentals: {judgment.summary}",
+            )
         return FilterResult(verdict="PASS")
