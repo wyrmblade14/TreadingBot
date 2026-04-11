@@ -97,3 +97,29 @@ class TestDedupFilter:
         f.evaluate(_make_signal(strategy="ema_crossover"), ctx)
         result = f.evaluate(_make_signal(strategy="rsi_macd_combo"), ctx)
         assert result.verdict == "PASS"
+
+
+# ── Task 3 tests ──────────────────────────────────────────────────────
+
+from unittest.mock import patch
+from execution.signal_pipeline import ShortSellingFilter
+
+
+class TestShortSellingFilter:
+    def test_buy_always_passes(self):
+        f = ShortSellingFilter()
+        result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "PASS"
+
+    def test_sell_passes_when_short_selling_enabled(self):
+        f = ShortSellingFilter()
+        with patch("execution.signal_pipeline.SHORT_SELLING_ENABLED", True):
+            result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert result.verdict == "PASS"
+
+    def test_sell_rejected_when_short_selling_disabled(self):
+        f = ShortSellingFilter()
+        with patch("execution.signal_pipeline.SHORT_SELLING_ENABLED", False):
+            result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert result.verdict == "REJECT"
+        assert "short selling disabled" in result.reason

@@ -22,6 +22,7 @@ from typing import Optional
 import pandas as pd
 from loguru import logger
 
+from config.settings import SHORT_SELLING_ENABLED
 from strategies.base_strategy import Action, Signal
 
 
@@ -151,4 +152,14 @@ class DedupFilter(SignalFilter):
             self._seen.add(key)
             if len(self._seen) > 200:   # bounded — clear after ~200 unique signals
                 self._seen.clear()
+        return FilterResult(verdict="PASS")
+
+
+class ShortSellingFilter(SignalFilter):
+    """Reject SELL signals when short selling is disabled in config."""
+    name = "short"
+
+    def evaluate(self, signal: Signal, context: FilterContext) -> FilterResult:
+        if signal.action == Action.SELL and not SHORT_SELLING_ENABLED:
+            return FilterResult(verdict="REJECT", reason="short selling disabled")
         return FilterResult(verdict="PASS")
