@@ -123,3 +123,81 @@ class TestShortSellingFilter:
             result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
         assert result.verdict == "REJECT"
         assert "short selling disabled" in result.reason
+
+
+# ── Task 4 tests ──────────────────────────────────────────────────────
+
+from unittest.mock import MagicMock
+from execution.signal_pipeline import CatalystFilter
+
+
+def _make_catalyst(direction: str, confidence: float, reason: str = "test event") -> MagicMock:
+    cat = MagicMock()
+    cat.symbol = "RELIANCE"
+    cat.direction = direction
+    cat.confidence = confidence
+    cat.reason = reason
+    return cat
+
+
+def _mock_catalysts(bullish=None, bearish=None):
+    summary = MagicMock()
+    summary.bullish = bullish or []
+    summary.bearish = bearish or []
+    return summary
+
+
+class TestCatalystFilter:
+    def test_no_catalyst_passes(self):
+        f = CatalystFilter()
+        with patch("execution.signal_pipeline.get_todays_catalysts",
+                   return_value=_mock_catalysts()):
+            result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "PASS"
+
+    def test_bearish_catalyst_rejects_buy_below_flip_threshold(self):
+        # confidence=0.71 → block but don't flip (flip needs ≥0.75)
+        f = CatalystFilter()
+        cat = _make_catalyst("BEARISH_CATALYST", confidence=0.71)
+        with patch("execution.signal_pipeline.get_todays_catalysts",
+                   return_value=_mock_catalysts(bearish=[cat])):
+            with patch("execution.signal_pipeline.SHORT_SELLING_ENABLED", False):
+                result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "REJECT"
+        assert "catalyst conflict" in result.reason
+
+    def test_bearish_catalyst_flips_buy_to_sell_at_high_confidence(self):
+        f = CatalystFilter()
+        cat = _make_catalyst("BEARISH_CATALYST", confidence=0.80)
+        with patch("execution.signal_pipeline.get_todays_catalysts",
+                   return_value=_mock_catalysts(bearish=[cat])):
+            with patch("execution.signal_pipeline.SHORT_SELLING_ENABLED", True):
+                result = f.evaluate(
+                    _make_signal(action=Action.BUY),
+                    _make_context(ltp=2500.0),
+                )
+        assert result.verdict == "MODIFY"
+        assert result.modified_signal is not None
+        assert result.modified_signal.action == Action.SELL
+        assert result.modified_signal.strategy == "catalyst_short"
+
+    def test_bullish_catalyst_flips_sell_to_buy_at_high_confidence(self):
+        f = CatalystFilter()
+        cat = _make_catalyst("BULLISH_CATALYST", confidence=0.80)
+        with patch("execution.signal_pipeline.get_todays_catalysts",
+                   return_value=_mock_catalysts(bullish=[cat])):
+            result = f.evaluate(
+                _make_signal(action=Action.SELL),
+                _make_context(ltp=2500.0),
+            )
+        assert result.verdict == "MODIFY"
+        assert result.modified_signal.action == Action.BUY
+        assert result.modified_signal.strategy == "catalyst_long"
+
+    def test_catalyst_fetch_error_passes(self):
+        f = CatalystFilter()
+        with patch("execution.signal_pipeline.get_todays_catalysts",
+                   side_effect=Exception("network error")):
+            result = f.evaluate(_make_signal(), _make_context())
+        # CatalystFilter catches its own exceptions and returns PASS
+        assert result.verdict == "PASS"

@@ -22,6 +22,7 @@ from typing import Optional
 import pandas as pd
 from loguru import logger
 
+from analysis.catalyst_scanner import get_todays_catalysts
 from config.settings import SHORT_SELLING_ENABLED
 from strategies.base_strategy import Action, Signal
 
@@ -162,4 +163,80 @@ class ShortSellingFilter(SignalFilter):
     def evaluate(self, signal: Signal, context: FilterContext) -> FilterResult:
         if signal.action == Action.SELL and not SHORT_SELLING_ENABLED:
             return FilterResult(verdict="REJECT", reason="short selling disabled")
+        return FilterResult(verdict="PASS")
+
+
+class CatalystFilter(SignalFilter):
+    """
+    Block or flip signals that conflict with a high-confidence news catalyst.
+
+    Rules (confidence thresholds):
+      ≥ 0.70: reject the conflicting signal
+      ≥ 0.75: also flip to trade WITH the catalyst (MODIFY)
+
+    Flip sizing: 1.5% SL / 3.0% target = 2:1 RR so RiskManager's
+    minimum-RR check always passes.
+
+    Fails open — any data error returns PASS.
+    """
+    name = "catalyst"
+
+    def evaluate(self, signal: Signal, context: FilterContext) -> FilterResult:
+        try:
+            summary = get_todays_catalysts()
+        except Exception:
+            return FilterResult(verdict="PASS")
+
+        cat_map = {r.symbol: r for r in (summary.bullish + summary.bearish)}
+        cat = cat_map.get(context.symbol)
+
+        if cat is None or cat.confidence < 0.7:
+            return FilterResult(verdict="PASS")
+
+        if signal.action == Action.BUY and cat.direction == "BEARISH_CATALYST":
+            if SHORT_SELLING_ENABLED and cat.confidence >= 0.75 and context.ltp:
+                sl  = round(context.ltp * 1.015, 2)
+                tgt = round(context.ltp * 0.970, 2)
+                flipped = Signal(
+                    symbol=context.symbol,
+                    action=Action.SELL,
+                    entry_price=context.ltp,
+                    stop_loss=sl,
+                    target=tgt,
+                    strategy="catalyst_short",
+                    reason=f"Catalyst flip: {cat.reason}",
+                )
+                return FilterResult(
+                    verdict="MODIFY",
+                    reason=f"catalyst flip: {cat.reason}",
+                    modified_signal=flipped,
+                )
+            return FilterResult(
+                verdict="REJECT",
+                reason=f"catalyst conflict: {cat.reason} ({cat.confidence:.0%})",
+            )
+
+        if signal.action == Action.SELL and cat.direction == "BULLISH_CATALYST":
+            if context.ltp and cat.confidence >= 0.75:
+                sl  = round(context.ltp * 0.985, 2)
+                tgt = round(context.ltp * 1.030, 2)
+                flipped = Signal(
+                    symbol=context.symbol,
+                    action=Action.BUY,
+                    entry_price=context.ltp,
+                    stop_loss=sl,
+                    target=tgt,
+                    strategy="catalyst_long",
+                    reason=f"Catalyst flip: {cat.reason}",
+                )
+                return FilterResult(
+                    verdict="MODIFY",
+                    reason=f"catalyst flip: {cat.reason}",
+                    modified_signal=flipped,
+                )
+            return FilterResult(
+                verdict="REJECT",
+                reason=f"catalyst conflict: {cat.reason} ({cat.confidence:.0%})",
+            )
+
         return FilterResult(verdict="PASS")
