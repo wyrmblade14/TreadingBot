@@ -71,7 +71,7 @@ def _log_pipeline(
     chain = " ".join(parts) if parts else "—"
     suffix = " → APPROVED" if approved else ""
     logger.info(
-        f"[PIPELINE] {context.symbol:<12} {signal.action.value:<4} | "
+        f"[PIPELINE] {context.symbol:<10} {signal.action.value:<4} | "
         f"{chain} | {elapsed_ms:.0f}ms{suffix}"
     )
 
