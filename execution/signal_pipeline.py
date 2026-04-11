@@ -13,6 +13,7 @@ Audit log (one line per signal):
 
 from __future__ import annotations
 
+import threading
 import time as _time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -120,3 +121,34 @@ class SignalPipeline:
         elapsed = (_time.monotonic() - start) * 1000
         _log_pipeline(signal, context, named, approved=True, elapsed_ms=elapsed)
         return signal, results
+
+
+# ── Filters ───────────────────────────────────────────────────────────
+
+class DedupFilter(SignalFilter):
+    """
+    Reject a signal if the same (symbol, strategy, candle_ts) key was
+    already seen this cycle. Prevents duplicate orders when signal_check()
+    is called more frequently than the candle interval.
+
+    The lock makes the check+add atomic so concurrent signal_check()
+    threads cannot both pass the guard at the same millisecond.
+    """
+    name = "dedup"
+
+    def __init__(self) -> None:
+        self._seen: set[tuple] = set()
+        self._lock = threading.Lock()
+
+    def evaluate(self, signal: Signal, context: FilterContext) -> FilterResult:
+        key = (context.symbol, signal.strategy, context.candle_ts)
+        with self._lock:
+            if key in self._seen:
+                return FilterResult(
+                    verdict="REJECT",
+                    reason="duplicate: same candle already fired",
+                )
+            self._seen.add(key)
+            if len(self._seen) > 200:   # bounded — clear after ~200 unique signals
+                self._seen.clear()
+        return FilterResult(verdict="PASS")

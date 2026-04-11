@@ -58,3 +58,42 @@ def test_pipeline_returns_original_signal_when_no_filters():
     pipeline = SignalPipeline([])
     approved, _ = pipeline.run(signal, ctx)
     assert approved is signal
+
+
+# ── Task 2 tests ──────────────────────────────────────────────────────
+
+from execution.signal_pipeline import DedupFilter
+
+
+class TestDedupFilter:
+    def test_first_signal_passes(self):
+        f = DedupFilter()
+        sig = _make_signal()
+        ctx = _make_context(candle_ts=datetime(2026, 4, 11, 9, 25))
+        result = f.evaluate(sig, ctx)
+        assert result.verdict == "PASS"
+
+    def test_duplicate_on_same_candle_rejects(self):
+        f = DedupFilter()
+        sig = _make_signal(strategy="ema_crossover")
+        ctx = _make_context(candle_ts=datetime(2026, 4, 11, 9, 25))
+        f.evaluate(sig, ctx)                  # first call — registers key
+        result = f.evaluate(sig, ctx)         # second call — same key
+        assert result.verdict == "REJECT"
+        assert "duplicate" in result.reason
+
+    def test_different_candle_ts_passes(self):
+        f = DedupFilter()
+        sig = _make_signal(strategy="ema_crossover")
+        ctx1 = _make_context(candle_ts=datetime(2026, 4, 11, 9, 25))
+        ctx2 = _make_context(candle_ts=datetime(2026, 4, 11, 9, 30))
+        f.evaluate(sig, ctx1)
+        result = f.evaluate(sig, ctx2)        # new candle — should pass
+        assert result.verdict == "PASS"
+
+    def test_different_strategy_same_candle_passes(self):
+        f = DedupFilter()
+        ctx = _make_context(candle_ts=datetime(2026, 4, 11, 9, 25))
+        f.evaluate(_make_signal(strategy="ema_crossover"), ctx)
+        result = f.evaluate(_make_signal(strategy="rsi_macd_combo"), ctx)
+        assert result.verdict == "PASS"
