@@ -13,7 +13,6 @@ Audit log (one line per signal):
 
 from __future__ import annotations
 
-import threading
 import time as _time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
