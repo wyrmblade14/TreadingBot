@@ -26,7 +26,7 @@
 # .env, the bot auto-refreshes the Kite token at 8:30 AM every trading day.
 # No daily intervention needed.
 
-PROD_COMPOSE = docker-compose -f docker-compose.yml -f docker-compose.prod.yml
+PROD_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.prod.yml
 
 .PHONY: up down prod-up prod-deploy oci-provision oci-setup-services oci-ssh oci-destroy oci-backup oci-backups oci-vault-push db-restore login login-manual telegram deploy logs restart db test migrate clean build-all
 
@@ -101,7 +101,7 @@ login:
 	@echo "Attempting automated Kite login..."
 	python3 scripts/auto_kite_login.py && \
 	  ( echo "Restarting containers to pick up new token..."; \
-	    docker-compose restart bot watchdog; \
+	    docker compose restart bot watchdog; \
 	    echo "Done." ) || \
 	  ( echo "Auto-login failed — falling back to manual login..."; \
 	    $(MAKE) login-manual )
@@ -109,7 +109,7 @@ login:
 login-manual:
 	python3 scripts/kite_login.py
 	@echo "Restarting bot to pick up new token..."
-	docker-compose restart bot watchdog
+	docker compose restart bot watchdog
 	@echo "Done. Bot is running with fresh Kite token."
 
 telegram:
@@ -117,24 +117,24 @@ telegram:
 	python3 scripts/telegram_daemon.py
 
 deploy:
-	docker-compose build --parallel bot watchdog dashboard-api react-dashboard
-	docker-compose up -d --no-deps bot watchdog dashboard-api react-dashboard
+	docker compose build --parallel bot watchdog dashboard-api react-dashboard
+	docker compose up -d --no-deps bot watchdog dashboard-api react-dashboard
 
 build-all:
-	docker-compose build --parallel
+	docker compose build --parallel
 
 up:
 	python3 scripts/setup_env.py
-	docker-compose up -d
+	docker compose up -d
 
 down:
-	docker-compose down
+	docker compose down
 
 logs:
-	docker-compose logs -f bot
+	docker compose logs -f bot
 
 restart:
-	docker-compose restart
+	docker compose restart
 
 db:
 	docker exec -it treadingbot_postgres psql -U $${POSTGRES_USER:-treadingbot} -d $${POSTGRES_DB:-treadingbot}
@@ -144,7 +144,7 @@ test:
 
 migrate:
 	python3 scripts/setup_env.py
-	docker-compose up -d postgres
+	docker compose up -d postgres
 	@echo "Waiting for postgres to be ready (user + db created)..."
 	@until docker exec treadingbot_postgres psql -U $${POSTGRES_USER:-treadingbot} -d $${POSTGRES_DB:-treadingbot} -c "SELECT 1" -q 2>/dev/null; do sleep 1; done
 	@echo "Postgres is ready."
