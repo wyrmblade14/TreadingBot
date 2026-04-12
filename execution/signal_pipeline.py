@@ -24,6 +24,7 @@ from loguru import logger
 
 from analysis.catalyst_scanner import get_todays_catalysts
 from analysis.market_direction import get_market_direction, MarketDirection
+from analysis.nifty_correlation import get_divergence
 from analysis.regime_detector import get_current_regime, MarketRegime
 from config.settings import SHORT_SELLING_ENABLED
 from scheduler.watchlist import get_fundamental_judgment
@@ -321,5 +322,39 @@ class RegimeFilter(SignalFilter):
             return FilterResult(
                 verdict="REJECT",
                 reason=f"regime: {direction.value}+{regime.value}",
+            )
+        return FilterResult(verdict="PASS")
+
+
+class DivergenceFilter(SignalFilter):
+    """
+    Skip BUY on stocks lagging a rising NIFTY; skip SELL on stocks holding
+    up in a falling NIFTY.
+
+    Rules (thresholds in analysis/nifty_correlation.py):
+      NIFTY ≥ +1% AND stock < +0.3%  →  LAGGING → REJECT BUY
+      NIFTY ≤ −1% AND stock > −0.3%  →  LEADING → REJECT SELL
+      LAGGING stock + SELL signal    →  PASS (relative-weakness short confirmed)
+    """
+    name = "divergence"
+
+    def evaluate(self, signal: Signal, context: FilterContext) -> FilterResult:
+        div = get_divergence(context.symbol, context.df, context.nifty_chg)
+
+        if div.suppress_buy and signal.action == Action.BUY:
+            return FilterResult(
+                verdict="REJECT",
+                reason=(
+                    f"divergence: stock {div.stock_chg_pct:+.1f}% "
+                    f"vs NIFTY {div.nifty_chg_pct:+.1f}%"
+                ),
+            )
+        if div.suppress_sell and signal.action == Action.SELL:
+            return FilterResult(
+                verdict="REJECT",
+                reason=(
+                    f"divergence: stock {div.stock_chg_pct:+.1f}% "
+                    f"vs NIFTY {div.nifty_chg_pct:+.1f}%"
+                ),
             )
         return FilterResult(verdict="PASS")

@@ -41,7 +41,7 @@ from notifications.telegram_notifier import get_notifier
 from broker.paper_broker import PaperBroker
 from config.settings import (
     IST, VIRTUAL_CAPITAL, TRADING_MODE,
-    MARKET_OPEN, SHORT_SELLING_ENABLED, SQUAREOFF_TIME,
+    MARKET_OPEN, SQUAREOFF_TIME,
 )
 from data.historical import fetch_ohlcv
 from data.instruments import KITE_TO_YF
@@ -49,6 +49,11 @@ from data.kite_auth import is_kite_available
 from data.kite_feed import fetch_kite_ohlcv
 from data.kite_ticker import get_ticker_feed
 from execution.order_manager import OrderManager
+from execution.signal_pipeline import (
+    SignalPipeline, FilterContext,
+    DedupFilter, ShortSellingFilter, CatalystFilter,
+    FundamentalsFilter, RegimeFilter, DivergenceFilter,
+)
 from execution.portfolio import Portfolio
 from execution.trade_log import TradeLogger
 from risk.risk_manager import RiskManager
@@ -73,6 +78,7 @@ _trade_log:   Optional[TradeLogger]   = None
 _portfolio:   Optional[Portfolio]     = None
 _strategies:  list                    = []
 _watchlist:   list[str]               = []
+_pipeline:    Optional[SignalPipeline] = None
 _watchlist_selection: Optional[DailyWatchlist] = None
 _new_entries_allowed: bool            = True
 _scheduler:   Optional[BlockingScheduler] = None
@@ -113,14 +119,8 @@ def _on_tick_exit(symbol: str, price: float) -> None:
             pass
 
 
-# Duplicate-signal guard: tracks (symbol, strategy, 5m-candle-timestamp) of
-# the last signal fired. Prevents the same signal from firing multiple times
-# within the same 5-minute candle when signal_check runs every 1 minute.
-# Lock makes the check+add atomic so concurrent signal_check() threads can't
-# both pass the guard at the same millisecond (root cause of duplicate orders).
-import threading as _threading
-_last_signal_key: set[tuple] = set()
-_last_signal_lock = _threading.Lock()
+# Signal dedup state has moved into DedupFilter (execution/signal_pipeline.py).
+# The pipeline is a singleton created in setup() and stored in _pipeline.
 
 
 def _refresh_daily_watchlist(watchlist_size: int | None = None) -> None:
@@ -153,7 +153,7 @@ def setup(watchlist_size: int = 10, capital: float = VIRTUAL_CAPITAL) -> None:
         capital:        Starting paper capital in INR.
     """
     global _broker, _risk_mgr, _order_mgr, _trade_log, _portfolio
-    global _strategies, _watchlist
+    global _strategies, _watchlist, _pipeline
 
     _broker    = PaperBroker(initial_capital=capital)
     _risk_mgr  = RiskManager(capital=capital)
@@ -167,6 +167,15 @@ def setup(watchlist_size: int = 10, capital: float = VIRTUAL_CAPITAL) -> None:
         ORBStrategy(),
         VWAPBounceStrategy(),
     ]
+
+    _pipeline = SignalPipeline([
+        DedupFilter(),
+        ShortSellingFilter(),
+        CatalystFilter(),
+        FundamentalsFilter(),
+        RegimeFilter(),
+        DivergenceFilter(),
+    ])
 
     _refresh_daily_watchlist(watchlist_size)
 
@@ -496,190 +505,22 @@ def signal_check() -> None:
                 if signal.action == Action.HOLD:
                     continue
 
-                # Deduplicate: skip if we already fired this signal on the same candle.
-                # Lock makes the check+add atomic — prevents concurrent signal_check()
-                # threads from both seeing the key as absent and both placing orders.
-                sig_key = (kite_sym, strategy.name, last_candle_ts)
-                with _last_signal_lock:
-                    if sig_key in _last_signal_key:
-                        continue
-                    _last_signal_key.add(sig_key)
-                    # Keep set bounded — only retain keys from the last 30 minutes
-                    if len(_last_signal_key) > 200:
-                        _last_signal_key.clear()
-
-                # NSE intraday (MIS) short selling is legal on the cash equity segment.
-                # SHORT_SELLING_ENABLED controls whether this bot uses it.
-                if signal.action == Action.SELL and not SHORT_SELLING_ENABLED:
-                    logger.debug(
-                        f"Skipping SELL signal [{kite_sym} / {strategy.name}]: "
-                        f"SHORT_SELLING_ENABLED=False"
-                    )
+                ctx = FilterContext(
+                    symbol=kite_sym,
+                    df=df,
+                    ltp=ltp,
+                    nifty_chg=_nifty_chg,
+                    candle_ts=last_candle_ts,
+                )
+                approved, _ = _pipeline.run(signal, ctx)
+                if approved is None:
                     continue
+                signal = approved
 
-                # ── Catalyst filter + opportunity flip ────────────────
-                # When a signal opposes a high-confidence news catalyst, don't
-                # just skip it — flip it to trade WITH the catalyst instead.
-                #
-                # Logic (confidence thresholds):
-                #   ≥ 0.70: block the conflicting signal
-                #   ≥ 0.75: also flip to counter-direction to profit from the event
-                #
-                # Flip targets: 1.5% SL / 3.0% target = exactly 2:1 RR so the
-                # RiskManager's minimum-RR check always passes.
-                #
-                # Examples:
-                #   BEARISH catalyst (NCLT filing) + BUY signal
-                #     → flip to SHORT (sell) if SHORT_SELLING_ENABLED
-                #   BULLISH catalyst (dividend) + SELL signal
-                #     → flip to LONG (buy)
-                try:
-                    from analysis.catalyst_scanner import get_todays_catalysts as _gtc
-                    _cat = {r.symbol: r for r in (
-                        _gtc().bullish + _gtc().bearish
-                    )}.get(kite_sym)
-                    if _cat and _cat.confidence >= 0.7:
-                        if signal.action == Action.BUY and _cat.direction == "BEARISH_CATALYST":
-                            if SHORT_SELLING_ENABLED and _cat.confidence >= 0.75 and ltp:
-                                # Flip to a catalyst-driven short — ride the bad news down
-                                _sl  = round(ltp * 1.015, 2)   # 1.5% stop above entry
-                                _tgt = round(ltp * 0.970, 2)   # 3.0% target below (2:1 RR)
-                                signal = Signal(
-                                    symbol=kite_sym,
-                                    action=Action.SELL,
-                                    entry_price=ltp,
-                                    stop_loss=_sl,
-                                    target=_tgt,
-                                    strategy="catalyst_short",
-                                    reason=f"Catalyst flip: {_cat.reason}",
-                                )
-                                logger.info(
-                                    f"Catalyst flip BUY→SHORT [{kite_sym}]: {_cat.reason} "
-                                    f"(conf={_cat.confidence:.0%}) "
-                                    f"entry={ltp} sl={_sl} tgt={_tgt}"
-                                )
-                                # fall through to rm.evaluate() with the new SELL signal
-                            else:
-                                logger.info(
-                                    f"Skipping BUY [{kite_sym}]: BEARISH catalyst "
-                                    f"({_cat.reason}, conf={_cat.confidence:.0%})"
-                                )
-                                continue
-                        elif signal.action == Action.SELL and _cat.direction == "BULLISH_CATALYST":
-                            if ltp and _cat.confidence >= 0.75:
-                                # Flip to a catalyst-driven long — ride the good news up
-                                _sl  = round(ltp * 0.985, 2)   # 1.5% stop below entry
-                                _tgt = round(ltp * 1.030, 2)   # 3.0% target above (2:1 RR)
-                                signal = Signal(
-                                    symbol=kite_sym,
-                                    action=Action.BUY,
-                                    entry_price=ltp,
-                                    stop_loss=_sl,
-                                    target=_tgt,
-                                    strategy="catalyst_long",
-                                    reason=f"Catalyst flip: {_cat.reason}",
-                                )
-                                logger.info(
-                                    f"Catalyst flip SELL→BUY [{kite_sym}]: {_cat.reason} "
-                                    f"(conf={_cat.confidence:.0%}) "
-                                    f"entry={ltp} sl={_sl} tgt={_tgt}"
-                                )
-                                # fall through to rm.evaluate() with the new BUY signal
-                            else:
-                                logger.info(
-                                    f"Skipping SELL [{kite_sym}]: BULLISH catalyst "
-                                    f"({_cat.reason}, conf={_cat.confidence:.0%})"
-                                )
-                                continue
-                except Exception:
-                    pass  # fail-open — catalyst filter never blocks on data error
-
-                # ── Fundamental judgment for sizing + conflict check ─────
-                # Fundamental analysis does not replace the technical strategy.
-                # It only changes how aggressively we trade the signal:
-                #   - weak/mixed fundamentals -> RiskManager scales size down
-                #   - high-confidence conflict -> skip the signal
-                #
-                # Rule-based judgments use confidence=0.5, so the hard skip below
-                # only triggers when the AI analyst is confident, while sizing still
-                # works with the deterministic fallback.
+                # FundamentalsFilter already checked for signal conflicts above.
+                # Re-fetch here (TTL-cached, zero network cost) so RiskManager
+                # can use it for position-sizing even after a CatalystFilter MODIFY.
                 _judgment = get_fundamental_judgment(kite_sym)
-                if _judgment is not None and not signal.strategy.startswith("catalyst_"):
-                    if (
-                        signal.action == Action.BUY
-                        and _judgment.bias == "BEARISH"
-                        and _judgment.confidence >= 0.6
-                    ):
-                        logger.info(
-                            f"Skipping BUY [{kite_sym}]: high-confidence bearish "
-                            f"fundamentals ({_judgment.summary})"
-                        )
-                        continue
-                    if (
-                        signal.action == Action.SELL
-                        and _judgment.bias == "BULLISH"
-                        and _judgment.confidence >= 0.7
-                    ):
-                        logger.info(
-                            f"Skipping SELL [{kite_sym}]: high-confidence bullish "
-                            f"fundamentals ({_judgment.summary})"
-                        )
-                        continue
-
-                # ── NIFTY divergence filter ───────────────────────────
-                # Skip BUY on stocks lagging a rising NIFTY (NIFTY≥1%, stock<0.3%).
-                # Skip SELL on stocks holding up in a falling NIFTY (relative strength).
-                # amplify_sell=True stocks pass through — relative weakness confirms the short.
-                try:
-                    from analysis.nifty_correlation import get_divergence
-                    _div = get_divergence(kite_sym, df, _nifty_chg)
-                    if _div.suppress_buy and signal.action == Action.BUY:
-                        logger.info(
-                            f"[DIVERGENCE] Suppressing BUY [{kite_sym}/{strategy.name}] — LAGGING "
-                            f"(NIFTY {_div.nifty_chg_pct:+.1f}% / stock {_div.stock_chg_pct:+.1f}%)"
-                        )
-                        continue
-                    if _div.suppress_sell and signal.action == Action.SELL:
-                        logger.info(
-                            f"[DIVERGENCE] Suppressing SELL [{kite_sym}/{strategy.name}] — LEADING "
-                            f"(NIFTY {_div.nifty_chg_pct:+.1f}% / stock {_div.stock_chg_pct:+.1f}%)"
-                        )
-                        continue
-                except Exception:
-                    pass  # fail-open — never block a signal on data error
-
-                # ── Regime + direction filter ─────────────────────────
-                # VIX rule (in RiskManager) blocks BUY on high VIX but does NOT
-                # block SELL on strong bull days. This filter covers that gap:
-                # suppress counter-trend signals when market is clearly trending.
-                try:
-                    from analysis.market_direction import get_market_direction, MarketDirection
-                    from analysis.regime_detector import get_current_regime, MarketRegime
-                    _dir = get_market_direction()
-                    _reg = get_current_regime()
-                    if (
-                        signal.action == Action.SELL
-                        and _dir == MarketDirection.UP
-                        and _reg == MarketRegime.TRENDING
-                    ):
-                        logger.info(
-                            f"[REGIME] Suppressing SELL [{kite_sym}/{strategy.name}] "
-                            f"— market Trending UP"
-                        )
-                        continue
-                    if (
-                        signal.action == Action.BUY
-                        and _dir == MarketDirection.DOWN
-                        and _reg == MarketRegime.TRENDING
-                    ):
-                        logger.info(
-                            f"[REGIME] Suppressing BUY [{kite_sym}/{strategy.name}] "
-                            f"— market Trending DOWN"
-                        )
-                        continue
-                except Exception:
-                    pass  # fail-open — never block on data error
-
                 decision = _risk_mgr.evaluate(signal, judgment=_judgment)
                 if not decision.approved:
                     logger.debug(

@@ -301,3 +301,62 @@ class TestRegimeFilter:
                 buy_result  = f.evaluate(_make_signal(action=Action.BUY),  _make_context())
         assert sell_result.verdict == "PASS"
         assert buy_result.verdict  == "PASS"
+
+
+# ── Task 7 tests — DivergenceFilter ───────────────────────────────────
+
+from unittest.mock import patch
+from execution.signal_pipeline import DivergenceFilter
+from analysis.nifty_correlation import DivergenceResult
+
+
+def _lagging() -> DivergenceResult:
+    return DivergenceResult(
+        nifty_chg_pct=1.2, stock_chg_pct=0.1,
+        label="LAGGING", suppress_buy=True, suppress_sell=False, amplify_sell=True,
+    )
+
+
+def _leading() -> DivergenceResult:
+    return DivergenceResult(
+        nifty_chg_pct=-1.1, stock_chg_pct=-0.1,
+        label="LEADING", suppress_buy=False, suppress_sell=True, amplify_sell=False,
+    )
+
+
+def _in_line() -> DivergenceResult:
+    return DivergenceResult(
+        nifty_chg_pct=0.5, stock_chg_pct=0.4,
+        label="IN_LINE", suppress_buy=False, suppress_sell=False, amplify_sell=False,
+    )
+
+
+class TestDivergenceFilter:
+    def test_lagging_rejects_buy(self):
+        f = DivergenceFilter()
+        with patch("execution.signal_pipeline.get_divergence", return_value=_lagging()):
+            result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "REJECT"
+        assert "divergence" in result.reason
+
+    def test_lagging_passes_sell(self):
+        """LAGGING stock + SELL = relative-weakness short — should pass."""
+        f = DivergenceFilter()
+        with patch("execution.signal_pipeline.get_divergence", return_value=_lagging()):
+            result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert result.verdict == "PASS"
+
+    def test_leading_rejects_sell(self):
+        f = DivergenceFilter()
+        with patch("execution.signal_pipeline.get_divergence", return_value=_leading()):
+            result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert result.verdict == "REJECT"
+        assert "divergence" in result.reason
+
+    def test_in_line_passes_both_sides(self):
+        f = DivergenceFilter()
+        with patch("execution.signal_pipeline.get_divergence", return_value=_in_line()):
+            buy  = f.evaluate(_make_signal(action=Action.BUY),  _make_context())
+            sell = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert buy.verdict  == "PASS"
+        assert sell.verdict == "PASS"
