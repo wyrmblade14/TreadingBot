@@ -123,6 +123,7 @@ def render() -> None:
             "Strategy":    r.strategy,
             "Signal":      "🟢 BUY" if r.action == Action.BUY else "🔴 SELL",
             "Confidence":  f"{dots}  {score}/5  {tier}",
+            "Divergence":  getattr(r, "divergence", "—"),
             "Entry ₹":     r.entry_price,
             "Stop Loss ₹": r.stop_loss,
             "Target ₹":    r.target,

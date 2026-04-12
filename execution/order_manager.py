@@ -93,6 +93,9 @@ class OrderManager:
         self._mode         = trading_mode
         self._open_trades: dict[str, OpenTrade] = {}  # symbol → OpenTrade
         self._lock         = threading.RLock()         # guards _open_trades (tick + scheduler threads)
+        # Per-symbol cooldown: (exit_time, action) — prevents same-symbol re-entry
+        # within 30 min of a close AND blocks opposite-direction trades all session.
+        self._cooldown: dict[str, tuple[datetime, Action]] = {}
 
     def execute_signal(self, signal: Signal) -> bool:
         """
@@ -111,6 +114,38 @@ class OrderManager:
         """Inner implementation — must be called with self._lock held."""
         if signal.action == Action.HOLD:
             return False
+
+        # Last-defence duplicate guard — if this symbol is already in _open_trades
+        # (i.e. a concurrent thread slipped through the signal-key dedup), reject it.
+        if signal.symbol in self._open_trades:
+            logger.debug(
+                f"[ORDER] {signal.symbol} already in _open_trades — skipping duplicate"
+            )
+            return False
+
+        # Per-symbol cooldown: block re-entry within 30 min of any exit, and block
+        # opposite-direction entries for the entire session. Prevents the re-entry
+        # loop (same losing signal re-fires on the next tick after a fast SL hit)
+        # and stops two strategies fighting opposite directions on the same symbol.
+        last = self._cooldown.get(signal.symbol)
+        if last:
+            last_exit_time, last_action = last
+            now = datetime.now(IST)
+            same_session = last_exit_time.date() == now.date()
+            elapsed_secs = (now - last_exit_time).total_seconds()
+            if same_session:
+                if elapsed_secs < 1800:  # 30-min cooldown
+                    logger.info(
+                        f"[ORDER] {signal.symbol} blocked — 30-min cooldown "
+                        f"({elapsed_secs/60:.0f} min since last exit)"
+                    )
+                    return False
+                if last_action != signal.action:  # opposite direction for same session
+                    logger.info(
+                        f"[ORDER] {signal.symbol} blocked — already traded "
+                        f"{last_action.value} today, refusing opposite {signal.action.value}"
+                    )
+                    return False
 
         if signal.quantity <= 0:
             logger.warning(f"OrderManager: Signal for {signal.symbol} has qty=0, skipping.")
@@ -463,6 +498,9 @@ class OrderManager:
             # Always remove from open trades — even if DB logging fails, we must
             # not leave a ghost position that triggers repeated spurious orders.
             self._open_trades.pop(trade.symbol, None)
+            # Record cooldown so the same symbol can't re-enter for 30 min and
+            # can't flip direction for the rest of the session.
+            self._cooldown[trade.symbol] = (datetime.now(IST), trade.action)
 
         logger.info(
             f"Trade closed #{trade.trade_log_id} | {trade.symbol} "

@@ -116,7 +116,11 @@ def _on_tick_exit(symbol: str, price: float) -> None:
 # Duplicate-signal guard: tracks (symbol, strategy, 5m-candle-timestamp) of
 # the last signal fired. Prevents the same signal from firing multiple times
 # within the same 5-minute candle when signal_check runs every 1 minute.
+# Lock makes the check+add atomic so concurrent signal_check() threads can't
+# both pass the guard at the same millisecond (root cause of duplicate orders).
+import threading as _threading
 _last_signal_key: set[tuple] = set()
+_last_signal_lock = _threading.Lock()
 
 
 def _refresh_daily_watchlist(watchlist_size: int | None = None) -> None:
@@ -401,6 +405,15 @@ def signal_check() -> None:
             sym, df, ltp = future.result()
             symbol_data[sym] = (df, ltp)
 
+    # Fetch NIFTY's intraday % change once per cycle — reused per-symbol to avoid
+    # repeated network calls. Returns 0.0 on error (divergence filter → IN_LINE).
+    _nifty_chg = 0.0
+    try:
+        from analysis.nifty_correlation import get_nifty_change
+        _nifty_chg = get_nifty_change()
+    except Exception:
+        pass
+
     # Process signals sequentially (RiskManager and OrderManager share state)
     for kite_sym in _watchlist:
         df, ltp = symbol_data.get(kite_sym, (None, None))
@@ -483,14 +496,17 @@ def signal_check() -> None:
                 if signal.action == Action.HOLD:
                     continue
 
-                # Deduplicate: skip if we already fired this signal on the same candle
+                # Deduplicate: skip if we already fired this signal on the same candle.
+                # Lock makes the check+add atomic — prevents concurrent signal_check()
+                # threads from both seeing the key as absent and both placing orders.
                 sig_key = (kite_sym, strategy.name, last_candle_ts)
-                if sig_key in _last_signal_key:
-                    continue
-                _last_signal_key.add(sig_key)
-                # Keep set bounded — only retain keys from the last 30 minutes
-                if len(_last_signal_key) > 200:
-                    _last_signal_key.clear()
+                with _last_signal_lock:
+                    if sig_key in _last_signal_key:
+                        continue
+                    _last_signal_key.add(sig_key)
+                    # Keep set bounded — only retain keys from the last 30 minutes
+                    if len(_last_signal_key) > 200:
+                        _last_signal_key.clear()
 
                 # NSE intraday (MIS) short selling is legal on the cash equity segment.
                 # SHORT_SELLING_ENABLED controls whether this bot uses it.
@@ -609,6 +625,60 @@ def signal_check() -> None:
                             f"fundamentals ({_judgment.summary})"
                         )
                         continue
+
+                # ── NIFTY divergence filter ───────────────────────────
+                # Skip BUY on stocks lagging a rising NIFTY (NIFTY≥1%, stock<0.3%).
+                # Skip SELL on stocks holding up in a falling NIFTY (relative strength).
+                # amplify_sell=True stocks pass through — relative weakness confirms the short.
+                try:
+                    from analysis.nifty_correlation import get_divergence
+                    _div = get_divergence(kite_sym, df, _nifty_chg)
+                    if _div.suppress_buy and signal.action == Action.BUY:
+                        logger.info(
+                            f"[DIVERGENCE] Suppressing BUY [{kite_sym}/{strategy.name}] — LAGGING "
+                            f"(NIFTY {_div.nifty_chg_pct:+.1f}% / stock {_div.stock_chg_pct:+.1f}%)"
+                        )
+                        continue
+                    if _div.suppress_sell and signal.action == Action.SELL:
+                        logger.info(
+                            f"[DIVERGENCE] Suppressing SELL [{kite_sym}/{strategy.name}] — LEADING "
+                            f"(NIFTY {_div.nifty_chg_pct:+.1f}% / stock {_div.stock_chg_pct:+.1f}%)"
+                        )
+                        continue
+                except Exception:
+                    pass  # fail-open — never block a signal on data error
+
+                # ── Regime + direction filter ─────────────────────────
+                # VIX rule (in RiskManager) blocks BUY on high VIX but does NOT
+                # block SELL on strong bull days. This filter covers that gap:
+                # suppress counter-trend signals when market is clearly trending.
+                try:
+                    from analysis.market_direction import get_market_direction, MarketDirection
+                    from analysis.regime_detector import get_current_regime, MarketRegime
+                    _dir = get_market_direction()
+                    _reg = get_current_regime()
+                    if (
+                        signal.action == Action.SELL
+                        and _dir == MarketDirection.UP
+                        and _reg == MarketRegime.TRENDING
+                    ):
+                        logger.info(
+                            f"[REGIME] Suppressing SELL [{kite_sym}/{strategy.name}] "
+                            f"— market Trending UP"
+                        )
+                        continue
+                    if (
+                        signal.action == Action.BUY
+                        and _dir == MarketDirection.DOWN
+                        and _reg == MarketRegime.TRENDING
+                    ):
+                        logger.info(
+                            f"[REGIME] Suppressing BUY [{kite_sym}/{strategy.name}] "
+                            f"— market Trending DOWN"
+                        )
+                        continue
+                except Exception:
+                    pass  # fail-open — never block on data error
 
                 decision = _risk_mgr.evaluate(signal, judgment=_judgment)
                 if not decision.approved:

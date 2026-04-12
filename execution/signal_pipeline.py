@@ -23,6 +23,8 @@ import pandas as pd
 from loguru import logger
 
 from analysis.catalyst_scanner import get_todays_catalysts
+from analysis.market_direction import get_market_direction, MarketDirection
+from analysis.regime_detector import get_current_regime, MarketRegime
 from config.settings import SHORT_SELLING_ENABLED
 from scheduler.watchlist import get_fundamental_judgment
 from strategies.base_strategy import Action, Signal
@@ -281,5 +283,43 @@ class FundamentalsFilter(SignalFilter):
             return FilterResult(
                 verdict="REJECT",
                 reason=f"fundamentals: {judgment.summary}",
+            )
+        return FilterResult(verdict="PASS")
+
+
+class RegimeFilter(SignalFilter):
+    """
+    Suppress counter-trend signals when the market is clearly trending.
+
+    This covers the gap left by the VIX filter in RiskManager:
+    VIX blocks BUYs on high fear but not SELLs on a bull trending day.
+
+    Rules:
+      SELL + market Trending UP   → REJECT (shorting into a bull trend)
+      BUY  + market Trending DOWN → REJECT (buying into a bear trend)
+    """
+    name = "regime"
+
+    def evaluate(self, signal: Signal, context: FilterContext) -> FilterResult:
+        direction = get_market_direction()
+        regime    = get_current_regime()
+
+        if (
+            signal.action == Action.SELL
+            and direction == MarketDirection.UP
+            and regime == MarketRegime.TRENDING
+        ):
+            return FilterResult(
+                verdict="REJECT",
+                reason=f"regime: {direction.value}+{regime.value}",
+            )
+        if (
+            signal.action == Action.BUY
+            and direction == MarketDirection.DOWN
+            and regime == MarketRegime.TRENDING
+        ):
+            return FilterResult(
+                verdict="REJECT",
+                reason=f"regime: {direction.value}+{regime.value}",
             )
         return FilterResult(verdict="PASS")

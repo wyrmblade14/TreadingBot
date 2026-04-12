@@ -13,7 +13,7 @@ Virtual environment: `venv/`.
 - macOS/Linux: `source venv/bin/activate`
 - Windows: `venv/Scripts/python.exe` (not `venv/bin/`)
 
-Current test status: 272 passing, 0 failures (April 2026, Python 3.14).
+Current test status: 275 passing, 0 failures (April 2026, Python 3.14).
 
 Current architecture boundaries:
 - `analysis/` owns market/fundamental/catalyst/regime scoring and stock-universe selection.
@@ -244,3 +244,28 @@ Key facts:
 - scheduler/job_runner.py now stays focused on scheduled jobs and passes
   FundamentalJudgment into RiskManager.evaluate() for size scaling.
 - Full suite after refactor: 272 passed, 1 Loguru deprecation warning.
+
+## Apr 10 Post-Mortem Bug Fixes (April 2026) ✅
+Files changed: execution/order_manager.py, scheduler/job_runner.py.
+Test count: 275 passing.
+
+Post-mortem of April 10 trades (13 trades, 0 wins, -₹5,411) and April 2 (-₹11,557) revealed 3 bugs:
+
+1. **Race condition on `_last_signal_key`** (scheduler/job_runner.py): The signal dedup set had no
+   lock. Concurrent `signal_check()` executions both passed the guard simultaneously, producing
+   2–3 identical orders in the same millisecond. Fix: `_last_signal_lock = threading.Lock()` wraps
+   the check+add atomically. Also added last-resort guard in `OrderManager._execute_signal_locked()`:
+   if symbol in `_open_trades`, return False immediately.
+
+2. **Re-entry loop after fast SL exit** (execution/order_manager.py): After a 2-second SL hit, the
+   same signal re-fired on the next tick. AXISBANK was entered 3× in 4 minutes (-₹1,053 extra).
+   Fix: `_cooldown: dict[str, tuple[datetime, Action]]` — 30-min block after any exit, plus a
+   same-session direction lock (prevents two strategies from taking opposite sides on the same symbol).
+   Cooldown is set in `_close_trade()` and checked at top of `_execute_signal_locked()`.
+
+3. **Regime filter not wired into signal loop** (scheduler/job_runner.py): On April 2, VIX=26
+   correctly blocked BUY signals but not SELL signals. Market went UP +2%. All 12 short trades lost.
+   `get_market_direction()` and `get_current_regime()` were computed at 09:00 but never consulted
+   during intraday scanning. Fix: check both in `signal_check()` before `_risk_mgr.evaluate()`.
+   Suppress SELL when `MarketDirection.UP + MarketRegime.TRENDING`, BUY when DOWN + TRENDING.
+   Wrapped in try/except — fail-open.

@@ -43,6 +43,7 @@ class ScanResult:
     scanned_at:        datetime
     confidence_score:  int   = 0     # 0–5 — how many of the 5 quality checks passed
     confidence_checks: dict  = None  # {check_name: (passed, detail_text)}
+    divergence:        str   = "—"   # "LAGGING ↓" | "IN_LINE" | "LEADING ↑" | "—"
 
 
 _STRATEGIES = {
@@ -76,6 +77,14 @@ def scan_nifty50(
     results: list[ScanResult] = []
     now = datetime.now()
 
+    # Fetch NIFTY's intraday change once for the whole scan (cached 5 min)
+    _nifty_chg = 0.0
+    try:
+        from analysis.nifty_correlation import get_nifty_change
+        _nifty_chg = get_nifty_change()
+    except Exception:
+        pass
+
     for kite_sym in symbols:
         yf_sym = KITE_TO_YF.get(kite_sym, kite_sym + ".NS")
         try:
@@ -91,6 +100,16 @@ def scan_nifty50(
                 signal: Signal = strategy.generate_signal(kite_sym, df)
                 if signal.action != Action.HOLD and signal.is_valid():
                     scored: ScoreResult = score_signal(signal, df)
+                    # Compute divergence label for display
+                    _div_label = "—"
+                    try:
+                        from analysis.nifty_correlation import get_divergence as _get_div
+                        _div = _get_div(kite_sym, df, _nifty_chg)
+                        _div_label = {"LAGGING": "LAGGING ↓", "LEADING": "LEADING ↑"}.get(
+                            _div.label, "IN_LINE"
+                        )
+                    except Exception:
+                        pass
                     results.append(ScanResult(
                         symbol=kite_sym,
                         strategy=strat_name,
@@ -102,6 +121,7 @@ def scan_nifty50(
                         scanned_at=now,
                         confidence_score=scored.score,
                         confidence_checks=scored.checks,
+                        divergence=_div_label,
                     ))
             except Exception:
                 continue

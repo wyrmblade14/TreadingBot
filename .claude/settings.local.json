@@ -44,7 +44,17 @@
       "Bash(venv/Scripts/python.exe -m pytest tests/ -v)",
       "Bash(venv/Scripts/python.exe:*)",
       "Bash(kill 1518)",
-      "Bash(echo \"PID: $!\")"
+      "Bash(echo \"PID: $!\")",
+      "Bash(find:*)",
+      "Bash(sqlite3:*)",
+      "Bash(python3 -m pytest tests/ -v --tb=short)",
+      "Bash(pip3 install:*)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(python3 -m pytest tests/ -v --tb=short -q)",
+      "Bash(git commit:*)",
+      "Bash(python -m pytest tests/test_signal_pipeline.py -v --tb=short)"
     ]
   }
 }

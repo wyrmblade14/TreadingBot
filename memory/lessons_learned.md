@@ -222,6 +222,24 @@ type: project
 - Boundary after April 2026 refactor:
   - `scheduler/job_runner.py`: APScheduler job functions, market-day checks, data fetch loop, strategy execution orchestration.
   - `scheduler/watchlist.py`: daily watchlist selection and fundamental judgment lookup.
+
+## Duplicate Order Race Condition — `_last_signal_key` Must Be Locked
+- Root cause (2026-04-10): `signal_check()` runs every minute via APScheduler. If one execution takes >60s (e.g. slow yfinance), a second starts while the first is still running. Both reach the dedup guard simultaneously, both see `sig_key not in _last_signal_key`, both add it and both place orders. This produced 2–3 identical orders in the same millisecond (BHARTIARTL SELL ×3 at 12:29:00.385/.388/.389).
+- Fix: wrap the check+add in `_last_signal_lock = threading.Lock()` so it's atomic.
+- The set itself is fine — it just needs the check+add to be one indivisible operation.
+- Also added a fallback guard at the top of `OrderManager._execute_signal_locked()`: if `signal.symbol in self._open_trades`, return False immediately. Belt-and-suspenders.
+
+## Per-Symbol Cooldown After Exit Prevents Re-Entry Loops
+- Root cause (2026-04-10): AXISBANK BUY entered at 14:07, hit SL in 2 seconds, symbol removed from `_open_trades`, same EMA crossover signal still active → bot re-entered at 14:10, exited in 1 second, re-entered again at 14:11. Total: 3 identical failing trades in 4 minutes, -₹1,053.
+- Fix: `OrderManager._cooldown: dict[str, tuple[datetime, Action]]` set on every `_close_trade()`. Two rules enforced in `_execute_signal_locked()`:
+  1. 30-min cooldown: if elapsed < 1800s and same session → reject
+  2. Direction block: if same session and `last_action != signal.action` → reject (prevents two strategies from fighting each other — one going long, one going short on the same symbol same day)
+- The direction block also catches VWAP SELL + EMA BUY type conflicts that would otherwise overwrite each other.
+
+## Regime Filter Must Be in Signal Loop, Not Just Pre-Market Log
+- Root cause (2026-04-02): VIX=26 correctly blocked BUY signals on high-fear days. But the market that day went UP +1.5–2.3%. `rsi_macd_combo` fired SELL (short) signals on every stock — all of them lost because shorts on an up day always lose. The market direction + regime was computed at 09:00 and logged to Telegram, but **never consulted during signal_check()**.
+- Fix: In `signal_check()` signal loop, call `get_market_direction()` and `get_current_regime()`. Suppress `Action.SELL` when `MarketDirection.UP + MarketRegime.TRENDING`. Suppress `Action.BUY` when `MarketDirection.DOWN + MarketRegime.TRENDING`. Wrapped in `try/except` — fail-open (never block trading on data error).
+- Note on enum names: `MarketDirection.UP` / `MarketDirection.DOWN` (not BULLISH/BEARISH), `MarketRegime.TRENDING` (not Regime.TRENDING). Import both from their respective modules.
   - `analysis/fundamental_selector.py`: pure ranking/selection rules for fundamentals.
   - `risk/risk_manager.py`: final approval, sizing, VIX/blackout gates.
 - When adding new pre-trade intelligence, put scoring/ranking in `analysis/`, scheduler glue in `scheduler/watchlist.py`, and only call it from `job_runner.py`.

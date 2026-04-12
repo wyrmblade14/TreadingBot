@@ -64,6 +64,9 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 55 | Fundamentals-ranked bot watchlist — select trade universe from sector-relative fundamental scores before signal scan | H | M | Ph6 enh | DONE |
 | 56 | Scheduler watchlist module refactor — keep job_runner focused on timed jobs, move universe selection to scheduler/watchlist.py | M | L | Structure | DONE |
 | 57 | Kite feed symbol/timezone cleanup — replace stale TATAMOTORS mapping and normalise Kite candle datetimes for pandas | H | L | Ph6b ops | DONE |
+| 58 | Thread-safe signal dedup — add `_last_signal_lock` around `_last_signal_key` check+add in `signal_check()` | H | L | Ph6 bug | DONE |
+| 59 | Per-symbol cooldown after exit — 30-min re-entry block + same-session direction lock in `OrderManager` | H | L | Ph6 bug | DONE |
+| 60 | Regime filter in signal loop — suppress counter-trend signals when `MarketDirection.UP/DOWN + MarketRegime.TRENDING` | H | L | Ph6 enh | DONE |
 
 ---
 
@@ -137,6 +140,12 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 **#55 Fundamentals-ranked bot watchlist** ✅ DONE: `analysis/fundamental_selector.py` ranks the NIFTY50 with existing `score_fundamentals()`, avoids earnings-blackout names when alternatives exist, caps sector concentration, and fails open to the static NIFTY50 order when fundamentals data is unavailable. `scheduler/job_runner.py` now uses that selector at setup and pre-market refresh, then passes a per-symbol `FundamentalJudgment` into `RiskManager.evaluate()` so position sizing reflects company quality.
 
 **#56 Scheduler watchlist refactor** ✅ DONE: `scheduler/watchlist.py` now owns `DailyWatchlist`, static fallback selection, fundamentals-ranked daily selection, and cached fundamental judgment lookup. `scheduler/job_runner.py` remains the timed-job orchestrator. Added `tests/test_scheduler_watchlist.py`. Full suite after refactor: 272 passed, 1 Loguru deprecation warning.
+
+**#58 Thread-safe signal dedup** ✅ DONE: `_last_signal_lock = threading.Lock()` added in `scheduler/job_runner.py`. The `_last_signal_key` set's check+add is now one atomic operation so concurrent `signal_check()` executions can't both pass the guard. Root cause: April 10 BHARTIARTL SELL ×3 at same millisecond. Also added last-resort guard at top of `OrderManager._execute_signal_locked()`: if symbol already in `_open_trades`, return False.
+
+**#59 Per-symbol cooldown after exit** ✅ DONE: `OrderManager._cooldown: dict[str, tuple[datetime, Action]]`. Two rules in `_execute_signal_locked()`: (1) 30-min cooldown if same session; (2) direction block for rest of session if `last_action != signal.action`. Cooldown recorded in `_close_trade()`. Root cause: April 10 AXISBANK re-entered 3× in 4 min after 2-second SL exits, -₹1,053 extra loss.
+
+**#60 Regime filter in signal loop** ✅ DONE: In `signal_check()` before `_risk_mgr.evaluate()`, check `get_market_direction()` + `get_current_regime()`. Block SELL when `MarketDirection.UP + MarketRegime.TRENDING`, block BUY when `MarketDirection.DOWN + MarketRegime.TRENDING`. Wrapped in `try/except` (fail-open). Root cause: April 2 VIX=26 blocked BUYs but not SELLs — all 12 short trades lost on a +2% bull day.
 
 **#57 Kite feed symbol/timezone cleanup** ✅ DONE: Logs showed repeated `Kite: no token found for ['TATAMOTORS']`, `No 5m data for TATAMOTORS.NS`, and Kite REST fallback errors with `NoneType.timezone`. `data/instruments.py` now uses `TMPV` / `TMPV.NS` for Tata Motors Passenger Vehicles after the demerger. `data/kite_feed.py` normalises Kite candle `date` values to stdlib `ZoneInfo("Asia/Kolkata")` before building the pandas DataFrame, avoiding pandas/Python 3.14 failures on pytz-aware Kite datetimes. Added `tests/test_kite_feed.py`.
 

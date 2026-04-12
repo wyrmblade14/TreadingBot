@@ -253,3 +253,51 @@ class TestFundamentalsFilter:
                    return_value=_make_judgment("BEARISH", 0.90)):
             result = f.evaluate(sig, _make_context())
         assert result.verdict == "PASS"
+
+
+# ── Task 6 tests ──────────────────────────────────────────────────────
+
+from execution.signal_pipeline import RegimeFilter
+from analysis.market_direction import MarketDirection
+from analysis.regime_detector import MarketRegime
+
+
+class TestRegimeFilter:
+    def test_sell_rejected_on_trending_up_market(self):
+        f = RegimeFilter()
+        with patch("execution.signal_pipeline.get_market_direction",
+                   return_value=MarketDirection.UP):
+            with patch("execution.signal_pipeline.get_current_regime",
+                       return_value=MarketRegime.TRENDING):
+                result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert result.verdict == "REJECT"
+        assert "regime" in result.reason
+
+    def test_buy_rejected_on_trending_down_market(self):
+        f = RegimeFilter()
+        with patch("execution.signal_pipeline.get_market_direction",
+                   return_value=MarketDirection.DOWN):
+            with patch("execution.signal_pipeline.get_current_regime",
+                       return_value=MarketRegime.TRENDING):
+                result = f.evaluate(_make_signal(action=Action.BUY), _make_context())
+        assert result.verdict == "REJECT"
+
+    def test_sell_passes_on_trending_down_market(self):
+        f = RegimeFilter()
+        with patch("execution.signal_pipeline.get_market_direction",
+                   return_value=MarketDirection.DOWN):
+            with patch("execution.signal_pipeline.get_current_regime",
+                       return_value=MarketRegime.TRENDING):
+                result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+        assert result.verdict == "PASS"
+
+    def test_ranging_market_does_not_suppress_either_side(self):
+        f = RegimeFilter()
+        with patch("execution.signal_pipeline.get_market_direction",
+                   return_value=MarketDirection.UP):
+            with patch("execution.signal_pipeline.get_current_regime",
+                       return_value=MarketRegime.RANGING):
+                sell_result = f.evaluate(_make_signal(action=Action.SELL), _make_context())
+                buy_result  = f.evaluate(_make_signal(action=Action.BUY),  _make_context())
+        assert sell_result.verdict == "PASS"
+        assert buy_result.verdict  == "PASS"
