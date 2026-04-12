@@ -333,3 +333,6 @@ source venv/bin/activate
 python -m pytest tests/ -v
 # 272 passed
 ```
+
+## Deployment
+CI/CD automated via GitHub Actions.
