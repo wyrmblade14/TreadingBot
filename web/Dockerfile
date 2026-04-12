@@ -36,7 +36,6 @@ RUN addgroup --system --gid 1001 nodejs \
 
 # Only copy the necessary files from the builder
 # standalone mode includes both node_modules and .next server files
-COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 

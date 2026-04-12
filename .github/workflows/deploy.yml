@@ -103,19 +103,21 @@ jobs:
           key: ${{ secrets.OCI_SSH_KEY }}
           script: |
             cd ~/TreadingBot
+            # Verify .env exists on the host
+            if [ ! -f ".env" ]; then
+              echo "ERROR: .env file missing on OCI host. Please copy .env.example to .env and fill in secrets before deploying."
+              exit 1
+            fi
+            
             # Log in to GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Export image names so docker-compose uses the GHCR versions
+            # Export and Run in a single execution block
             export BOT_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BOT }}:latest
             export API_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
             export DASH_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_DASH }}:latest
             
-            # Pull new images
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            
-            # Restart services
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps bot dashboard-api react-dashboard nginx
             
-            # Clean up old images
             docker image prune -f
