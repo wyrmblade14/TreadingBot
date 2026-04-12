@@ -45,7 +45,7 @@ def _oci_backup() -> None:
     Silently skipped if OCI CLI is not configured (local dev, non-Oracle deploys).
     """
     import subprocess
-    script = Path(__file__).parent.parent / "scripts" / "backup_to_oci.sh"
+    script = Path(__file__).parent.parent / "oci" / "backup.sh"
     if not script.exists():
         return
     try:

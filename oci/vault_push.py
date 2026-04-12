@@ -3,10 +3,11 @@ One-time script — push secrets from .env into OCI Vault.
 
 Run this ONCE after `make oci-setup-services` has created your Vault:
 
-    python3 scripts/oci_vault_push.py
+    python3 oci/vault_push.py
 
 After this, the bot will load all VAULT_KEYS from Vault at startup,
 and fall back to .env if Vault is unreachable.
+"""
 
 Requirements:
   - OCI_VAULT_ID set in .env  (or passed as OCI_VAULT_ID env var)

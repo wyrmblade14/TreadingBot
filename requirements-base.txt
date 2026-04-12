@@ -1,0 +1,15 @@
+# ── Core Utilities ──────────────────────────────────────────────────
+loguru==0.7.2               # Structured, coloured logging
+python-dotenv==1.0.1        # Load .env files for API keys
+requests==2.31.0            # HTTP calls
+pytz==2024.1                # IST timezone handling
+pyotp>=2.9.0                # TOTP code generation for automated Kite login
+tabulate==0.9.0             # Pretty-print tables in terminal
+
+# ── Database (Core) ──────────────────────────────────────────────────
+sqlalchemy>=2.0.36          # ORM for the trade log
+psycopg2-binary>=2.9.9      # PostgreSQL driver
+
+# ── Testing ──────────────────────────────────────────────────────────
+pytest==8.1.1
+pytest-cov==5.0.0

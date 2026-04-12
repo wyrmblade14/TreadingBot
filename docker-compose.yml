@@ -45,7 +45,9 @@ services:
       start_period: 10s
 
   bot:
-    build: .
+    build:
+      context: .
+      target: bot-runtime
     container_name: treadingbot_bot
     command: python scripts/run_bot.py
     env_file: .env
@@ -68,7 +70,9 @@ services:
     # Bot auto-refreshes Kite token at startup and at 8:30 AM via APScheduler.
 
   dashboard-api:
-    build: .
+    build:
+      context: .
+      target: bot-runtime
     container_name: treadingbot_dashboard_api
     command: python scripts/run_react_dashboard.py
     env_file: .env
@@ -106,7 +110,9 @@ services:
         condition: service_started
 
   watchdog:
-    build: .
+    build:
+      context: .
+      target: watchdog-runtime
     container_name: treadingbot_watchdog
     command: python scripts/watchdog.py
     env_file: .env

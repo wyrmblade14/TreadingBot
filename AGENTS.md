@@ -141,7 +141,7 @@ make oci-destroy          # terminate instance (asks for confirmation)
 make oci-provision ARGS="--compartment-id ocid1.compartment..."  # specific compartment
 ```
 
-The provisioning script (`scripts/oci_provision.sh`) is idempotent — safe to run multiple times.
+The provisioning script (`oci/provision.sh`) is idempotent — safe to run multiple times.
 
 ## Oracle Cloud Deployment (One-Time Setup)
 

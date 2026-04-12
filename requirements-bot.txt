@@ -1,0 +1,15 @@
+# ── Broker / Market Data ────────────────────────────────────────────
+kiteconnect==5.0.1          # Zerodha Kite Connect SDK
+yfinance>=0.2.54            # Free historical OHLCV data (NSE stocks)
+
+# ── Technical Analysis & Math ───────────────────────────────────────
+ta                          # RSI, MACD, EMA, Bollinger Bands, ATR
+pandas>=2.2.3               # Core data manipulation
+numpy>=2.1.0                # Numerical computing
+
+# ── Scheduling ───────────────────────────────────────────────────────
+APScheduler==3.10.4         # Cron-style job scheduling (IST timezone)
+
+# ── Legacy & UI (Optional — move to heavy if not needed daily) ──────
+plotly==5.20.0              # Interactive candlestick and equity charts
+oci>=2.126.0                # Oracle Cloud SDK (Vault secrets + Object Storage)

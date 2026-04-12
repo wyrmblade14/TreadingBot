@@ -31,7 +31,7 @@ PROD_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.prod.yml
 .PHONY: up down prod-up prod-deploy oci-provision oci-setup-services oci-ssh oci-destroy oci-backup oci-backups oci-vault-push db-restore login login-manual telegram deploy logs restart db test migrate clean build-all
 
 oci-provision:
-	@bash scripts/oci_provision.sh $(ARGS)
+	@bash oci/provision.sh $(ARGS)
 
 oci-ssh:
 	@IP=$$(oci compute instance list-vnics \
@@ -44,10 +44,10 @@ oci-ssh:
 	ssh ubuntu@$$IP
 
 oci-setup-services:
-	@bash scripts/oci_setup_free_services.sh $(ARGS)
+	@bash oci/setup_services.sh $(ARGS)
 
 oci-backup:
-	@bash scripts/backup_to_oci.sh
+	@bash oci/backup.sh
 
 oci-backups:
 	@oci os object list --bucket-name treadingbot-backups \
@@ -56,10 +56,10 @@ oci-backups:
 
 oci-vault-push:
 	@echo "Pushing .env secrets to OCI Vault..."
-	python3 scripts/oci_vault_push.py
+	python3 oci/vault_push.py
 
 db-restore:
-	@bash scripts/db_restore.sh
+	@bash oci/restore.sh
 
 oci-destroy:
 	@echo "WARNING: This will TERMINATE the TreadingBot instance and all data."
