@@ -245,6 +245,17 @@ Key facts:
   FundamentalJudgment into RiskManager.evaluate() for size scaling.
 - Full suite after refactor: 272 passed, 1 Loguru deprecation warning.
 
+## Build & Ops Optimization ✅ (April 2026)
+Files: Dockerfile, web/Dockerfile, .dockerignore, web/.dockerignore, Makefile, GEMINI.md
+
+Key facts:
+- **Multi-stage Docker builds**: Python image uses a `builder` stage for C-extensions/pip-install and a `runtime` stage for execution, reducing image size.
+- **Next.js Standalone Mode**: `web/Dockerfile` uses `output: 'standalone'` to include only necessary node_modules, significantly shrinking the frontend image.
+- **Build Context Optimization**: Comprehensive `.dockerignore` files (root and `web/`) prevent logs, node_modules, and temp files from bloating the build context.
+- **Parallel Builds**: `Makefile` updated with `make build-all` and `make deploy` using `docker-compose build --parallel`.
+- **GEMINI.md**: Created a single source of truth for Gemini CLI instructional context.
+- **Cleanup**: `make clean` task added to purge `__pycache__`, `.next`, and test artifacts.
+
 ## Apr 10 Post-Mortem Bug Fixes (April 2026) ✅
 Files changed: execution/order_manager.py, scheduler/job_runner.py.
 Test count: 275 passing.

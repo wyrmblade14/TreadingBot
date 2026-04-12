@@ -60,6 +60,7 @@ from typing import Optional
 
 from loguru import logger
 
+from analysis.market_overview import get_nifty_overview
 from config.settings import (
     FIRST_CANDLE_BLACKOUT,
     IST,
@@ -221,6 +222,37 @@ class RiskManager:
                     )
             except Exception:
                 pass  # Non-fatal: allow trading if VIX data unavailable
+
+        # ── Market Breadth check ─────────────────────────────────────
+        # If fewer than 20% of NIFTY50 stocks are up, market is broadly weak — suppress BUY.
+        # If fewer than 20% of NIFTY50 stocks are down, market is broadly strong — suppress SELL.
+        try:
+            overview = get_nifty_overview()
+            if overview and overview.total_symbols >= 40:  # Ensure we have enough data
+                adv_ratio = overview.advances / overview.total_symbols
+                dec_ratio = overview.declines / overview.total_symbols
+
+                if adv_ratio < 0.2 and signal.action == Action.BUY:
+                    logger.warning(
+                        f"Market Breadth: only {adv_ratio:.1%} stocks up. "
+                        f"Broad weakness, suppressing BUY entry for {signal.symbol}."
+                    )
+                    return RiskDecision(
+                        approved=False,
+                        reason=f"Market Breadth: broad weakness ({adv_ratio:.1%} up), BUY entries suppressed.",
+                    )
+                if dec_ratio < 0.2 and signal.action == Action.SELL:
+                    logger.warning(
+                        f"Market Breadth: only {dec_ratio:.1%} stocks down. "
+                        f"Broad strength, suppressing SELL/short entry for {signal.symbol}."
+                    )
+                    return RiskDecision(
+                        approved=False,
+                        reason=f"Market Breadth: broad strength ({dec_ratio:.1%} down), SELL entries suppressed.",
+                    )
+        except Exception as e:
+            logger.debug(f"RiskManager: market breadth check failed: {e}")
+            pass  # Fail-open: don't block trading if breadth data fetch fails
 
         # ── Rule 8: Max open positions ───────────────────────────────
         if len(self.state.open_positions) >= MAX_OPEN_POSITIONS:

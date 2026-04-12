@@ -136,7 +136,7 @@ def render() -> None:
     # ── Today's trades ────────────────────────────────────────────────
     hdr_col, refresh_col, auto_col = st.columns([5, 1, 2])
     hdr_col.subheader("Today's Trades")
-    refresh_clicked = refresh_col.button("🔄 Refresh", use_container_width=True)
+    refresh_clicked = refresh_col.button(":material/refresh: Refresh", use_container_width=True)
     auto_refresh    = auto_col.toggle("Auto-refresh (5s)", value=False)
 
     if not today_trades:
@@ -144,7 +144,7 @@ def render() -> None:
     else:
         open_count = sum(1 for t in today_trades if t["exit_price"] is None)
         if open_count:
-            st.caption(f"⏳ {open_count} open position(s) — live prices from KiteTickerFeed")
+            st.caption(f":material/schedule: {open_count} open position(s) — live prices from KiteTickerFeed")
 
         rows = []
         for t in today_trades:
@@ -174,13 +174,19 @@ def render() -> None:
                 tgt_dist   = abs(target - ltp) / entry * 100 if target else None
                 sl_str     = f"{sl_dist:.1f}% away" if sl_dist is not None else "—"
                 tgt_str    = f"{tgt_dist:.1f}% away" if tgt_dist is not None else "—"
-                result     = "⏳ LIVE"
+                result     = ":material/pending: Live"
             else:
                 unreal_str = "—"
                 ltp_str    = "—" if is_open else "—"
                 sl_str     = "—"
                 tgt_str    = "—"
-                result     = ("✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳")
+                result     = (
+                    ":material/check_circle: Win"
+                    if pnl and pnl > 0
+                    else ":material/cancel: Loss"
+                    if pnl and pnl < 0
+                    else ":material/schedule: Open"
+                )
 
             rows.append({
                 "Symbol":       t["symbol"],
@@ -226,7 +232,7 @@ def render() -> None:
                 "Win %":     f"{s['win_rate_pct'] or 0:.1f}%",
                 "Total P&L": f"₹{total:+,.0f}",
                 "Avg P&L":   f"₹{s['avg_net_pnl'] or 0:+,.0f}",
-                "Status":    "✅" if total > 0 else "❌",
+                "Status":    ":material/check_circle: Positive" if total > 0 else ":material/cancel: Negative",
             })
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 

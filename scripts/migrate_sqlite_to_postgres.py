@@ -1,21 +1,21 @@
 """
 One-shot migration: copy all rows from logs/trades.db (SQLite) into PostgreSQL.
 
-Run this once after the postgres container is up and before starting the bot
-against the new database.
+Run via `make migrate` — it starts the postgres container automatically, waits
+for it to be healthy, then runs this script.
 
-Usage:
+Or manually:
     # 1. Start the postgres container
     docker-compose up -d postgres
 
-    # 2. Wait ~10 seconds for it to become healthy, then run from the project root:
-    python scripts/migrate_sqlite_to_postgres.py
+    # 2. Run from the project root (localhost is used automatically outside Docker):
+    python3 scripts/migrate_sqlite_to_postgres.py
 
     # 3. Verify the row count matches
     docker exec treadingbot_postgres psql -U treadingbot -d treadingbot -c "SELECT COUNT(*) FROM trades;"
 
 Requirements:
-    - DATABASE_URL must be set in .env and point to PostgreSQL (not SQLite)
+    - DATABASE_URL must be set in .env and point to PostgreSQL
     - logs/trades.db must exist
 
 The script is idempotent: rows whose id already exists in PostgreSQL are skipped,
@@ -49,10 +49,13 @@ pg_url = os.environ.get("DATABASE_URL", "")
 if not pg_url or pg_url.startswith("sqlite"):
     print("ERROR: DATABASE_URL must be set to a PostgreSQL URL in .env")
     print("  Example: postgresql://treadingbot:secret@localhost:5432/treadingbot")
-    print("  Note: use 'localhost' when running this script outside Docker.")
     sys.exit(1)
 
-pg_engine = create_engine(pg_url)
+# When running from the host (outside Docker), the service name "postgres"
+# doesn't resolve — swap it to "localhost" automatically.
+pg_url_host = pg_url.replace("@postgres:", "@localhost:")
+
+pg_engine = create_engine(pg_url_host)
 
 # ── ensure PostgreSQL schema exists ───────────────────────────────────
 from execution.trade_log import Base

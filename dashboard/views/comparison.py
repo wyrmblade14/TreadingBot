@@ -114,7 +114,7 @@ def _colour_metric(value: float, good_above: float = 0) -> str:
 # ── Main render ───────────────────────────────────────────────────────
 
 def render() -> None:
-    st.title("⚔️ Strategy Head-to-Head")
+    st.title(":material/compare_arrows: Strategy Head-to-Head")
     st.caption(
         "Live performance from your paper trade data. "
         "This is how each strategy is *actually* doing, not how it did in backtests."
@@ -126,7 +126,7 @@ def render() -> None:
 
     if not closed:
         st.info(
-            "📭 No closed trades in the database yet.\n\n"
+            "No closed trades in the database yet.\n\n"
             "Start the paper trading bot and let a few trades close (hit target or stop-loss). "
             "This page will populate automatically as trades complete."
         )
@@ -154,7 +154,7 @@ def render() -> None:
     st.markdown("---")
 
     # ── KPI scorecards (one column per strategy) ──────────────────────
-    st.subheader("📊 Scorecard")
+    st.subheader(":material/analytics: Scorecard")
     st.caption(
         f"Win rate target: **≥{_WIN_RATE_TARGET:.0f}%** · "
         f"Profit factor target: **≥{_PROFIT_FACTOR_MIN:.1f}**"
@@ -168,14 +168,14 @@ def render() -> None:
     st.markdown("---")
 
     # ── Cumulative P&L chart ──────────────────────────────────────────
-    st.subheader("📈 Cumulative P&L by Strategy")
+    st.subheader(":material/show_chart: Cumulative P&L by Strategy")
     st.caption("Each line is the running total of net P&L for that strategy over time.")
     _render_cumulative_pnl_chart(by_strategy, closed)
 
     st.markdown("---")
 
     # ── Rolling win rate trend ────────────────────────────────────────
-    st.subheader("🎯 Rolling 10-Trade Win Rate")
+    st.subheader(":material/track_changes: Rolling 10-Trade Win Rate")
     st.caption(
         "Shows whether each strategy is getting better or worse over time. "
         "A falling line means recent trades are underperforming."
@@ -185,13 +185,13 @@ def render() -> None:
     st.markdown("---")
 
     # ── Head-to-head table ────────────────────────────────────────────
-    st.subheader("📋 Side-by-Side Summary Table")
+    st.subheader(":material/table: Side-by-Side Summary Table")
     _render_summary_table(stats)
 
     st.markdown("---")
 
     # ── Per-strategy drilldown ────────────────────────────────────────
-    st.subheader("🔍 Strategy Drilldown")
+    st.subheader(":material/manage_search: Strategy Drilldown")
     selected = st.selectbox(
         "Select strategy to inspect trade-by-trade",
         [cfg["label"] for cfg in _STRATEGIES.values()],
@@ -227,7 +227,7 @@ def _render_winner_banner(stats: dict) -> None:
         f"<div style='background:#1a1d27;border:1px solid {colour};"
         f"border-radius:12px;padding:16px 20px;margin-bottom:8px'>"
         f"<span style='font-size:0.8rem;color:#9ca3af;text-transform:uppercase;"
-        f"letter-spacing:0.08em'>🏆 Currently Leading</span><br>"
+        f"letter-spacing:0.08em'>Currently Leading</span><br>"
         f"<span style='font-size:1.3rem;font-weight:700;color:{colour}'>{label}</span>"
         f"<span style='font-size:1rem;color:#e0e0e0;margin-left:16px'>"
         f"₹{pnl_sign}{total_pnl:,.2f} total  ·  {win_rate}% win rate  ·  "
@@ -525,7 +525,7 @@ def _render_drilldown(trades: list[dict], cfg: dict) -> None:
             "Exit":     f"₹{exit_p:.2f}",
             "P&L":      f"₹{pnl:+.2f}",
             "R Earned": f"{rr:.2f}R",
-            "Outcome":  "✅ Win" if pnl > 0 else "❌ Loss",
+            "Outcome":  "Win" if pnl > 0 else "Loss",
         })
 
     df = pd.DataFrame(rows)

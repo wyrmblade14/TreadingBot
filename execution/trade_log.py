@@ -1,5 +1,5 @@
 """
-Trade Log — persists every trade to a SQLite database.
+Trade Log — persists every trade to PostgreSQL.
 
 Why log trades?
   The only way to improve as a trader (or improve your bot) is to review
@@ -14,8 +14,8 @@ Why log trades?
     - What time of day produces the best trades?
     - Which stocks work best with each strategy?
 
-Database: PostgreSQL (Docker service). Falls back to SQLite (logs/trades.db) when DATABASE_URL
-is not set — used for local dev and tests so they never need a running Postgres instance.
+Database: PostgreSQL only. Set DATABASE_URL in .env, e.g.:
+  DATABASE_URL=postgresql://user:password@localhost:5432/treadingbot
 
 The log is append-only. We never delete or modify past trades.
 """
@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import os
 from datetime import datetime, date
-from pathlib import Path
 
 from loguru import logger
 from sqlalchemy import (
@@ -35,18 +34,14 @@ from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 # ── Database setup ────────────────────────────────────────────────────
 
-_DEFAULT_SQLITE = "sqlite:///" + str(
-    Path(__file__).parent.parent / "logs" / "trades.db"
-)
-_DB_URL = os.environ.get("DATABASE_URL", _DEFAULT_SQLITE)
+_DB_URL = os.environ.get("DATABASE_URL")
 
-# Ensure logs/ directory exists (only relevant for the SQLite fallback)
-if _DB_URL.startswith("sqlite"):
-    _sqlite_path = Path(_DB_URL.replace("sqlite:///", ""))
-    _sqlite_path.parent.mkdir(exist_ok=True)
-
-engine = create_engine(_DB_URL, echo=False)
-SessionLocal = sessionmaker(bind=engine)
+if _DB_URL is not None:
+    engine = create_engine(_DB_URL, echo=False)
+    SessionLocal = sessionmaker(bind=engine)
+else:
+    engine = None       # type: ignore[assignment]
+    SessionLocal = None # type: ignore[assignment]
 
 
 class Base(DeclarativeBase):
@@ -79,11 +74,16 @@ class TradeRecord(Base):
 
 def init_db() -> None:
     """Create tables if they don't exist. Safe to call multiple times."""
+    if engine is None:
+        raise RuntimeError(
+            "DATABASE_URL is not set. Add it to .env, e.g.:\n"
+            "  DATABASE_URL=postgresql://user:password@localhost:5432/treadingbot"
+        )
     inspector = inspect(engine)
     is_new = not inspector.has_table("trades")
     Base.metadata.create_all(engine)
     if is_new:
-        logger.info(f"Trade database initialised ({_DB_URL.split('@')[-1]})")
+        logger.info(f"Trade database initialised ({engine.url!s})")
     else:
         # Add exit_timestamp column to databases that predate this field.
         # inspect() is database-agnostic — works on PostgreSQL and SQLite.
@@ -93,12 +93,12 @@ def init_db() -> None:
                 conn.execute(text("ALTER TABLE trades ADD COLUMN exit_timestamp TIMESTAMP"))
                 conn.commit()
             logger.info("Trade database migrated: added exit_timestamp column")
-        logger.debug(f"Trade database ready ({_DB_URL.split('@')[-1]})")
+        logger.debug(f"Trade database ready ({engine.url!s})")
 
 
 class TradeLogger:
     """
-    Records trades to the SQLite database.
+    Records trades to the PostgreSQL database.
 
     Usage:
         log = TradeLogger()

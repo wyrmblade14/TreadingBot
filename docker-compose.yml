@@ -2,23 +2,25 @@
 # TreadingBot — docker-compose
 #
 # Services:
-#   bot        — Paper trading bot (APScheduler, 08:45–15:35 IST)
-#   dashboard  — Streamlit UI at http://localhost:8501
-#   watchdog   — Crash recovery (restarts bot if it dies, max 3x/day)
+#   bot              — Paper trading bot (APScheduler, 08:30–15:35 IST)
+#   dashboard-api    — JSON API for the React dashboard at http://localhost:8000
+#   react-dashboard  — Next.js React UI at http://localhost:3000
+#   watchdog         — Crash recovery (restarts bot if it dies, max 3x/day)
+#
+# Zero-touch daily operation (recommended):
+#   Set ZERODHA_USER_ID, ZERODHA_PASSWORD, ZERODHA_TOTP_SECRET in .env.
+#   The bot will auto-refresh its Kite token at startup AND at 8:30 AM each
+#   trading day — no browser, no phone, no manual steps required.
 #
 # Weekly backtest (Saturday 10:00 IST) is triggered from the HOST crontab:
 #   0 10 * * 6 docker compose -f /path/to/docker-compose.yml run --rm bot \
 #               python scripts/scheduled_backtest.py >> /path/to/logs/backtest_weekly.log 2>&1
 #
-# Usage:
-#   docker-compose up -d            # start all services
-#   docker-compose logs -f bot      # follow bot logs
-#   docker-compose down             # stop all
-#
-# Setup:
-#   1. Copy .env.example to .env and fill in your values
-#   2. docker-compose up -d
+# First-time setup:
+#   1. Copy .env.example to .env and fill in all values
+#   2. docker-compose up -d     (or: make up)
 #   3. Add the weekly backtest cron line above to your host crontab
+#   4. All containers have restart: unless-stopped — they survive server reboots.
 # ──────────────────────────────────────────────────────────────────────────────
 
 services:
@@ -49,31 +51,59 @@ services:
     env_file: .env
     volumes:
       - ./logs:/app/logs
-    restart: unless-stopped
+      - ./.env:/app/.env          # writable mount so auto-login can save the fresh token
+    ports:
+      - "7777:7777"               # Kite OAuth callback server — browser redirect lands here
+    restart: unless-stopped       # auto-restarts on crash AND on server reboot
     depends_on:
       postgres:
         condition: service_healthy
-    # Bot manages its own IST-scheduled jobs internally via APScheduler.
-    # It auto-starts at 09:00 IST and auto-shuts at 15:35 IST.
-    # Use the host crontab / Task Scheduler to start this container daily.
+    healthcheck:
+      # Process alive = healthy. Docker will restart the container if it exits.
+      test: ["CMD-SHELL", "pgrep -f run_bot.py > /dev/null || exit 1"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    # Bot auto-refreshes Kite token at startup and at 8:30 AM via APScheduler.
 
-  dashboard:
+  dashboard-api:
     build: .
-    container_name: treadingbot_dashboard
-    command: >
-      python -m streamlit run dashboard/app.py
-      --server.address 0.0.0.0
-      --server.port 8501
-      --server.headless true
+    container_name: treadingbot_dashboard_api
+    command: python scripts/run_react_dashboard.py
     env_file: .env
+    environment:
+      DASHBOARD_API_HOST: 0.0.0.0
+      DASHBOARD_API_PORT: 8000
     ports:
-      - "8501:8501"
+      - "8000:8000"
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
+
+  react-dashboard:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: dev
+    container_name: treadingbot_react_dashboard
+    command: npm run dev
+    environment:
+      NEXT_PUBLIC_DASHBOARD_API_URL: ${NEXT_PUBLIC_DASHBOARD_API_URL:-http://localhost:8000}
+      DASHBOARD_API_INTERNAL_URL: http://dashboard-api:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      - react_dashboard_node_modules:/app/node_modules
+      - react_dashboard_next:/app/.next
+    restart: unless-stopped
+    depends_on:
+      dashboard-api:
+        condition: service_started
 
   watchdog:
     build: .
@@ -94,3 +124,5 @@ services:
 
 volumes:
   postgres_data:   # Docker manages this — data survives container restarts; only lost with "down -v"
+  react_dashboard_node_modules:
+  react_dashboard_next:

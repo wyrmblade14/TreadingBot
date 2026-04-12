@@ -19,56 +19,60 @@ from datetime import date
 
 # Official NSE equity segment holidays
 # Source: NSE circular on exchange holidays
-NSE_HOLIDAYS: set[date] = {
+NSE_HOLIDAYS: dict[date, str] = {
     # ── 2024 ──────────────────────────────────────────────────────────
-    date(2024, 1, 22),   # Ram Mandir consecration (special closure)
-    date(2024, 1, 26),   # Republic Day
-    date(2024, 3, 25),   # Holi
-    date(2024, 3, 29),   # Good Friday
-    date(2024, 4, 14),   # Dr. Ambedkar Jayanti / Ram Navami
-    date(2024, 4, 17),   # Ram Navami
-    date(2024, 4, 21),   # Mahavir Jayanti
-    date(2024, 5, 23),   # Buddha Purnima
-    date(2024, 6, 17),   # Eid ul-Adha (Bakri Eid)
-    date(2024, 7, 17),   # Muharram
-    date(2024, 8, 15),   # Independence Day
-    date(2024, 10, 2),   # Gandhi Jayanti / Mahatma Gandhi Birthday
-    date(2024, 11, 1),   # Diwali Laxmi Puja (Muhurat trading exception)
-    date(2024, 11, 15),  # Gurunanak Jayanti
-    date(2024, 12, 25),  # Christmas
+    date(2024, 1, 22):  "Ram Mandir Consecration",
+    date(2024, 1, 26):  "Republic Day",
+    date(2024, 3, 25):  "Holi",
+    date(2024, 3, 29):  "Good Friday",
+    date(2024, 4, 11):  "Id-ul-Fitr (Ramadan Eid)",
+    date(2024, 4, 17):  "Shri Ram Navami",
+    date(2024, 4, 21):  "Mahavir Jayanti",
+    date(2024, 5, 23):  "Buddha Purnima",
+    date(2024, 6, 17):  "Bakri Id",
+    date(2024, 7, 17):  "Muharram",
+    date(2024, 8, 15):  "Independence Day",
+    date(2024, 10, 2):  "Mahatma Gandhi Jayanti",
+    date(2024, 11, 1):  "Diwali Laxmi Pujan",
+    date(2024, 11, 15): "Gurunanak Jayanti",
+    date(2024, 12, 25): "Christmas",
 
     # ── 2025 ──────────────────────────────────────────────────────────
-    date(2025, 2, 26),   # Mahashivratri
-    date(2025, 3, 14),   # Holi
-    date(2025, 3, 31),   # Id-ul-Fitr (Ramadan Eid)
-    date(2025, 4, 10),   # Shri Ram Navami
-    date(2025, 4, 14),   # Dr. Ambedkar Jayanti
-    date(2025, 4, 18),   # Good Friday
-    date(2025, 5, 1),    # Maharashtra Day
-    date(2025, 8, 15),   # Independence Day
-    date(2025, 8, 27),   # Ganesh Chaturthi
-    date(2025, 10, 2),   # Gandhi Jayanti / Mahatma Gandhi Birthday
-    date(2025, 10, 21),  # Diwali Amavasya (Laxmi Puja)
-    date(2025, 10, 22),  # Diwali (Balipratipada)
-    date(2025, 10, 28),  # Gurunanak Jayanti (tentative)
-    date(2025, 11, 5),   # Gurunanak Jayanti
-    date(2025, 12, 25),  # Christmas
+    date(2025, 2, 26):  "Mahashivratri",
+    date(2025, 3, 14):  "Holi",
+    date(2025, 3, 31):  "Id-ul-Fitr (Ramadan Eid)",
+    date(2025, 4, 10):  "Shri Ram Navami",
+    date(2025, 4, 14):  "Dr. Ambedkar Jayanti",
+    date(2025, 4, 18):  "Good Friday",
+    date(2025, 5, 1):   "Maharashtra Day",
+    date(2025, 8, 15):  "Independence Day",
+    date(2025, 8, 27):  "Ganesh Chaturthi",
+    date(2025, 10, 2):  "Mahatma Gandhi Jayanti",
+    date(2025, 10, 21): "Diwali Amavasya (Laxmi Pujan)",
+    date(2025, 10, 22): "Diwali Balipratipada",
+    date(2025, 11, 5):  "Gurunanak Jayanti",
+    date(2025, 12, 25): "Christmas",
 
     # ── 2026 (tentative — update when NSE publishes official list) ────
-    date(2026, 1, 26),   # Republic Day
-    date(2026, 3, 3),    # Mahashivratri (approx)
-    date(2026, 4, 3),    # Good Friday (approx)
-    date(2026, 8, 15),   # Independence Day
-    date(2026, 10, 2),   # Gandhi Jayanti
-    date(2026, 12, 25),  # Christmas
+    date(2026, 1, 26):  "Republic Day",
+    date(2026, 3, 3):   "Mahashivratri",
+    date(2026, 4, 3):   "Good Friday",
+    date(2026, 8, 15):  "Independence Day",
+    date(2026, 10, 2):  "Mahatma Gandhi Jayanti",
+    date(2026, 12, 25): "Christmas",
 }
 
+
+# Special weekend trading sessions (e.g., Muhurat trading on weekends, DR site testing)
+# Add dates here if a weekend session is announced by NSE.
+SPECIAL_WEEKEND_TRADING: set[date] = set()
 
 def is_trading_day(d: date | None = None) -> bool:
     """
     Return True if the given date is a regular NSE trading day.
 
-    A trading day is a weekday (Mon–Fri) that is NOT in the holiday list.
+    A trading day is a weekday (Mon–Fri) that is NOT in the holiday list,
+    or a weekend day explicitly listed in SPECIAL_WEEKEND_TRADING.
 
     Args:
         d: Date to check. Defaults to today.
@@ -85,9 +89,41 @@ def is_trading_day(d: date | None = None) -> bool:
     """
     if d is None:
         d = date.today()
-    if d.weekday() >= 5:          # Saturday=5, Sunday=6
+        
+    # If the date is explicitly an NSE holiday, the market is closed
+    if d in NSE_HOLIDAYS:
         return False
-    return d not in NSE_HOLIDAYS
+        
+    # If it's a weekend (Saturday=5, Sunday=6)
+    if d.weekday() >= 5:
+        # Check if there is a special weekend trading session (like Muhurat trading)
+        if d in SPECIAL_WEEKEND_TRADING:
+            return True
+        return False
+        
+    return True
+
+def is_holiday(d: date | None = None) -> bool:
+    """
+    Return True if the given date is a holiday or a non-trading weekend.
+    This acts as the exact inverse of is_trading_day.
+    """
+    return not is_trading_day(d)
+
+def get_holiday_reason(d: date | None = None) -> str:
+    """Return the name of the holiday or 'Weekend' if market is closed."""
+    if d is None:
+        d = date.today()
+    
+    if d in NSE_HOLIDAYS:
+        return NSE_HOLIDAYS[d]
+    
+    if d.weekday() == 5:
+        return "Weekend (Saturday)"
+    if d.weekday() == 6:
+        return "Weekend (Sunday)"
+    
+    return ""
 
 
 def next_trading_day(from_date: date | None = None) -> date:

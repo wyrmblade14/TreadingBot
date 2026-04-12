@@ -136,6 +136,13 @@ type: project
   direction system fires → SHORT trades → get stopped out → accept the loss as cost of doing business.
 - If the 15-day test period contains a V-reversal day, that one day's loss is noise, not signal.
 
+## Build & Ops Optimization (April 2026)
+- **Docker Multi-Stage Builds**: Separating the build environment (compiler, development headers) from the runtime environment reduces the final image size and minimizes the attack surface.
+- **Next.js Standalone Output**: Configuring Next.js for `output: 'standalone'` is essential for lean Docker images. It automatically traces and copies only the necessary `node_modules` into a small `server.js` bundle.
+- **Docker Context and .dockerignore**: A bloated Docker build context (e.g., including `node_modules`, `venv`, or large `logs/`) is the #1 cause of slow builds. Explicitly excluding everything *except* what's needed for the build ensures fast iterative development.
+- **Parallel Docker Builds**: Using `docker-compose build --parallel` is significantly faster on modern multi-core machines, as independent service images can be built simultaneously.
+- **GEMINI.md for AI Context**: Keeping high-level architecture and common commands in a dedicated `GEMINI.md` file significantly improves the performance and accuracy of AI agents working in the repository.
+
 ## Kite API Rate Limiting
 - Kite REST API rate limit: ~3 req/s. Fetching 12+ symbols sequentially without delay hits it.
 - Symptom: "Too many requests" warning, fetch returns None for all subsequent calls.

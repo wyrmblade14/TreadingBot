@@ -101,8 +101,10 @@ def main() -> None:
     print(f"Logged in as: {user_name} ({user_id})")
     print(f"Access token saved to .env")
     print()
-    print("The bot will now use Kite for precise NSE tick data.")
-    print("This token is valid until midnight tonight.")
+    print("Token valid until midnight tonight.")
+    print("If you ran this via 'make login', containers are restarting automatically.")
+    print("If you ran this directly, restart the containers to pick up the new token:")
+    print("  docker-compose restart bot dashboard watchdog")
     print()
 
 

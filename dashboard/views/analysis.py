@@ -25,10 +25,10 @@ from analysis.market_overview import get_nifty_overview, MarketOverview
 
 
 def render() -> None:
-    st.title("🌐 Market Analysis")
+    st.title(":material/language: Market Analysis")
     st.caption("NIFTY50 breadth, top movers, and sector view. Data from yfinance.")
 
-    refresh = st.button("🔄 Refresh Data", type="primary")
+    refresh = st.button(":material/refresh: Refresh Data", type="primary")
 
     # Cache overview in session state
     if refresh or "market_overview" not in st.session_state:
@@ -48,7 +48,7 @@ def render() -> None:
     col1.metric("NIFTY50 Price", f"{overview.nifty_price:,.2f}")
     col2.metric("Day Change",    f"{overview.nifty_change:+.2f}",
                 delta=f"{overview.nifty_change_pct:+.2f}%")
-    col3.metric("Direction",     "🟢 UP" if overview.nifty_change >= 0 else "🔴 DOWN")
+    col3.metric("Direction",     "UP" if overview.nifty_change >= 0 else "DOWN")
 
     st.markdown("---")
 
@@ -89,7 +89,7 @@ def render() -> None:
     col_g, col_l = st.columns(2)
 
     with col_g:
-        st.subheader("🟢 Top Gainers")
+        st.subheader(":material/trending_up: Top Gainers")
         if overview.top_gainers:
             gainers_df = pd.DataFrame(overview.top_gainers)
             gainers_df.columns = ["Symbol", "Change %", "Price ₹"]
@@ -98,7 +98,7 @@ def render() -> None:
             st.info("No gainer data available.")
 
     with col_l:
-        st.subheader("🔴 Top Losers")
+        st.subheader(":material/trending_down: Top Losers")
         if overview.top_losers:
             losers_df = pd.DataFrame(overview.top_losers)
             losers_df.columns = ["Symbol", "Change %", "Price ₹"]

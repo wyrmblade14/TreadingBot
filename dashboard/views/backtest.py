@@ -42,7 +42,7 @@ _STRATEGY_MAP = {
 
 
 def render() -> None:
-    st.title("📊 Backtest Runner")
+    st.title(":material/analytics: Backtest Runner")
     st.caption("Test any strategy on historical NIFTY50 data. No real money involved.")
 
     tab_single, tab_wf, tab_sim = st.tabs(
@@ -73,7 +73,7 @@ def _render_single_backtest() -> None:
                                    __import__("datetime").date(2024, 12, 31))
         all_strats = st.checkbox("Run all strategies (compare)")
 
-    run_btn = st.button("▶ Run Backtest", type="primary")
+    run_btn = st.button(":material/play_arrow: Run Backtest", type="primary")
 
     if not run_btn:
         days = (end_date - start_date).days
@@ -203,7 +203,7 @@ def _render_walk_forward() -> None:
         "is consistent across different market periods — not just lucky on one stretch."
     )
 
-    with st.expander("ℹ️ How to read this (beginner guide)", expanded=False):
+    with st.expander(":material/info: How to read this (beginner guide)", expanded=False):
         st.markdown("""
 **Why walk-forward?**
 A regular backtest might show great results on 2023 data — but that could be luck.
@@ -238,7 +238,7 @@ Walk-forward splits the full period into many smaller windows and tests each one
     est_windows  = max(0, (total_months - wf_train - wf_test) // wf_test + 1)
     st.caption(f"Estimated windows: **{est_windows}** | Total range: {total_months} months")
 
-    if st.button("▶ Run Walk-Forward", type="primary"):
+    if st.button(":material/play_arrow: Run Walk-Forward", type="primary"):
         if wf_start >= wf_end:
             st.error("Start date must be before end date.")
             return
@@ -265,9 +265,9 @@ Walk-forward splits the full period into many smaller windows and tests each one
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Windows",      f"{wf.profitable_windows}/{wf.num_windows} profitable")
         c2.metric("Consistency",  f"{wf.consistency_pct:.0f}%",
-                  delta="✅ pass" if wf.consistency_pct >= 60 else "❌ fail")
+                  delta="Pass" if wf.consistency_pct >= 60 else "Fail")
         c3.metric("Avg Win Rate", f"{wf.avg_win_rate:.1f}%",
-                  delta="✅ pass" if wf.avg_win_rate >= 45 else "❌ fail")
+                  delta="Pass" if wf.avg_win_rate >= 45 else "Fail")
         c4.metric("Total Trades", str(wf.total_trades))
 
         if wf.is_robust:
@@ -310,7 +310,7 @@ Walk-forward splits the full period into many smaller windows and tests each one
                     "Profit Factor": f"{pf:.2f}" if pf != float("inf") else "∞",
                     "Return %":    f"{w.metrics.total_return_pct:+.1f}%",
                     "Net P&L ₹":   f"₹{w.metrics.total_net_pnl:,.0f}",
-                    "Result":      "✅" if w.is_profitable else "❌",
+                    "Result":      "Profitable" if w.is_profitable else "Loss",
                 })
             st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
@@ -363,7 +363,7 @@ def _render_portfolio_sim() -> None:
             "This answers: *'Would this bot have made money recently?'*"
         )
 
-    run_btn = st.button("▶ Run Simulation", type="primary", key="sim_run")
+    run_btn = st.button(":material/play_arrow: Run Simulation", type="primary", key="sim_run")
     if not run_btn:
         return
 
@@ -469,7 +469,7 @@ def _render_portfolio_sim() -> None:
                 "Wins":     stats["wins"],
                 "Win %":    f"{wr:.1f}%",
                 "Net P&L":  f"₹{stats['net_pnl']:+,.0f}",
-                "Result":   "✅" if stats["net_pnl"] > 0 else "❌",
+                "Result":   "Positive" if stats["net_pnl"] > 0 else "Negative",
             })
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
@@ -483,6 +483,6 @@ def _render_portfolio_sim() -> None:
             "Win %":   f"{day.win_rate_pct:.0f}%" if day.num_trades else "—",
             "Net P&L": f"₹{day.net_pnl:+,.0f}",
             "Capital": f"₹{day.capital_end:,.0f}",
-            "Note":    "⛔ Halted" if day.halted else ("✅" if day.net_pnl > 0 else ("❌" if day.net_pnl < 0 else "—")),
+            "Note":    "Halted" if day.halted else ("Profit" if day.net_pnl > 0 else ("Loss" if day.net_pnl < 0 else "Flat")),
         })
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)

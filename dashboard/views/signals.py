@@ -28,7 +28,7 @@ from strategies.base_strategy import Action
 
 
 def render() -> None:
-    st.title("🔍 Signal Scanner")
+    st.title(":material/radar: Signal Scanner")
     st.caption("Scans all NIFTY50 stocks for active BUY/SELL signals using your strategies.")
 
     # ── Market Regime Banner ──────────────────────────────────────────
@@ -39,12 +39,12 @@ def render() -> None:
         details = get_regime_details()
 
     _REGIME_CONFIG = {
-        MarketRegime.TRENDING:  ("🟢", "#1b5e20", "#4caf50", "Strong trend — all strategies active."),
-        MarketRegime.RANGING:   ("🟡", "#4a3900", "#ffc107", "Sideways market — EMA + ORB suppressed. RSI+MACD still active."),
-        MarketRegime.VOLATILE:  ("🔴", "#4e0000", "#ef5350", "Volatile market — all strategies suppressed. No signals today."),
-        MarketRegime.UNKNOWN:   ("⚪", "#1e1e2e", "#9ca3af", "Regime unknown (data fetch failed) — all strategies running as fallback."),
+        MarketRegime.TRENDING:  ("#1b5e20", "#4caf50", "Strong trend — all strategies active."),
+        MarketRegime.RANGING:   ("#4a3900", "#ffc107", "Sideways market — EMA + ORB suppressed. RSI+MACD still active."),
+        MarketRegime.VOLATILE:  ("#4e0000", "#ef5350", "Volatile market — all strategies suppressed. No signals today."),
+        MarketRegime.UNKNOWN:   ("#1e1e2e", "#9ca3af", "Regime unknown (data fetch failed) — all strategies running as fallback."),
     }
-    icon, bg, border, caption_text = _REGIME_CONFIG[regime]
+    bg, border, caption_text = _REGIME_CONFIG[regime]
 
     adx_str   = f"ADX {details.get('adx', '—')}" if details else ""
     atr_str   = f"ATR ratio {details.get('atr_ratio', '—')}×" if details else ""
@@ -54,7 +54,7 @@ def render() -> None:
         f"<div style='background:{bg};border:1px solid {border};border-radius:10px;"
         f"padding:14px 18px;margin-bottom:16px'>"
         f"<span style='font-size:1.1rem;font-weight:700;color:{border}'>"
-        f"{icon} Market Regime: {regime.value}</span>"
+        f"Market Regime: {regime.value}</span>"
         f"<span style='font-size:0.82rem;color:#9ca3af'>{metric_str}</span><br>"
         f"<span style='font-size:0.85rem;color:#c0c0d0'>{caption_text}</span>"
         f"</div>",
@@ -93,7 +93,7 @@ def render() -> None:
     with col2:
         max_syms = st.slider("Max symbols to scan", 10, 50, 50)
 
-    run_scan = st.button("🔍 Run Scanner", type="primary")
+    run_scan = st.button(":material/search: Run Scanner", type="primary")
 
     if not run_scan:
         st.info("Click **Run Scanner** to scan NIFTY50 for active signals. This takes ~30–60 seconds.")
@@ -116,13 +116,12 @@ def render() -> None:
     rows = []
     for r in results:
         score = r.confidence_score
-        dots  = "●" * score + "○" * (5 - score)
         tier  = "High" if score >= 4 else "Moderate" if score == 3 else "Low"
         rows.append({
             "Symbol":      r.symbol,
             "Strategy":    r.strategy,
-            "Signal":      "🟢 BUY" if r.action == Action.BUY else "🔴 SELL",
-            "Confidence":  f"{dots}  {score}/5  {tier}",
+            "Signal":      "BUY" if r.action == Action.BUY else "SELL",
+            "Confidence":  f"{score}/5 ({tier})",
             "Divergence":  getattr(r, "divergence", "—"),
             "Entry ₹":     r.entry_price,
             "Stop Loss ₹": r.stop_loss,
@@ -179,7 +178,7 @@ A signal can pass all strategy rules and still score 2/5 — meaning only 2 of 5
         f"display:flex;align-items:center;justify-content:center;flex-shrink:0'>"
         f"<span style='font-size:1.4rem;font-weight:700;color:{_score_colour}'>{score}/5</span></div>"
         f"<div><div style='font-size:1rem;font-weight:600;color:{_score_colour}'>{_score_label}</div>"
-        f"<div style='font-size:1.5rem;letter-spacing:4px'>{'●' * score}{'○' * (5 - score)}</div></div>"
+        f"<div style='font-size:0.9rem;color:#cbd5e1'>Quality score: {score} of 5</div></div>"
         f"</div>",
         unsafe_allow_html=True,
     )
@@ -187,11 +186,12 @@ A signal can pass all strategy rules and still score 2/5 — meaning only 2 of 5
     # Individual check breakdown
     if checks:
         for check_name, (passed, detail) in checks.items():
-            icon   = "✅" if passed else "❌"
+            status = "PASS" if passed else "FAIL"
             colour = "#4caf50" if passed else "#6b7280"
             st.markdown(
                 f"<div style='display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #2a2d3e'>"
-                f"<span style='font-size:1rem;flex-shrink:0'>{icon}</span>"
+                f"<span style='font-size:0.72rem;flex-shrink:0;color:{colour};font-weight:700;"
+                f"border:1px solid {colour};border-radius:6px;padding:2px 6px'>{status}</span>"
                 f"<div><span style='font-weight:600;color:{colour};font-size:0.88rem'>{check_name}</span>"
                 f"<br><span style='font-size:0.81rem;color:#9ca3af'>{detail}</span></div>"
                 f"</div>",
@@ -201,7 +201,7 @@ A signal can pass all strategy rules and still score 2/5 — meaning only 2 of 5
     st.markdown("---")
 
     # ── Detail chart for selected symbol ──────────────────────────────
-    st.subheader("📈 Price Chart")
+    st.subheader(":material/show_chart: Price Chart")
     symbols = [r.symbol for r in results]
     chosen  = st.selectbox("View chart for:", symbols)
 

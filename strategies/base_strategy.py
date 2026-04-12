@@ -35,6 +35,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 import pandas as pd
 
@@ -70,6 +71,9 @@ class Signal:
     strategy:    str            = ""
     timestamp:   datetime       = field(default_factory=datetime.now)
     reason:      str            = ""
+    # Phase A self-learning: indicator snapshot attached by job_runner before execute_signal()
+    # Keys: rsi, ema_spread, vwap_dev, volume_ratio, macd_hist, atr_pct (see learning/feature_store.py)
+    features:    Optional[dict] = field(default=None, repr=False, compare=False)
 
     @property
     def risk_per_share(self) -> float:

@@ -41,7 +41,7 @@ _trade_log = TradeLogger()
 
 
 def render() -> None:
-    st.title("⏮ Day Replay")
+    st.title(":material/history: Day Replay")
     st.caption(
         "Replay any past trading day candle-by-candle through all strategies. "
         "Uses real historical 5-min candles from yfinance."
@@ -91,7 +91,7 @@ def render() -> None:
             "on the Home page's live paper-trading dashboard."
         )
 
-    run_btn = st.button("▶ Run Replay", type="primary")
+    run_btn = st.button("Run Replay", icon=":material/play_arrow:", type="primary")
 
     if not run_btn:
         return
@@ -120,7 +120,7 @@ def render() -> None:
 
     # ── Metrics row ───────────────────────────────────────────────────
     net_pnl = result.net_pnl
-    pnl_delta = f"{'▲' if net_pnl >= 0 else '▼'} ₹{abs(net_pnl):,.0f}"
+    pnl_delta = f"{'Gain' if net_pnl >= 0 else 'Loss'} ₹{abs(net_pnl):,.0f}"
 
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("Starting Capital", f"₹{result.starting_capital:,.0f}")
@@ -132,7 +132,7 @@ def render() -> None:
     c5.metric("Win Rate",         f"{result.win_rate_pct:.0f}%")
 
     # ── Trade log ─────────────────────────────────────────────────────
-    st.subheader("📋 Trade Log")
+    st.subheader(":material/receipt_long: Trade Log")
 
     closed = [t for t in result.trades if t.get("exit_price")]
     if closed:
@@ -155,7 +155,7 @@ def render() -> None:
         st.info("No completed trades on this replay day.")
 
     # ── Candle activity log ───────────────────────────────────────────
-    st.subheader("📡 Candle Activity")
+    st.subheader(":material/timeline: Candle Activity")
     st.caption(
         "Every signal evaluated, candle by candle. "
         "Filter to just the highlights using the event filter below."

@@ -30,9 +30,44 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from loguru import logger
 from config.settings import VIRTUAL_CAPITAL
 from scheduler.bot_controller import get_controller
+
+
+def _startup_token_refresh() -> None:
+    """
+    Called once at startup. If the Kite token is missing or expired, attempt
+    a fully-automated login (ZERODHA_USER_ID + PASSWORD + TOTP_SECRET).
+    Falls back gracefully — never blocks the bot from starting.
+    """
+    import os
+    try:
+        import config.settings as _cfg
+        if _cfg.KITE_API_KEY and _cfg.KITE_ACCESS_TOKEN:
+            from kiteconnect import KiteConnect
+            kite = KiteConnect(api_key=_cfg.KITE_API_KEY)
+            kite.set_access_token(_cfg.KITE_ACCESS_TOKEN)
+            kite.profile()   # raises TokenException if expired
+            logger.info("Startup: Kite token is valid — no refresh needed.")
+            return
+    except Exception:
+        logger.info("Startup: Kite token missing or expired — attempting auto-login.")
+
+    try:
+        from scripts.auto_kite_login import auto_login
+        if auto_login():
+            logger.info("Startup: auto-login succeeded — token refreshed.")
+        else:
+            logger.warning(
+                "Startup: auto-login skipped (ZERODHA_* credentials not set). "
+                "Token will be refreshed via Telegram at 8:30 AM or run `make login` manually."
+            )
+    except Exception as exc:
+        logger.warning(f"Startup: auto-login error — {exc}")
 
 
 def main() -> None:
@@ -50,6 +85,11 @@ def main() -> None:
     args = parser.parse_args()
 
     logger.info("TreadingBot starting | mode=PAPER | no real money at risk")
+
+    # ── Startup: auto-refresh Kite token if expired / missing ────────────────
+    # This runs ONCE at startup so the bot never needs human intervention after
+    # deploy — Docker restarts, server reboots, etc. all handled automatically.
+    _startup_token_refresh()
 
     if args.dry_run:
         # Preview schedule without starting anything
@@ -69,7 +109,7 @@ def main() -> None:
 
     logger.info(msg)
     logger.info("Press Ctrl+C to stop and square off all positions.")
-    logger.info("Dashboard: streamlit run dashboard/app.py")
+    logger.info("Dashboard: http://localhost:3000  (React) | API: http://localhost:8000")
 
     def _shutdown(sig, frame):
         logger.info("Shutdown signal received — stopping bot...")

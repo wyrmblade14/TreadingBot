@@ -97,7 +97,7 @@ class OrderManager:
         # within 30 min of a close AND blocks opposite-direction trades all session.
         self._cooldown: dict[str, tuple[datetime, Action]] = {}
 
-    def execute_signal(self, signal: Signal) -> bool:
+    def execute_signal(self, signal: Signal) -> Optional[OpenTrade]:
         """
         Place an entry order for an approved signal.
 
@@ -105,15 +105,15 @@ class OrderManager:
             signal: A Risk Manager-approved Signal with quantity filled in.
 
         Returns:
-            True if order was placed and filled successfully, False otherwise.
+            The OpenTrade object if order was placed successfully, None otherwise.
         """
         with self._lock:
             return self._execute_signal_locked(signal)
 
-    def _execute_signal_locked(self, signal: Signal) -> bool:
+    def _execute_signal_locked(self, signal: Signal) -> Optional[OpenTrade]:
         """Inner implementation — must be called with self._lock held."""
         if signal.action == Action.HOLD:
-            return False
+            return None
 
         # Last-defence duplicate guard — if this symbol is already in _open_trades
         # (i.e. a concurrent thread slipped through the signal-key dedup), reject it.
@@ -121,12 +121,8 @@ class OrderManager:
             logger.debug(
                 f"[ORDER] {signal.symbol} already in _open_trades — skipping duplicate"
             )
-            return False
-
-        # Per-symbol cooldown: block re-entry within 30 min of any exit, and block
-        # opposite-direction entries for the entire session. Prevents the re-entry
-        # loop (same losing signal re-fires on the next tick after a fast SL hit)
-        # and stops two strategies fighting opposite directions on the same symbol.
+            return None
+        # ... rest of validation ...
         last = self._cooldown.get(signal.symbol)
         if last:
             last_exit_time, last_action = last
@@ -139,17 +135,17 @@ class OrderManager:
                         f"[ORDER] {signal.symbol} blocked — 30-min cooldown "
                         f"({elapsed_secs/60:.0f} min since last exit)"
                     )
-                    return False
+                    return None
                 if last_action != signal.action:  # opposite direction for same session
                     logger.info(
                         f"[ORDER] {signal.symbol} blocked — already traded "
                         f"{last_action.value} today, refusing opposite {signal.action.value}"
                     )
-                    return False
+                    return None
 
         if signal.quantity <= 0:
             logger.warning(f"OrderManager: Signal for {signal.symbol} has qty=0, skipping.")
-            return False
+            return None
 
         transaction = (
             TransactionType.BUY if signal.action == Action.BUY else TransactionType.SELL
@@ -172,7 +168,7 @@ class OrderManager:
                 f"OrderManager: Entry order not filled | {signal.symbol} | "
                 f"status={order.status} reason={order.rejection_reason}"
             )
-            return False
+            return None
 
         # Log the entry to the database
         trade_id = self._log.record_entry(
@@ -188,12 +184,11 @@ class OrderManager:
             trading_mode=self._mode,
         )
 
-        # Back-calculate ATR from SL distance: all strategies use SL = entry ± 1.5×ATR
-        # so ATR = |entry - stop_loss| / 1.5. Fallback to 0.5% of price if somehow zero.
+        # Back-calculate ATR from SL distance
         sl_distance = abs(order.filled_price - signal.stop_loss)
         entry_atr   = sl_distance / 1.5 if sl_distance > 0 else order.filled_price * 0.005
 
-        self._open_trades[signal.symbol] = OpenTrade(
+        trade = OpenTrade(
             trade_log_id=trade_id,
             symbol=signal.symbol,
             action=signal.action,
@@ -205,13 +200,29 @@ class OrderManager:
             entry_order_id=order.order_id,
             atr=round(entry_atr, 4),
         )
+        self._open_trades[signal.symbol] = trade
+
+        # Phase A self-learning: persist the indicator snapshot alongside the trade.
+        # signal.features is populated by job_runner before execute_signal() is called.
+        # Wrapped in try/except — a feature store failure must never abort an entry.
+        try:
+            from learning.feature_store import FeatureStore
+            if getattr(signal, "features", None) is not None:
+                FeatureStore().capture(
+                    trade_id=trade_id,
+                    symbol=signal.symbol,
+                    strategy=signal.strategy,
+                    indicator_features=signal.features,
+                )
+        except Exception as _fs_exc:
+            logger.debug(f"FeatureStore.capture skipped: {_fs_exc}")
 
         logger.info(
             f"Trade opened #{trade_id} | {signal.action.value} {signal.quantity}×"
             f"{signal.symbol} @ ₹{order.filled_price:.2f} | "
             f"sl=₹{signal.stop_loss:.2f} target=₹{signal.target:.2f}"
         )
-        return True
+        return trade
 
     def check_exits(self, symbol: str, current_price: float) -> Optional[float]:
         """
@@ -494,6 +505,22 @@ class OrderManager:
                 f"Position removed from tracker; P&L not persisted."
             )
             net_pnl = 0.0
+
+        # Phase A self-learning: label the feature row with the outcome.
+        # hold_minutes derived from opened_at → now IST.
+        try:
+            from learning.feature_store import FeatureStore
+            hold_mins = int(
+                (datetime.now(IST) - trade.opened_at).total_seconds() / 60
+            )
+            FeatureStore().label(
+                trade_id=trade.trade_log_id,
+                pnl=net_pnl,
+                hold_minutes=hold_mins,
+            )
+        except Exception as _fs_exc:
+            logger.debug(f"FeatureStore.label skipped: {_fs_exc}")
+
         finally:
             # Always remove from open trades — even if DB logging fails, we must
             # not leave a ghost position that triggers repeated spurious orders.
@@ -576,3 +603,26 @@ class OrderManager:
 
     def has_open_trade(self, symbol: str) -> bool:
         return symbol in self._open_trades
+
+    def get_open_trade(self, symbol: str) -> Optional[OpenTrade]:
+        """Return the OpenTrade object for a symbol, or None if not open."""
+        with self._lock:
+            return self._open_trades.get(symbol)
+
+    def set_stop_loss(self, symbol: str, new_sl: float) -> bool:
+        """
+        Update the stop-loss for an open trade. Thread-safe.
+        Returns True if updated, False if no trade is open for that symbol.
+        Called from Telegram /setsl command.
+        """
+        with self._lock:
+            trade = self._open_trades.get(symbol)
+            if trade is None:
+                return False
+            old_sl = trade.stop_loss
+            trade.stop_loss = round(new_sl, 2)
+            logger.info(
+                f"OrderManager: SL updated for {symbol} | "
+                f"old=₹{old_sl:.2f} → new=₹{new_sl:.2f} (via Telegram)"
+            )
+            return True

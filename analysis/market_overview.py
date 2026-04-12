@@ -16,6 +16,7 @@ All data is fetched via yfinance (free, no API key needed).
 
 from __future__ import annotations
 
+import time as _time
 from dataclasses import dataclass
 
 import pandas as pd
@@ -38,9 +39,16 @@ class MarketOverview:
     total_symbols:  int
 
 
+_CACHE_TTL = 300  # 5 minutes
+_cache: dict = {
+    "timestamp": 0.0,
+    "overview": None
+}
+
+
 def get_nifty_overview(top_n: int = 5) -> MarketOverview | None:
     """
-    Fetch NIFTY50 index level and breadth data.
+    Fetch NIFTY50 index level and breadth data with 5-minute TTL cache.
 
     Args:
         top_n: Number of top gainers/losers to return
@@ -48,6 +56,14 @@ def get_nifty_overview(top_n: int = 5) -> MarketOverview | None:
     Returns:
         MarketOverview dataclass, or None if data fetch failed.
     """
+    global _cache
+    now_ts = _time.monotonic()
+
+    if now_ts - _cache["timestamp"] < _CACHE_TTL and _cache["overview"] is not None:
+        return _cache["overview"]
+
+    _cache["timestamp"] = now_ts
+
     try:
         # Fetch NIFTY50 index
         nifty = yf.Ticker("^NSEI")
@@ -98,7 +114,7 @@ def get_nifty_overview(top_n: int = 5) -> MarketOverview | None:
         top_gainers = sorted_changes[:top_n]
         top_losers  = sorted_changes[-top_n:][::-1]
 
-        return MarketOverview(
+        overview = MarketOverview(
             nifty_price=round(nifty_close, 2),
             nifty_change=round(nifty_chg, 2),
             nifty_change_pct=round(nifty_pct, 2),
@@ -109,6 +125,8 @@ def get_nifty_overview(top_n: int = 5) -> MarketOverview | None:
             top_losers=top_losers,
             total_symbols=len(changes),
         )
+        _cache["overview"] = overview
+        return overview
 
     except Exception as e:
         from loguru import logger

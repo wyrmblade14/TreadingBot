@@ -20,7 +20,7 @@ If token/chat_id are not set, all notify_*() calls are silent no-ops.
 What's "intelligent" about this notifier:
   • HTML formatting — bold text actually renders bold on your phone
   • Trade context — entry messages include trade # today and running day P&L
-  • Exit context — cumulative P&L, RR achieved, whether SL or target was hit
+  • Exit context — cumulative P&L, RR achieved, duration, and reason
   • Pre-market briefing — VIX, regime, NIFTY direction before the session starts
   • Adaptive mode alerts — notified when bot shifts NORMAL→DEFENSIVE→HALTED
   • Rich EOD — win rate, profit factor, streak, best/worst trade, per-strategy summary
@@ -34,12 +34,13 @@ import csv
 import io
 import threading
 import time
+from datetime import datetime
 from typing import Optional
 
 import requests
 from loguru import logger
 
-from config.settings import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from config.settings import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, IST
 
 
 def _h(text: str) -> str:
@@ -121,35 +122,55 @@ class TelegramNotifier:
         trade_num:   int   = 0,    # trade # today (1, 2, 3 …)
         day_pnl:     float = 0.0,  # running day P&L before this trade
         adaptive_mode: str = "",   # NORMAL / DEFENSIVE / HALTED
+        judgment:    str = "",     # Fundamental judgment
+        score:       float = 0.0,  # Fundamental score
+        regime:      str = "",     # Market regime
+        direction:   str = "",     # Market direction
     ) -> None:
         """Alert: new trade entered — includes day context."""
         if not self._rate_ok((symbol, "entry")):
             return
 
-        icon = "📈" if action == "BUY" else "📉"
+        icon = "🚀" if action == "BUY" else "🔻"
         risk_ps   = abs(price - sl)
         reward_ps = abs(target - price)
-        rr        = round(reward_ps / risk_ps, 1) if risk_ps else 0
+        rr        = round(reward_ps / risk_ps, 2) if risk_ps else 0
         max_loss  = risk_ps * qty
 
         # Day context line
         ctx_parts = []
         if trade_num:
-            ctx_parts.append(f"Trade #{trade_num} today")
+            ctx_parts.append(f"Trade #{trade_num}")
         if day_pnl != 0.0:
             sign = "+" if day_pnl >= 0 else ""
-            ctx_parts.append(f"Day P&amp;L so far: {sign}₹{day_pnl:,.0f}")
+            ctx_parts.append(f"Day: {sign}₹{day_pnl:,.0f}")
         if adaptive_mode:
             ctx_parts.append(f"Mode: {adaptive_mode}")
         context_line = "  |  ".join(ctx_parts)
 
+        # Market context line
+        mkt_parts = []
+        if regime:
+            mkt_parts.append(f"Regime: {regime}")
+        if direction:
+            mkt_parts.append(f"Dir: {direction}")
+        market_line = "  |  ".join(mkt_parts)
+
         lines = [
             f"{icon} <b>{_h(action)} {_h(symbol)}</b>",
-            f"Entry    <code>₹{price:,.2f}</code>  ×  {qty} shares",
-            f"Stop     <code>₹{sl:,.2f}</code>  (max loss ₹{max_loss:,.0f})",
+            f"Entry    <code>₹{price:,.2f}</code>  ×  {qty}",
+            f"Stop     <code>₹{sl:,.2f}</code>  (Risk ₹{max_loss:,.0f})",
             f"Target   <code>₹{target:,.2f}</code>  (RR {rr}:1)",
             f"Strategy <i>{_h(strategy)}</i>",
         ]
+        
+        if judgment or score:
+            score_str = f" ({score:.1f}/5)" if score else ""
+            lines.append(f"Quality  <i>{_h(judgment)}{score_str}</i>")
+            
+        if market_line:
+            lines.append(f"Market   <i>{market_line}</i>")
+            
         if context_line:
             lines.append(f"<i>{context_line}</i>")
 
@@ -167,6 +188,8 @@ class TelegramNotifier:
         day_pnl:      float = 0.0,  # cumulative day P&L AFTER this trade
         consec_wins:  int   = 0,
         consec_losses:int   = 0,
+        strategy:     str   = "",
+        opened_at:    Optional[datetime] = None,
         # legacy kwarg — some callers pass price= instead of exit_price=
         price: float = 0.0,
     ) -> None:
@@ -175,27 +198,55 @@ class TelegramNotifier:
             return
 
         ep = exit_price or price
-        icon = "✅" if pnl >= 0 else "❌"
+        icon = "💰" if pnl > 0 else ("📉" if pnl < 0 else "⚖️")
         sign = "+" if pnl >= 0 else ""
-        result_word = "WIN" if pnl > 0 else ("LOSS" if pnl < 0 else "SCRATCH")
+        result_word = "PROFIT" if pnl > 0 else ("LOSS" if pnl < 0 else "SCRATCH")
 
-        # RR achieved (if we know entry)
-        rr_line = ""
+        # RR achieved calculation
+        rr_achieved = 0.0
         if entry_price and ep:
             direction = 1 if action in ("BUY", "LONG") else -1
-            achieved = (ep - entry_price) * direction
-            risk_taken = abs(entry_price - 0) if not entry_price else None
-            rr_line = ""   # skip — entry_price not always reliable here
+            gross_profit_ps = (ep - entry_price) * direction
+            # We assume initial risk was 1.5 * ATR or entry-sl from when it was opened
+            # But simpler is to just show points gained/lost vs price
+            points_pct = (gross_profit_ps / entry_price) * 100
+            rr_line = f"Outcome  <code>{sign}{points_pct:.2f}%</code>"
+        else:
+            rr_line = ""
+
+        # Duration calculation
+        duration_str = ""
+        if opened_at:
+            now = datetime.now(IST)
+            diff = now - opened_at
+            minutes = int(diff.total_seconds() / 60)
+            if minutes < 60:
+                duration_str = f"{minutes}m"
+            else:
+                duration_str = f"{minutes // 60}h {minutes % 60}m"
 
         lines = [
-            f"{icon} <b>{_h(symbol)} closed — {result_word}</b>",
-            f"Exit     <code>₹{ep:,.2f}</code>  →  {sign}₹{pnl:,.0f}",
+            f"{icon} <b>{_h(symbol)} Exit — {result_word}</b>",
+            f"Exit     <code>₹{ep:,.2f}</code>  →  <b>{sign}₹{pnl:,.1f}</b>",
         ]
+        
+        if rr_line:
+            lines.append(rr_line)
+        if strategy:
+            lines.append(f"Strategy <i>{_h(strategy)}</i>")
         if reason:
             lines.append(f"Reason   <i>{_h(reason)}</i>")
+        
+        ctx_parts = []
         if day_pnl != 0.0:
             day_sign = "+" if day_pnl >= 0 else ""
-            lines.append(f"Day P&amp;L  <code>{day_sign}₹{day_pnl:,.0f}</code>")
+            ctx_parts.append(f"Day: {day_sign}₹{day_pnl:,.0f}")
+        if duration_str:
+            ctx_parts.append(f"Dur: {duration_str}")
+        
+        if ctx_parts:
+            lines.append(f"<i>{'  |  '.join(ctx_parts)}</i>")
+
         if consec_wins >= 2:
             lines.append(f"🔥 <i>{consec_wins} wins in a row</i>")
         if consec_losses >= 2:
@@ -245,6 +296,21 @@ class TelegramNotifier:
         ]
         self.send("\n".join(lines))
 
+    def notify_watchlist_refresh(
+        self,
+        symbols: list[str],
+        source:  str,
+    ) -> None:
+        """Alert: daily watchlist selected/refreshed."""
+        if not self._once_today(f"watchlist_{source}"):
+            return
+            
+        lines = [
+            f"📋 <b>Daily Watchlist</b> ({source})",
+            f"<code>{', '.join(symbols)}</code>"
+        ]
+        self.send("\n".join(lines))
+
     def notify_adaptive_change(
         self,
         old_mode: str,
@@ -287,6 +353,16 @@ class TelegramNotifier:
             f"Watchlist  {watchlist_size} NIFTY50 symbols"
         )
 
+    def notify_market_closed(self, reason: str) -> None:
+        """Alert: bot started but market is closed."""
+        if not self._once_today("market_closed"):
+            return
+        self.send(
+            f"😴 <b>TreadingBot (Idle)</b>\n"
+            f"Market is closed today.\n"
+            f"Reason: <i>{_h(reason)}</i>"
+        )
+
     def notify_premarket_catalysts(
         self,
         bullish: list,
@@ -325,6 +401,12 @@ class TelegramNotifier:
 
         self.send("\n".join(lines))
 
+    def notify_error(self, message: str) -> None:
+        """Alert: critical system error."""
+        if not self._rate_ok(("error", message[:20])):
+            return
+        self.send(f"⚠️ <b>System Error</b>\n<code>{_h(message)}</code>")
+
     def notify_bot_stopped(self) -> None:
         """Alert: scheduler stopped."""
         self.send("⏹ <b>TreadingBot Stopped</b> — all positions squared off.")
@@ -352,8 +434,9 @@ class TelegramNotifier:
             )
             return
 
-        emoji = "🟢" if net_pnl >= 0 else "🔴"
+        emoji = "🏁"
         sign  = "+" if net_pnl >= 0 else ""
+        pnl_color = "🟢" if net_pnl > 0 else ("🔴" if net_pnl < 0 else "🟡")
 
         # Compute stats from closed trades
         closed = [t for t in trades if t.get("net_pnl") is not None]
@@ -404,7 +487,7 @@ class TelegramNotifier:
             f"{emoji} <b>EOD Report — {trade_date}</b>",
             f"Trades    {num_trades}  ({len(wins)}W / {len(losses)}L)",
             f"Win rate  {win_rate:.0f}%",
-            f"Net P&amp;L   <code>{sign}₹{net_pnl:,.0f}</code>",
+            f"Net P&amp;L   {pnl_color} <b>{sign}₹{net_pnl:,.0f}</b>",
             f"Cash      <code>₹{cash:,.0f}</code>",
         ]
         if pf:
@@ -416,14 +499,21 @@ class TelegramNotifier:
             lines.append(f"<i>{best_str}</i>")
         if worst_str:
             lines.append(f"<i>{worst_str}</i>")
+            
         if len(strategies) > 1:
+            lines.append("")
+            # Find best and worst strategy
+            best_strat = max(strategies.items(), key=lambda x: x[1]["pnl"])
+            worst_strat = min(strategies.items(), key=lambda x: x[1]["pnl"])
+            lines.append(f"⭐ Best strategy: <i>{best_strat[0]}</i> (+₹{best_strat[1]['pnl']:,.0f})")
+
             lines.append("")
             for sname, stats in sorted(strategies.items()):
                 wr = stats["wins"] / stats["total"] * 100 if stats["total"] else 0
                 sp = stats["pnl"]
                 ss = "+" if sp >= 0 else ""
                 lines.append(
-                    f"<code>{_h(sname[:18]):<18}</code>"
+                    f"<code>{_h(sname[:14]):<14}</code>"
                     f"  {stats['wins']}/{stats['total']}  {ss}₹{sp:,.0f}"
                 )
 

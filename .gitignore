@@ -1,6 +1,8 @@
 # Secrets — NEVER commit these
 .env
 *.env
+.next/
+node_modules/
 
 # Python
 __pycache__/

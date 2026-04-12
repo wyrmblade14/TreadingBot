@@ -24,7 +24,7 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 15 | Bollinger Band Mean Reversion strategy | M | M | Ph2 enh | DONE |
 | 16 | Gap & Go morning gap strategy | M | M | Ph2 enh | DONE |
 | 17 | VWAP Retest Entry strategy | H | M | Ph2 enh | Idea |
-| 18 | Sector rotation / market breadth signal bias | M | M | Ph5 enh | Idea |
+| 18 | Sector rotation / market breadth signal bias | M | M | Ph5 enh | DONE |
 | 19 | Trailing stop after 1× ATR profit | H | M | Ph3 enh | DONE |
 | 20 | Time-based force-exit at 2:00 PM | M | L | Ph2 enh | DONE |
 | 21 | Volatility-scaled position sizing | M | M | Ph2 enh | Idea |
@@ -67,6 +67,9 @@ Status: Idea | In Progress | DONE | DROPPED(reason)
 | 58 | Thread-safe signal dedup — add `_last_signal_lock` around `_last_signal_key` check+add in `signal_check()` | H | L | Ph6 bug | DONE |
 | 59 | Per-symbol cooldown after exit — 30-min re-entry block + same-session direction lock in `OrderManager` | H | L | Ph6 bug | DONE |
 | 60 | Regime filter in signal loop — suppress counter-trend signals when `MarketDirection.UP/DOWN + MarketRegime.TRENDING` | H | L | Ph6 enh | DONE |
+| 61 | Dashboard UI modernization — minimalist visual system + replace emoji labels with Material icons | M | M | Ph5 enh | DONE |
+| 62 | Migrate dashboard UI from Streamlit to Next.js React frontend | H | H | Ph5 enh | DONE |
+| 63 | Tighten Docker build context with stronger `.dockerignore` rules for images | M | L | Ops | DONE |
 
 ---
 

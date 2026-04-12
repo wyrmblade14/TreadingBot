@@ -17,16 +17,16 @@ import config.settings as cfg
 
 
 def render() -> None:
-    st.title("⚙️ Settings & Configuration")
+    st.title(":material/settings: Settings & Configuration")
     st.caption("Read-only view of all active settings. Edit `config/settings.py` to change values.")
 
     # ── Trading mode ──────────────────────────────────────────────────
     st.subheader("Trading Mode")
     mode = getattr(cfg, "TRADING_MODE", "paper")
     if mode == "paper":
-        st.success("**PAPER TRADING MODE** 🟡 — No real money is at risk. All orders are simulated.")
+        st.success("**PAPER TRADING MODE** — No real money is at risk. All orders are simulated.")
     else:
-        st.error("**LIVE TRADING MODE** 🔴 — Real orders will be placed with Zerodha!")
+        st.error("**LIVE TRADING MODE** — Real orders will be placed with Zerodha!")
         st.warning("Switch back to paper mode by setting `TRADING_MODE = 'paper'` in `config/settings.py`.")
 
     st.markdown("---")
@@ -73,7 +73,7 @@ def render() -> None:
     st.markdown("---")
 
     # ── How to go live ────────────────────────────────────────────────
-    with st.expander("📖 How to switch to live trading (read this carefully first)"):
+    with st.expander(":material/menu_book: How to switch to live trading (read this carefully first)"):
         st.markdown("""
 ### Before going live, make sure:
 - [ ] You have paper traded for **at least 30 trading days** (about 6 weeks)
@@ -96,6 +96,6 @@ def render() -> None:
 4. **Start with ₹10,000–₹20,000 maximum**. Do NOT deploy full capital immediately.
 5. Run paper mode in parallel for the first 2 weeks to compare results.
 
-> ⚠️ The paper broker and live broker implement the same `BaseBroker` interface.
+> The paper broker and live broker implement the same `BaseBroker` interface.
 > Switching is just that one config line — no other code changes needed.
         """)

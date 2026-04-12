@@ -1,32 +1,54 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# TreadingBot — Docker image
-#
-# Build:   docker build -t treadingbot .
-# Run:     docker-compose up -d   (see docker-compose.yml)
-#
-# Python version: matches project requirement (3.14).
-# If python:3.14-slim is not yet on Docker Hub, use python:3.13-slim as fallback.
+# TreadingBot — Optimized Multi-stage Docker image
 # ──────────────────────────────────────────────────────────────────────────────
 
-FROM python:3.14-slim
+# Stage 1: Build & Dependencies
+FROM python:3.14-slim AS builder
 
-# Set IST timezone so APScheduler cron jobs fire at the correct wall-clock time
-ENV TZ=Asia/Kolkata
-RUN apt-get update && apt-get install -y --no-install-recommends tzdata && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
-    rm -rf /var/lib/apt/lists/*
+# Prevent Python from writing .pyc files and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 WORKDIR /app
 
-# Install Python dependencies first (layer cached unless requirements change)
+# Install build dependencies for C-extensions (like psycopg2 or numpy if needed)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies into a temporary directory
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --user -r requirements.txt
+
+
+# Stage 2: Runtime
+FROM python:3.14-slim AS runtime
+
+# Set IST timezone
+ENV TZ=Asia/Kolkata
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tzdata \
+    libpq5 \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the installed packages from the builder stage
+COPY --from=builder /root/.local /root/.local
+
+# Ensure /root/.local/bin is in PATH
+ENV PATH=/root/.local/bin:$PATH
 
 # Copy the rest of the project
 COPY . .
 
-# Ensure the logs directory exists (will be overridden by volume mount)
-RUN mkdir -p logs
+# Ensure necessary directories exist
+RUN mkdir -p logs && chmod +x scripts/*.sh 2>/dev/null || true
 
-# Make shell scripts executable
-RUN chmod +x scripts/start_bot.sh scripts/start_dashboard.sh 2>/dev/null || true
+# Default command can be overridden in docker-compose
+CMD ["python", "scripts/run_bot.py"]

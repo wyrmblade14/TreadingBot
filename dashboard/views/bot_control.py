@@ -88,7 +88,7 @@ def _live_log_fragment() -> None:
     if is_running:
         pid = status.get("pid")
         st.success(
-            f"🟢 **BOT RUNNING**  "
+            f"**BOT RUNNING**  "
             f"| PID: {pid}  "
             f"| Since: {status['started_at']}  "
             f"| Watchlist: {status['watchlist_size']} symbols  "
@@ -96,7 +96,7 @@ def _live_log_fragment() -> None:
         )
     else:
         st.warning(
-            "🔴 **BOT STOPPED**  |  "
+            "**BOT STOPPED**  |  "
             "Run `python scripts/run_bot.py` in the terminal to start."
         )
 
@@ -110,19 +110,19 @@ def _live_log_fragment() -> None:
 
         if mode == AdaptiveMode.HALTED:
             mode_colour = "#EF5350"
-            mode_icon   = "🔴"
+            mode_label  = "HALTED"
         elif mode == AdaptiveMode.DEFENSIVE:
             mode_colour = "#FFB74D"
-            mode_icon   = "🟡"
+            mode_label  = "DEFENSIVE"
         else:
             mode_colour = "#4CAF50"
-            mode_icon   = "🟢"
+            mode_label  = "NORMAL"
 
         st.markdown(
             f'<div style="background:#1e1e2e;border:1px solid {mode_colour};'
             f'border-radius:8px;padding:12px 16px;margin-bottom:8px">'
             f'<span style="color:{mode_colour};font-size:16px;font-weight:600">'
-            f'{mode_icon} Adaptive Mode: {mode}</span><br>'
+            f'Adaptive Mode: {mode_label}</span><br>'
             f'<span style="color:#aaa;font-size:12px">{adp.get("reason","—")}</span>'
             f"</div>",
             unsafe_allow_html=True,
@@ -151,10 +151,14 @@ def _live_log_fragment() -> None:
 
     hdr_col, refresh_col = st.columns([5, 1])
     with hdr_col:
-        st.subheader("📋 Live Log" if is_running else "📋 Log")
+        st.subheader(
+            ":material/description: Live Log"
+            if is_running
+            else ":material/description: Log"
+        )
     with refresh_col:
         st.write("")
-        if st.button("🔄 Refresh", use_container_width=True):
+        if st.button("Refresh", icon=":material/refresh:", use_container_width=True):
             st.rerun()
 
     if is_running:
@@ -199,23 +203,19 @@ def _render_strategy_health() -> None:
         st.error(
             "One or more strategies are degraded. "
             "Consider pausing them and reviewing recent market conditions.",
-            icon="⚠️",
+            icon=":material/warning:",
         )
 
     cols = st.columns(len(healths))
     for col, h in zip(cols, healths):
         if h.is_degraded:
-            colour = "#EF5350"
-            icon   = "🔴"
+            status = "Critical"
         elif not h.has_enough_trades:
-            colour = "#888888"
-            icon   = "🟡"
+            status = "Insufficient Data"
         elif h.drop_pct and h.drop_pct > 0:
-            colour = "#FFB74D"
-            icon   = "🟠"
+            status = "Watch"
         else:
-            colour = "#4CAF50"
-            icon   = "🟢"
+            status = "Healthy"
 
         with col:
             live_str = (
@@ -229,7 +229,7 @@ def _render_strategy_health() -> None:
                 else f"{h.trade_count}/{h.min_trades} trades"
             )
             st.metric(
-                label=f"{icon} {h.strategy.replace('_', ' ').title()}",
+                label=f"{h.strategy.replace('_', ' ').title()} ({status})",
                 value=live_str,
                 delta=delta_str,
                 delta_color="inverse" if h.is_degraded else "normal",
@@ -251,7 +251,7 @@ def render() -> None:
 
     # ── Run History (static — reload page to refresh) ─────────────────
     st.markdown("---")
-    st.subheader("📁 Run History")
+    st.subheader(":material/folder_open: Run History")
     st.caption("One log file is created per bot run. Click any run to read its full log.")
 
     log_files = sorted(_RUNS_DIR.glob("*.log"), reverse=True) if _RUNS_DIR.exists() else []
@@ -268,9 +268,9 @@ def render() -> None:
         size_kb   = log_file.stat().st_size / 1024
         label     = log_file.stem.replace("_", "  ", 1)   # 2026-03-27  09-00-00
         is_active = active_log_path and Path(active_log_path) == log_file
-        tag       = "  🟢 ACTIVE" if is_active else ""
+        tag       = "  ACTIVE" if is_active else ""
 
-        with st.expander(f"📄 {label}   ({size_kb:.1f} KB){tag}"):
+        with st.expander(f"Log File {label}   ({size_kb:.1f} KB){tag}"):
             _render_log_content(log_file)
 
     # ── Commented-out start/stop controls (kept for future re-enabling) ──
@@ -280,7 +280,7 @@ def render() -> None:
     # from data.instruments import NIFTY50_INSTRUMENTS
     # col_start, col_stop = st.columns(2)
     # with col_start:
-    #     st.subheader("▶ Start Bot")
+    #     st.subheader("Start Bot")
     #     max_symbols = len(NIFTY50_INSTRUMENTS)
     #     watchlist_size = st.slider("Watchlist size", 1, max_symbols,
     #                                value=status.get("watchlist_size", 10),
@@ -288,7 +288,7 @@ def render() -> None:
     #     capital = st.number_input("Starting capital (₹)",
     #                               value=int(status.get("capital", VIRTUAL_CAPITAL)),
     #                               step=10_000, min_value=10_000, disabled=is_running)
-    #     if st.button("▶ Start Bot", type="primary", disabled=is_running,
+    #     if st.button("Start Bot", type="primary", disabled=is_running,
     #                  use_container_width=True):
     #         with st.spinner("Starting scheduler…"):
     #             ok, msg = ctrl.start(watchlist_size=watchlist_size, capital=float(capital))
@@ -299,10 +299,10 @@ def render() -> None:
     #             st.warning(msg)
     #
     # with col_stop:
-    #     st.subheader("⏹ Stop Bot")
+    #     st.subheader("Stop Bot")
     #     st.markdown("Stopping squares off all open positions and shuts the scheduler.")
     #     st.write("")
-    #     if st.button("⏹ Stop Bot", type="secondary", disabled=not is_running,
+    #     if st.button("Stop Bot", type="secondary", disabled=not is_running,
     #                  use_container_width=True):
     #         with st.spinner("Stopping…"):
     #             ok, msg = ctrl.stop()

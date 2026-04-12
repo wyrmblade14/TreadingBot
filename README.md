@@ -16,6 +16,14 @@ Runs in **paper trading mode** by default — no real money at risk until you're
 
 ---
 
+## 🤖 For AI Agents (Claude, Gemini, etc.)
+This project uses a **Universal AI Agent Protocol** for seamless context handoff.
+1.  **Read [AGENT_RULES.md](AGENT_RULES.md)** first for session-tracking and handoff instructions.
+2.  **Read [AGENTS.md](AGENTS.md)** for technical architecture, commands, and project context.
+3.  **Check [memory/MEMORY.md](memory/MEMORY.md)** for the current session status and handoff note.
+
+---
+
 ## Quick Start
 
 ```bash
@@ -38,7 +46,7 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env — set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (optional)
 
-# 3. Run the dashboard
+# 3. Run the legacy Streamlit dashboard
 streamlit run dashboard/app.py
 # Opens at http://localhost:8501
 
@@ -48,6 +56,51 @@ python scripts/run_bot.py               # start paper trading
 # Optional: choose how many fundamentals-ranked NIFTY50 stocks to scan
 python scripts/run_bot.py --watchlist 10
 ```
+
+---
+
+## React Dashboard
+
+The Next.js React dashboard is the new UI path. Streamlit remains available as the legacy dashboard at `http://localhost:8501`.
+
+Run the database:
+
+```bash
+cp .env.example .env
+docker compose up -d postgres
+```
+
+Run the Python JSON API from the host:
+
+```bash
+source venv/bin/activate
+DATABASE_URL=postgresql://treadingbot:changeme_before_production@localhost:5432/treadingbot \
+  DASHBOARD_API_HOST=0.0.0.0 \
+  DASHBOARD_API_PORT=8000 \
+  python scripts/run_react_dashboard.py
+```
+
+Run the Next.js dev server:
+
+```bash
+cd web
+npm install
+NEXT_PUBLIC_DASHBOARD_API_URL=http://localhost:8000 npm run dev:local
+```
+
+Open `http://localhost:3000`.
+
+Docker Compose can run the full dashboard stack:
+
+```bash
+docker compose up -d postgres dashboard-api react-dashboard
+```
+
+Services:
+- `postgres` stores the trade log and dashboard data.
+- `dashboard-api` exposes the Python JSON API on `http://localhost:8000`.
+- `react-dashboard` serves the Next.js UI on `http://localhost:3000`.
+- `dashboard` is the legacy Streamlit UI on `http://localhost:8501`.
 
 ---
 
@@ -122,7 +175,8 @@ TreadingBot/
 │   └── regime_detector.py       # Trending/ranging/volatile market regime
 │
 ├── dashboard/
-│   ├── app.py               # Streamlit entry point
+│   ├── app.py               # Legacy Streamlit entry point
+│   ├── api/                 # JSON API for the React dashboard
 │   └── views/
 │       ├── home.py          # Portfolio P&L, open positions, today's trades
 │       ├── signals.py       # Live signal scanner with charts
@@ -135,10 +189,17 @@ TreadingBot/
 │       ├── bot_control.py   # Start/stop bot, activity log, next job schedule
 │       └── settings.py      # Read-only config view + go-live guide
 │
+├── web/
+│   ├── app/                 # Next.js app-router pages
+│   ├── components/          # React UI components
+│   ├── lib/                 # API clients and shared frontend helpers
+│   └── package.json         # React dashboard scripts and dependencies
+│
 ├── scripts/
 │   ├── run_bot.py           # CLI entry point for the scheduler
 │   ├── run_backtest.py      # CLI for running backtests
-│   ├── run_dashboard.py     # Convenience launcher for Streamlit
+│   ├── run_dashboard.py     # Convenience launcher for legacy Streamlit
+│   ├── run_react_dashboard.py # Python JSON API for the React dashboard
 │   ├── run_replay.py        # Replay one market day
 │   └── schedule_bot.py      # Cron/Task Scheduler installer
 │

@@ -96,9 +96,16 @@ class WalkForwardResult:
 
     @property
     def avg_profit_factor(self) -> float:
-        pfs = [w.metrics.profit_factor for w in self.windows
-               if w.metrics.num_trades > 0 and w.metrics.profit_factor != float("inf")]
-        return round(sum(pfs) / len(pfs), 2) if pfs else 0.0
+        all_pfs = [w.metrics.profit_factor for w in self.windows if w.metrics.num_trades > 0]
+        if not all_pfs:
+            return 0.0
+        
+        # Filter out inf for averaging finite values
+        finite_pfs = [pf for pf in all_pfs if pf != float("inf")]
+        if not finite_pfs:
+            return float("inf")
+            
+        return round(sum(finite_pfs) / len(finite_pfs), 2)
 
     @property
     def avg_return_pct(self) -> float:
@@ -215,11 +222,18 @@ class WalkForwardEngine:
                 f"train {train_start}->{train_end} | test {test_start}->{test_end}"
             )
             try:
+                # We fetch data from train_start to include a warmup period for indicators,
+                # but we only evaluate performance on trades that enter during the test period.
                 bt_result = engine.run(
                     symbol=symbol,
-                    start=str(test_start),
+                    start=str(train_start),
                     end=str(test_end),
                 )
+                # Filter trades to only include those that entered during the test period
+                bt_result.trades = [
+                    t for t in bt_result.trades
+                    if t.entry_time.date() >= test_start
+                ]
             except (ValueError, Exception) as exc:
                 logger.warning(f"  Window {i} skipped — data fetch failed: {exc}")
                 continue

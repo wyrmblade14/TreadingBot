@@ -96,6 +96,8 @@ def _on_tick_exit(symbol: str, price: float) -> None:
     """
     if _order_mgr is None or symbol not in _order_mgr.open_symbols:
         return
+    # Get the trade info before checking exit (as check_exits closes it)
+    trade = _order_mgr.get_open_trade(symbol)
     if _broker:
         _broker.update_ltp(symbol, price)
     pnl = _order_mgr.check_exits(symbol, price)
@@ -108,12 +110,15 @@ def _on_tick_exit(symbol: str, price: float) -> None:
             )
             get_notifier().notify_exit(
                 symbol=symbol,
-                action="EXIT",
+                action=trade.action.value if trade else "EXIT",
                 exit_price=price,
                 pnl=pnl,
                 reason="SL/target hit (tick)",
                 day_pnl=_day_pnl_exit,
                 consec_losses=_risk_mgr.state.consecutive_losses,
+                entry_price=trade.entry_price if trade else 0.0,
+                strategy=trade.strategy if trade else "",
+                opened_at=trade.opened_at if trade else None,
             )
         except Exception:
             pass
@@ -223,6 +228,80 @@ def _is_market_day() -> bool:
     return True
 
 
+def kite_login_reminder() -> None:
+    """
+    08:30 — Check Kite token validity and prompt via Telegram if refresh needed.
+
+    Kite access_tokens expire every midnight (SEBI rule). This job fires at
+    8:30 AM on trading days, before the 9:00 AM pre-market scan needs live data.
+
+    Flow:
+      1. Skip on non-trading days (holidays / weekends).
+      2. If token is already valid → send a brief "token OK" confirmation and return.
+      3. If token is missing or expired → send the /kite_login prompt to Telegram.
+         The user taps the URL on their phone, logs in, pastes the redirect URL
+         back to Telegram, and the handler saves the fresh token.
+
+    Why check validity rather than always prompting?
+      If the bot restarts mid-day (e.g. after a deploy), the token in .env is
+      still valid. Prompting unnecessarily would be confusing.
+    """
+    if not _is_market_day():
+        return
+
+    from notifications.telegram_command_handler import get_command_handler, send_login_prompt
+
+    handler = get_command_handler()
+    if not handler._enabled:
+        logger.info(
+            "Kite login reminder: Telegram not configured — skipping. "
+            "Run `make login` manually to refresh the token."
+        )
+        return
+
+    # ── Check whether the current token is still valid ────────────────
+    token_valid = False
+    try:
+        import config.settings as _cfg
+        if _cfg.KITE_API_KEY and _cfg.KITE_ACCESS_TOKEN:
+            from kiteconnect import KiteConnect
+            kite = KiteConnect(api_key=_cfg.KITE_API_KEY)
+            kite.set_access_token(_cfg.KITE_ACCESS_TOKEN)
+            kite.profile()          # raises TokenException if expired
+            token_valid = True
+    except Exception:
+        token_valid = False
+
+    if token_valid:
+        logger.info("Kite login reminder: token still valid — no refresh needed.")
+        handler._send(
+            "✅ <b>Kite token valid</b> — no refresh needed today.\n"
+            "<i>Markets open at 9:15 AM. Send /status for a live snapshot.</i>"
+        )
+        return
+
+    # ── Token missing or expired — try fully automated login first ───
+    logger.info("Kite login reminder: token expired or missing — attempting auto-login.")
+    try:
+        from scripts.auto_kite_login import auto_login
+        success = auto_login()
+    except Exception as _al_exc:
+        logger.debug(f"auto_login import/call error: {_al_exc}")
+        success = False
+
+    if success:
+        logger.info("Kite login reminder: auto-login succeeded — token refreshed, no action needed.")
+        handler._send(
+            "✅ <b>Kite token auto-refreshed</b>\n"
+            "<i>Automated login completed. Markets open at 9:15 AM.</i>"
+        )
+        return
+
+    # Auto-login not configured or failed — fall back to Telegram prompt
+    logger.info("Kite login reminder: auto-login unavailable — prompting via Telegram.")
+    send_login_prompt()
+
+
 def pre_market_scan() -> None:
     """09:00 — Log market overview before session opens."""
     if not _is_market_day():
@@ -234,6 +313,12 @@ def pre_market_scan() -> None:
     # Fundamentals are slow-moving, so this runs once pre-market and then the
     # selected watchlist is reused throughout the session.
     _refresh_daily_watchlist()
+
+    if _watchlist:
+        get_notifier().notify_watchlist_refresh(
+            symbols=_watchlist,
+            source=_watchlist_selection.source if _watchlist_selection else "NIFTY50"
+        )
 
     overview = get_nifty_overview(top_n=3)
     if overview:
@@ -278,6 +363,7 @@ def pre_market_scan() -> None:
             )
     except Exception as exc:
         logger.warning(f"VIX fetch failed: {exc}")
+        get_notifier().notify_error(f"Pre-market VIX/Regime fetch failed: {exc}")
 
     # ── Catalyst scan ─────────────────────────────────────────────────
     # Check NSE announcements + news from yesterday for each watchlist symbol.
@@ -295,6 +381,7 @@ def pre_market_scan() -> None:
         )
     except Exception as exc:
         logger.warning(f"Catalyst scan failed: {exc}")
+        get_notifier().notify_error(f"Pre-market catalyst scan failed: {exc}")
 
 
 def market_open() -> None:
@@ -414,12 +501,17 @@ def signal_check() -> None:
             sym, df, ltp = future.result()
             symbol_data[sym] = (df, ltp)
 
-    # Fetch NIFTY's intraday % change once per cycle — reused per-symbol to avoid
-    # repeated network calls. Returns 0.0 on error (divergence filter → IN_LINE).
+    # Fetch NIFTY's intraday % change, regime and direction once per cycle
     _nifty_chg = 0.0
+    _regime_val = ""
+    _direction_val = ""
     try:
         from analysis.nifty_correlation import get_nifty_change
+        from analysis.regime_detector import get_current_regime
+        from analysis.market_direction import get_market_direction
         _nifty_chg = get_nifty_change()
+        _regime_val = get_current_regime().value
+        _direction_val = get_market_direction().value
     except Exception:
         pass
 
@@ -430,13 +522,14 @@ def signal_check() -> None:
         # ── Check exit for any open position ─────────────────────────
         if _order_mgr and _order_mgr.has_open_trade(kite_sym):
             try:
+                # Get the trade info before checking exit
+                trade = _order_mgr.get_open_trade(kite_sym)
+                
                 if ltp:
                     _broker.update_ltp(kite_sym, ltp)
 
                 # ── V-reversal check (runs before SL/target) ──────────
-                # If price crosses back through VWAP within 30 min of a
-                # SELL entry (or below VWAP for a BUY), exit early.
-                # Saves ~50% of full SL on V-reversal days.
+                # ... (rest of V-reversal check) ...
                 _closed_early = False
                 if df is not None and ltp:
                     import math as _math
@@ -453,12 +546,15 @@ def signal_check() -> None:
                             )
                             get_notifier().notify_exit(
                                 symbol=kite_sym,
-                                action="EXIT",
+                                action=trade.action.value if trade else "EXIT",
                                 exit_price=ltp,
                                 pnl=rev_pnl,
                                 reason="V-reversal (VWAP cross-back)",
                                 day_pnl=_day_pnl_rev,
                                 consec_losses=_risk_mgr.state.consecutive_losses,
+                                entry_price=trade.entry_price if trade else 0.0,
+                                strategy=trade.strategy if trade else "",
+                                opened_at=trade.opened_at if trade else None,
                             )
 
                 # ── Normal SL / target check ──────────────────────────
@@ -472,12 +568,15 @@ def signal_check() -> None:
                         )
                         get_notifier().notify_exit(
                             symbol=kite_sym,
-                            action="BUY/SELL",
+                            action=trade.action.value if trade else "EXIT",
                             exit_price=ltp,
                             pnl=net_pnl,
                             reason="SL/target hit",
                             day_pnl=_day_pnl_now,
                             consec_losses=_risk_mgr.state.consecutive_losses,
+                            entry_price=trade.entry_price if trade else 0.0,
+                            strategy=trade.strategy if trade else "",
+                            opened_at=trade.opened_at if trade else None,
                         )
             except Exception as e:
                 logger.warning(f"Exit check failed for {kite_sym}: {e}")
@@ -485,6 +584,8 @@ def signal_check() -> None:
 
         if df is None:
             continue
+            
+        # ... rest of entry logic ...
 
         # Sync capital from broker before each new entry evaluation so a trade placed
         # earlier in this same cycle reduces the available capital for subsequent symbols
@@ -504,6 +605,15 @@ def signal_check() -> None:
                 signal: Signal = strategy.generate_signal(kite_sym, df)
                 if signal.action == Action.HOLD:
                     continue
+
+                # Phase A self-learning: snapshot indicator state at signal time.
+                # Attached to signal so OrderManager can persist it alongside the trade.
+                # Fails silently — never blocks a trade.
+                try:
+                    from learning.feature_store import extract_indicator_features
+                    signal.features = extract_indicator_features(df)
+                except Exception:
+                    signal.features = {}
 
                 ctx = FilterContext(
                     symbol=kite_sym,
@@ -529,13 +639,13 @@ def signal_check() -> None:
                     )
                     continue
 
-                placed = _order_mgr.execute_signal(decision.signal)
-                if placed:
+                trade = _order_mgr.execute_signal(decision.signal)
+                if trade:
                     _risk_mgr.on_position_opened(kite_sym)
                     logger.info(
                         f"ORDER PLACED | {kite_sym} | {signal.action.value} "
                         f"| strategy={strategy.name} "
-                        f"| entry={signal.entry_price:.2f} "
+                        f"| entry={trade.entry_price:.2f} "
                         f"| sl={signal.stop_loss:.2f} "
                         f"| target={signal.target:.2f}"
                     )
@@ -550,7 +660,7 @@ def signal_check() -> None:
                     get_notifier().notify_entry(
                         symbol=kite_sym,
                         action=signal.action.value,
-                        price=signal.entry_price,
+                        price=trade.entry_price,
                         sl=signal.stop_loss,
                         target=signal.target,
                         strategy=strategy.name,
@@ -558,6 +668,10 @@ def signal_check() -> None:
                         trade_num=_trade_num,
                         day_pnl=_day_pnl,
                         adaptive_mode=_adp_mode,
+                        judgment=_judgment.judgment if _judgment else "",
+                        score=_judgment.score if _judgment else 0.0,
+                        regime=_regime_val,
+                        direction=_direction_val,
                     )
                 break  # one signal per symbol per cycle (first strategy wins)
             except Exception as e:

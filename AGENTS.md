@@ -1,12 +1,9 @@
-# TreadingBot — Agent Reference
+# TreadingBot — Agent Master Reference
 
-## Self-Learning Rules
-- Read `memory/ideas_and_improvements.md` at session start
-- Add ideas to that file while building — not just at the end
-- Update idea Status (Idea→In Progress→DONE/DROPPED) as work happens
-- Log gaps found during user questions as new ideas
+## 🤖 Mandatory Protocol
+Before doing *anything* else, all AI agents MUST read and follow the **[AGENT_RULES.md](AGENT_RULES.md)** for session tracking and handoff.
 
-## Project Context
+## 🧠 Project Context
 - **User**: Stock market beginner. Always explain concepts. Paper-first, never rush to live.
 - **Broker**: Zerodha (Kite Connect). Market: NSE India. Instruments: NIFTY50 cash segment only.
 - **Mode**: `TRADING_MODE=paper` in `.env`. Switch to `live` only after 30+ days paper success.
@@ -23,10 +20,8 @@
 | EMA target = 3.0×ATR (not 2.5×ATR) | 3.0/1.5 = 2.0:1 RR exactly — 2.5/1.5 = 1.67 failed minimum |
 | Backtest intraday: global_idx not day-slice | Strategies need 26+ candles; day-only slice = 0 trades |
 | Backtest tiered intervals: 5m/1h/1d | yfinance limits: 5m=60d, 1h=730d, 1d=unlimited |
-| `BackgroundScheduler` for dashboard | `BlockingScheduler` freezes Streamlit thread |
-| `dashboard/views/` not `dashboard/pages/` | Streamlit auto-detects `pages/` folder and duplicates nav |
+| `BackgroundScheduler` for bot_controller | `BlockingScheduler` would block the main thread |
 | VWAP `_is_daily`: compare index to normalize() | floor("D") == normalize() always; must compare original to floor |
-| `TradeLogger` at module level in views | Streamlit reruns render() on every click — avoids repeated DB init |
 
 ## Architecture Flow
 ```
@@ -52,6 +47,7 @@ Market data → indicators/ → strategies/ → RiskManager.evaluate()
 | 5 Dashboard | ✅ Done | — | dashboard/app.py, dashboard/views/, analysis/ |
 | 6 Scheduler + Notifications | ✅ Done | — | scheduler/job_runner.py, scheduler/watchlist.py, notifications/ |
 | Fundamentals Watchlist | ✅ Done | 15 | analysis/fundamental_selector.py, scheduler/watchlist.py |
+| Build & Ops Optimization | ✅ Done | — | Dockerfile, web/Dockerfile, .dockerignore, Makefile |
 | 6b Live Kite | 🔲 Deferred | — | data/kite_auth.py, data/kite_feed.py, data/kite_ticker.py, broker/kite_broker.py |
 | 7 Paper Period | 🔲 | — | 30+ trading days, win rate >45% |
 | 8 Go Live | 🔲 | — | `TRADING_MODE=live`, start ₹10k–₹20k |
@@ -105,9 +101,10 @@ with patch("risk.risk_manager.datetime") as mock_dt:
 - `scripts/run_backtest.py`: CLI `--symbol`, `--strategy`, `--start`, `--end`
 
 ## Phase 5 — Dashboard (DONE)
-- Streamlit at `localhost:8501` — run `streamlit run dashboard/app.py`
+- React (Next.js) at `localhost:3000` — `cd web && npm run dev`
+- Python JSON API at `localhost:8000` — `python scripts/run_react_dashboard.py`
 - Pages: Home, Journal, Compare, Signals, Backtest, Replay, Analysis, Fundamentals, Bot Monitor, Settings
-- Views in `dashboard/views/` (NOT `pages/` — Streamlit auto-detects that folder)
+- Legacy Streamlit (`dashboard/`) kept for reference but not deployed or used
 
 ## Phase 6 — Scheduler + Notifications (DONE, live Kite deferred)
 - `scheduler/job_runner.py`: APScheduler IST jobs (9:00 pre-market → 15:30 report)
@@ -119,7 +116,113 @@ with patch("risk.risk_manager.datetime") as mock_dt:
 ## Phase 6b — Live Kite (Deferred)
 - `data/kite_auth.py`, `data/kite_feed.py`, `data/kite_ticker.py`: built Kite auth/feed/ticker pieces
 - `broker/kite_broker.py`: deferred live order execution
-- Daily re-auth: access_token expires daily (SEBI rule) — needs Streamlit helper
+- Daily re-auth: **fully automated** — see "Zero-Touch Daily Operations" below
+
+## Oracle Cloud Deployment via OCI CLI (Fully Automated)
+
+**One command to provision everything** (VCN, subnet, firewall, instance, Docker, Tailscale):
+
+```bash
+# 1. Install OCI CLI (once)
+pip install oci-cli
+oci setup config          # follow prompts — needs tenancy OCID, user OCID, API key
+
+# 2. Provision
+make oci-provision        # ~5 min, prints SSH command when done
+
+# 3. SSH in, activate Tailscale, clone repo, set .env, deploy
+make oci-ssh              # connects automatically
+```
+
+Other OCI commands:
+```bash
+make oci-ssh              # SSH into the instance
+make oci-destroy          # terminate instance (asks for confirmation)
+make oci-provision ARGS="--compartment-id ocid1.compartment..."  # specific compartment
+```
+
+The provisioning script (`scripts/oci_provision.sh`) is idempotent — safe to run multiple times.
+
+## Oracle Cloud Deployment (One-Time Setup)
+
+**Step 1 — Provision Oracle Free Tier instance**
+- Shape: `VM.Standard.A1.Flex` (Ampere ARM) — 4 OCPU + 24 GB RAM, always free
+- OS: Ubuntu 22.04 LTS
+- VCN Security List: **delete all inbound rules** — block everything from internet
+
+**Step 2 — Install Tailscale (private VPN)**
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+# Open the auth URL on your phone/laptop to approve
+```
+Install Tailscale on your phone and laptop too. All devices share a private network.
+
+**Step 3 — Install Docker**
+```bash
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER && newgrp docker
+sudo apt-get install -y docker-compose-plugin
+```
+
+**Step 4 — Clone and configure**
+```bash
+git clone <your-repo> TreadingBot && cd TreadingBot
+cp .env.example .env
+```
+Edit `.env` — set every value including:
+```
+ZERODHA_USER_ID=...          # enables auto-login — no manual token refresh ever
+ZERODHA_PASSWORD=...
+ZERODHA_TOTP_SECRET=...      # base32 key from Zerodha Console → Security
+NEXT_PUBLIC_DASHBOARD_API_URL=http://$(tailscale ip -4)  # your Tailscale IP, no port
+```
+
+**Step 5 — Deploy**
+```bash
+make prod-up
+```
+Builds images, starts all containers, prints your Tailscale dashboard URL. Done.
+
+**Access from any Tailscale device:**
+- Dashboard: `http://100.x.x.x` (Tailscale IP)
+- API health: `http://100.x.x.x/api/health`
+- Public internet: cannot reach anything — VCN blocks all inbound
+
+**After first deploy:**
+- Code changes: `make prod-deploy` (redeploys, postgres untouched)
+- Server reboots: `restart: unless-stopped` brings everything back automatically
+- Daily token: fully automated at 8:30 AM via TOTP — no action needed
+
+## Zero-Touch Daily Operations
+Set these once in `.env`; the bot handles everything after:
+
+```
+ZERODHA_USER_ID=AB1234
+ZERODHA_PASSWORD=your_password
+ZERODHA_TOTP_SECRET=JBSWY3DPEHPK3PXP   # base32 seed from Zerodha Console → Security
+```
+
+**What runs automatically:**
+| Time (IST) | What happens |
+|---|---|
+| Startup | `auto_kite_login.py` runs — refreshes token if expired, skips if valid |
+| 08:30 | `kite_login_reminder` cron — attempts auto-login, confirms via Telegram |
+| 09:00 | `pre_market_scan` — NIFTY breadth, builds watchlist |
+| 09:15 | `market_open` — resets risk state, logs capital |
+| 09:20–14:25 (every 1m) | Signal scan, risk check, paper executions |
+| 14:30 | `stop_new_entries` |
+| 15:15 | `square_off_all` — closes all positions |
+| 15:30 | `daily_report` — P&L summary via Telegram |
+| 15:35 | `auto_shutdown` |
+
+**Fallback chain (if auto-login fails):**
+1. Try headless HTTP login with TOTP (`scripts/auto_kite_login.py`)
+2. Send `/kite_login` Telegram prompt (tap URL on phone)
+3. Manual `make login` → paste redirect URL
+
+**Docker restart policy:** `restart: unless-stopped` on all containers — survives server reboots.  
+**Health check:** bot container pgrep'd every 60s — auto-restart if process dies.
 
 ## Memory Files
 - `memory/MEMORY.md` — index
@@ -128,5 +231,27 @@ with patch("risk.risk_manager.datetime") as mock_dt:
 - `memory/project_planned.md` — phases 4–8 detail
 - `memory/ideas_and_improvements.md` — living ideas backlog (read every session)
 
-## Skills (invoke with /skill-name)
-`/run-tests` `/backtest` `/dashboard` `/add-strategy` `/trade-log` `/paper-trade` `/ideas`
+## Skills
+
+All skills live in `skills/` (universal — usable by any AI agent).  
+Claude Code users invoke via `/skill-name`. Other agents: read `skills/<name>.md` directly.
+
+| Skill | File | What it does |
+|---|---|---|
+| `run-tests` | `skills/run-tests.md` | Run full test suite + explain failures |
+| `backtest` | `skills/backtest.md` | Run standard or walk-forward backtest |
+| `dashboard` | `.claude/commands/dashboard.md` | Start React dashboard (Next.js + API) |
+| `add-strategy` | `skills/add-strategy.md` | Add a new trading strategy end-to-end |
+| `trade-log` | `.claude/commands/trade-log.md` | Show trade history from DB |
+| `paper-trade` | `.claude/commands/paper-trade.md` | Start / explain paper trading session |
+| `ideas` | `.claude/commands/ideas.md` | Review ideas & improvements backlog |
+| `risk-audit` | `skills/risk-audit.md` | Audit all 12 risk gates + current state |
+| `signal-debug` | `skills/signal-debug.md` | Trace why a signal fired or was blocked |
+| `kite-live` | `skills/kite-live.md` | Kite auth, GTT, live switchover guide |
+| `strategy-perf` | `skills/strategy-perf.md` | Analyse paper trade win rates + degradation |
+| `go-live` | `skills/go-live.md` | Full Phase 7→8 go-live readiness checklist |
+| `watchlist` | `skills/watchlist.md` | Manage fundamentals-ranked universe |
+| `market-data` | `skills/market-data.md` | Fix yfinance/Kite data + NSE holiday issues |
+| `gtt-orders` | `skills/gtt-orders.md` | Implement GTT crash-safe stop orders |
+| `brainstorm` | `skills/brainstorm.md` | NSE market expert — accuracy improvement ideas |
+| `self-learn` | `skills/self-learn.md` | Self-learning: feature store → ML classifier → Bayesian param optimizer |

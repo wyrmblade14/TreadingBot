@@ -20,6 +20,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Load secrets from OCI Vault (if configured) — must run before any os.getenv() below.
+# Falls back to .env silently if Vault is not configured or unreachable.
+try:
+    from config.secrets import load_vault_secrets
+    load_vault_secrets()
+except Exception:
+    pass  # fail-open: .env values already loaded above
+
 # ── Timezone ──────────────────────────────────────────────────────────
 IST = pytz.timezone("Asia/Kolkata")
 

@@ -1,14 +1,53 @@
+# Config & Environment
 .env
-venv/
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
 .pytest_cache/
 .coverage
 htmlcov/
-logs/runs/
-logs/cron/
-logs/*.log
-logs/*.db
-*.html
+venv/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Logs & Data
+logs/
+*.log
+*.db
+*.sqlite3
+
+# Frontend (redundant in Python bot image)
+web/node_modules/
+web/.next/
+web/out/
+web/build/
+web/tsconfig.tsbuildinfo
+
+# OS & Version Control
 .git/
+.gitignore
+.gitattributes
+.DS_Store
+Thumbs.db

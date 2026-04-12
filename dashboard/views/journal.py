@@ -64,15 +64,15 @@ def _exit_type(trade: dict) -> str:
 
     if side == "BUY":
         if ep >= tgt * 0.995:   # within 0.5% of target = hit target
-            return "Target ✅"
+            return "Target Hit"
         if ep <= sl * 1.005:    # within 0.5% above SL = stopped out
-            return "Stop-Loss ❌"
+            return "Stop-Loss Hit"
         return "Manual Exit"
     else:  # SELL / short
         if ep <= tgt * 1.005:
-            return "Target ✅"
+            return "Target Hit"
         if ep >= sl * 0.995:
-            return "Stop-Loss ❌"
+            return "Stop-Loss Hit"
         return "Manual Exit"
 
 
@@ -279,9 +279,9 @@ def _render_calendar_heatmap(daily_rows: list[dict]) -> None:
     if total_days_with_trades > 0:
         day_win_pct = profitable_days / total_days_with_trades * 100
         st.caption(
-            f"📅 {total_days_with_trades} trading days  ·  "
-            f"🟢 {profitable_days} green  ·  "
-            f"🔴 {losing_days} red  ·  "
+            f":material/calendar_month: {total_days_with_trades} trading days  ·  "
+            f":material/trending_up: {profitable_days} profitable  ·  "
+            f":material/trending_down: {losing_days} losing  ·  "
             f"Day win rate: **{day_win_pct:.0f}%**"
         )
 
@@ -289,7 +289,7 @@ def _render_calendar_heatmap(daily_rows: list[dict]) -> None:
 # ── Main render ───────────────────────────────────────────────────────
 
 def render() -> None:
-    st.title("📓 Trade Journal")
+    st.title(":material/menu_book: Trade Journal")
     st.caption("Every paper trade — read like a logbook. Review these to build conviction before going live.")
 
     all_trades = _trade_log.get_all_trades(limit=2000)
@@ -421,7 +421,7 @@ def render() -> None:
     exp_col, dl_col = st.columns([6, 2])
     exp_col.subheader(f"Trade Entries ({len(trades)})")
     dl_col.download_button(
-        label="⬇️ Export CSV",
+        label=":material/download: Export CSV",
         data=_to_csv(trades),
         file_name=f"trades_{date_from}_{date_to}.csv",
         mime="text/csv",
@@ -429,7 +429,7 @@ def render() -> None:
     )
 
     # ── Two-tab layout: Table View | Card View ────────────────────────
-    tab_table, tab_cards = st.tabs(["📊 Table View", "📝 Card View"])
+    tab_table, tab_cards = st.tabs(["Table View", "Card View"])
 
     with tab_table:
         rows = []
@@ -462,7 +462,7 @@ def render() -> None:
                 "Plan R:R":    f"{rr_plan:.2f}:1" if rr_plan else "—",
                 "R Captured":  rr_actual,
                 "Net P&L ₹":   round(pnl, 2) if pnl is not None else None,
-                "Result":      ("✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳"),
+                "Result":      ("Win" if pnl and pnl > 0 else "Loss" if pnl and pnl < 0 else "Open"),
             })
 
         df_table = pd.DataFrame(rows)
@@ -496,7 +496,13 @@ def render() -> None:
             hold     = _hold_duration(trade)
             rr       = _rr_achieved(trade)
 
-            result_icon = "✅" if pnl and pnl > 0 else "❌" if pnl and pnl < 0 else "⏳"
+            result_icon = (
+                ":material/trending_up:"
+                if pnl and pnl > 0
+                else ":material/trending_down:"
+                if pnl and pnl < 0
+                else ":material/schedule:"
+            )
             pnl_str     = f"₹{pnl:+,.0f}" if pnl is not None else "Open"
             header      = (
                 f"{result_icon}  **{symbol}** · {side} · {strategy} · "
@@ -727,7 +733,7 @@ def render() -> None:
     daily_rows = _trade_log.get_daily_pnl()
     if len(daily_rows) >= 2:
         st.markdown("---")
-        st.subheader("📅 Daily P&L Calendar")
+        st.subheader(":material/calendar_month: Daily P&L Calendar")
         st.caption(
             "Green = profitable day · Red = losing day · Grey = no trades. "
             "Look for patterns: do losses cluster on specific days or weeks?"

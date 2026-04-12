@@ -26,153 +26,175 @@ import streamlit as st
 
 st.set_page_config(
     page_title="TreadingBot",
-    page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ── Global CSS — dark modern theme ───────────────────────────────────
+# ── Global CSS — minimalist dark theme ───────────────────────────────
 st.markdown("""
 <style>
 /* ── Base ── */
 html, body, [data-testid="stAppViewContainer"] {
-    background-color: #0f1117;
-    color: #e0e0e0;
+    background-color: #0e1116;
+    color: #e5e7eb;
+}
+[data-testid="stHeader"] {
+    background: rgba(14, 17, 22, 0.72);
+    border-bottom: 1px solid #1f2937;
 }
 
 /* ── Metric cards ── */
 [data-testid="metric-container"] {
-    background: #1a1d27;
-    border: 1px solid #2a2d3e;
-    border-radius: 12px;
-    padding: 18px 20px 14px 20px;
+    background: #121722;
+    border: 1px solid #1f2937;
+    border-radius: 8px;
+    padding: 14px 16px 12px 16px;
 }
-[data-testid="stMetricLabel"]  { color: #8b8fa8 !important; font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; }
-[data-testid="stMetricValue"]  { color: #ffffff !important; font-size: 1.5rem; font-weight: 700; }
+[data-testid="stMetricLabel"]  { color: #9ca3af !important; font-size: 0.78rem; text-transform: uppercase; }
+[data-testid="stMetricValue"]  { color: #f3f4f6 !important; font-size: 1.45rem; font-weight: 650; }
 [data-testid="stMetricDelta"]  { font-size: 0.82rem; }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #0d0f18 !important;
-    border-right: 1px solid #1e2030;
+    background: #0b0e14 !important;
+    border-right: 1px solid #1f2937;
 }
 [data-testid="stSidebar"] .stRadio label {
-    color: #9ca3af;
-    font-size: 0.92rem;
-    padding: 6px 0;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    padding: 4px 0;
     cursor: pointer;
 }
-[data-testid="stSidebar"] .stRadio label:hover { color: #ffffff; }
+[data-testid="stSidebar"] .stRadio label:hover { color: #f8fafc; }
+[data-testid="stSidebar"] .stRadio div[role="radiogroup"] > label {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    padding: 8px 10px;
+}
+[data-testid="stSidebar"] .stRadio div[role="radiogroup"] > label:has(input:checked) {
+    background: #111827;
+    border-color: #334155;
+}
 
 /* ── DataFrames ── */
-[data-testid="stDataFrame"] { border-radius: 10px; overflow: hidden; }
+[data-testid="stDataFrame"] { border-radius: 8px; overflow: hidden; }
 [data-testid="stDataFrame"] th {
-    background: #1a1d27 !important;
-    color: #8b8fa8 !important;
+    background: #111827 !important;
+    color: #94a3b8 !important;
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
 }
-[data-testid="stDataFrame"] td { background: #13151f !important; color: #e0e0e0 !important; }
+[data-testid="stDataFrame"] td { background: #0f172a !important; color: #e2e8f0 !important; }
 
 /* ── Buttons ── */
 [data-testid="baseButton-primary"] {
-    background: #4f6ef7 !important;
+    background: #2563eb !important;
     border: none !important;
     border-radius: 8px !important;
     color: #fff !important;
-    font-weight: 600;
+    font-weight: 650;
 }
-[data-testid="baseButton-primary"]:hover { background: #3d5ae5 !important; }
+[data-testid="baseButton-primary"]:hover { background: #1d4ed8 !important; }
 [data-testid="baseButton-secondary"] {
-    background: #1a1d27 !important;
-    border: 1px solid #2a2d3e !important;
+    background: #111827 !important;
+    border: 1px solid #334155 !important;
     border-radius: 8px !important;
-    color: #e0e0e0 !important;
+    color: #e2e8f0 !important;
 }
 
 /* ── Tabs ── */
 [data-testid="stTabs"] button {
-    color: #8b8fa8 !important;
+    color: #94a3b8 !important;
     font-weight: 500;
-    border-radius: 6px 6px 0 0;
+    border-radius: 8px 8px 0 0;
 }
 [data-testid="stTabs"] button[aria-selected="true"] {
-    color: #ffffff !important;
-    border-bottom: 2px solid #4f6ef7 !important;
+    color: #f8fafc !important;
+    border-bottom: 2px solid #2563eb !important;
 }
 
 /* ── Section divider ── */
-hr { border-color: #2a2d3e !important; margin: 1.2rem 0 !important; }
+hr { border-color: #334155 !important; margin: 1.1rem 0 !important; }
 
 /* ── Expander ── */
 [data-testid="stExpander"] {
-    background: #1a1d27;
-    border: 1px solid #2a2d3e;
-    border-radius: 10px;
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 8px;
 }
 
 /* ── Info / success / warning / error boxes ── */
 [data-testid="stAlert"] { border-radius: 8px; }
 
 /* ── Remove default top padding ── */
-.block-container { padding-top: 1.5rem !important; }
+.block-container { padding-top: 1.25rem !important; }
 
 /* ── Page title ── */
-h1 { font-size: 1.6rem !important; font-weight: 700; color: #ffffff; margin-bottom: 0.2rem; }
-h2 { font-size: 1.2rem !important; font-weight: 600; color: #e0e0e0; }
-h3 { font-size: 1rem !important; font-weight: 600; color: #c0c0d0; }
+h1 { font-size: 1.58rem !important; font-weight: 700; color: #f8fafc; margin-bottom: 0.15rem; }
+h2 { font-size: 1.16rem !important; font-weight: 620; color: #e2e8f0; }
+h3 { font-size: 1rem !important; font-weight: 600; color: #cbd5e1; }
 </style>
 """, unsafe_allow_html=True)
 
 # ── Sidebar navigation ────────────────────────────────────────────────
-st.sidebar.markdown("## 📈 TreadingBot")
+st.sidebar.markdown("## :material/query_stats: TreadingBot")
 st.sidebar.caption("Indian Market · NSE · Paper")
 st.sidebar.markdown("---")
 
-page = st.sidebar.radio(
-    "Navigate",
-    ["🏠 Home", "📓 Journal", "⚔️ Compare", "🔍 Signals", "📊 Backtest", "⏮ Replay", "🌐 Analysis", "📊 Fundamentals", "🤖 Bot Monitor", "⚙️ Settings"],
-    label_visibility="collapsed",
+_PAGES = [
+    ("Home", ":material/home: Home"),
+    ("Journal", ":material/menu_book: Journal"),
+    ("Compare", ":material/compare_arrows: Compare"),
+    ("Signals", ":material/radar: Signals"),
+    ("Backtest", ":material/analytics: Backtest"),
+    ("Replay", ":material/history: Replay"),
+    ("Analysis", ":material/language: Analysis"),
+    ("Fundamentals", ":material/finance: Fundamentals"),
+    ("Bot Monitor", ":material/smart_toy: Bot Monitor"),
+    ("Settings", ":material/settings: Settings"),
+]
+
+selected_label = st.sidebar.radio(
+    "Navigation",
+    [label for _, label in _PAGES],
+    label_visibility="collapsed"
 )
+page = next(key for key, label in _PAGES if label == selected_label)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("""
-<div style='font-size:0.78rem;color:#6b7280;line-height:1.8'>
-🟡 &nbsp;<b style='color:#e0e0e0'>Paper Trading</b><br>
-📍 &nbsp;NSE India<br>
-🧠 &nbsp;EMA · RSI+MACD · ORB · Gap&Go
-</div>
-""", unsafe_allow_html=True)
+st.sidebar.markdown(":material/token: **Paper Trading**")
+st.sidebar.markdown(":material/location_on: NSE India")
+st.sidebar.markdown(":material/neurology: EMA · RSI+MACD · ORB · Gap&Go")
 
 # ── Route to page ─────────────────────────────────────────────────────
-if page == "🏠 Home":
+if page == "Home":
     from dashboard.views.home import render
     render()
-elif page == "📓 Journal":
+elif page == "Journal":
     from dashboard.views.journal import render
     render()
-elif page == "⚔️ Compare":
+elif page == "Compare":
     from dashboard.views.comparison import render
     render()
-elif page == "🔍 Signals":
+elif page == "Signals":
     from dashboard.views.signals import render
     render()
-elif page == "📊 Backtest":
+elif page == "Backtest":
     from dashboard.views.backtest import render
     render()
-elif page == "⏮ Replay":
+elif page == "Replay":
     from dashboard.views.replay import render
     render()
-elif page == "🌐 Analysis":
+elif page == "Analysis":
     from dashboard.views.analysis import render
     render()
-elif page == "📊 Fundamentals":
+elif page == "Fundamentals":
     from dashboard.views.fundamentals import render
     render()
-elif page == "🤖 Bot Monitor":
+elif page == "Bot Monitor":
     from dashboard.views.bot_control import render
     render()
-elif page == "⚙️ Settings":
+elif page == "Settings":
     from dashboard.views.settings import render
     render()

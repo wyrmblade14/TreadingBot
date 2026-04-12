@@ -41,19 +41,19 @@ from data.instruments import NIFTY50_INSTRUMENTS, SYMBOL_TO_SECTOR
 
 
 def render() -> None:
-    st.title("📊 Fundamentals")
+    st.title(":material/finance: Fundamentals")
     st.caption(
         "Sector-relative fundamental health for all NIFTY50 stocks. "
         "Data from yfinance — cached 24 hours."
     )
 
-    refresh = st.button("🔄 Refresh", type="primary")
+    refresh = st.button(":material/refresh: Refresh", type="primary")
 
     # ── Today's Catalysts ─────────────────────────────────────────────
     # Show corporate announcements and news catalysts from yesterday so
     # you can see at a glance which stocks have bullish or bearish events.
     st.markdown("---")
-    st.subheader("📋 Today's Pre-Market Catalysts")
+    st.subheader(":material/newspaper: Today's Pre-Market Catalysts")
     st.caption(
         "Corporate announcements and news from yesterday that may move "
         "individual stocks today. The bot automatically skips BUY signals on "
@@ -87,13 +87,13 @@ def render() -> None:
             _rows = []
             for r in _cat.bullish:
                 _rows.append({
-                    "Symbol": r.symbol, "Direction": "📈 BULLISH",
+                    "Symbol": r.symbol, "Direction": "BULLISH",
                     "Reason": r.reason, "Confidence": f"{r.confidence:.0%}",
                     "Source": r.source,
                 })
             for r in _cat.bearish:
                 _rows.append({
-                    "Symbol": r.symbol, "Direction": "📉 BEARISH",
+                    "Symbol": r.symbol, "Direction": "BEARISH",
                     "Reason": r.reason, "Confidence": f"{r.confidence:.0%}",
                     "Source": r.source,
                 })
@@ -120,15 +120,15 @@ def render() -> None:
                     rows.append({
                         "Symbol": inst.kite_symbol,
                         "Sector": inst.sector,
-                        "Fund. Score": fs.dot_string(),
+                        "Fund. Score": f"{fs.score}/5",
                         "Rating": fs.label,
-                        "P/E Check": "✅" if checks.get("P/E vs sector", (False,))[0] else "❌",
-                        "Debt Check": "✅" if checks.get("Debt vs sector", (False,))[0] else "❌",
-                        "Margin Check": "✅" if checks.get("Profit margin vs sector", (False,))[0] else "❌",
-                        "Book Check": "✅" if checks.get("Price/Book vs sector", (False,))[0] else "❌",
+                        "P/E Check": "Pass" if checks.get("P/E vs sector", (False,))[0] else "Fail",
+                        "Debt Check": "Pass" if checks.get("Debt vs sector", (False,))[0] else "Fail",
+                        "Margin Check": "Pass" if checks.get("Profit margin vs sector", (False,))[0] else "Fail",
+                        "Book Check": "Pass" if checks.get("Price/Book vs sector", (False,))[0] else "Fail",
                         "Earnings Trend": trend,
                         "Next Earnings": str(earnings_date) if earnings_date else "—",
-                        "Blackout": "⚠️ YES" if blackout else "—",
+                        "Blackout": "Yes" if blackout else "—",
                         "_score": fs.score,  # hidden sort key
                     })
                 except Exception:
@@ -152,16 +152,15 @@ def render() -> None:
     st.markdown("---")
 
     total_stocks   = len(df)
-    # Re-derive numeric score from dot_string length of filled dots
-    avg_score      = df["Fund. Score"].apply(lambda s: s.count("●")).mean()
+    avg_score      = pd.to_numeric(df["Fund. Score"].astype(str).str.split("/").str[0], errors="coerce").mean()
     improving_count = (df["Earnings Trend"] == "IMPROVING").sum()
-    blackout_count  = (df["Blackout"] == "⚠️ YES").sum()
+    blackout_count  = (df["Blackout"] == "Yes").sum()
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Stocks Analysed",          f"{total_stocks}")
     col2.metric("Avg Fundamental Score",    f"{avg_score:.1f} / 5")
     col3.metric("Improving Earnings",       f"{improving_count}")
-    col4.metric("⚠️ Earnings Blackout",     f"{blackout_count}")
+    col4.metric("Earnings Blackout",     f"{blackout_count}")
 
     st.markdown("---")
 
@@ -170,9 +169,9 @@ def render() -> None:
 
     # Colour hint for beginners
     st.caption(
-        "**Fund. Score** — filled dots (●) = checks passed out of 5. "
-        "More dots = stronger fundamentals vs sector peers. "
-        "**⚠️ Blackout** = earnings result in next 3 days or 1 day ago — expect high volatility."
+        "**Fund. Score** = checks passed out of 5. "
+        "Higher score = stronger fundamentals vs sector peers. "
+        "**Blackout** = earnings result in next 3 days or 1 day ago — expect high volatility."
     )
 
     st.dataframe(df, use_container_width=True, hide_index=True)
@@ -180,7 +179,7 @@ def render() -> None:
     st.markdown("---")
 
     # ── AI Analysis expander ──────────────────────────────────────────
-    with st.expander("🤖 AI Fundamental Analysis (single stock)"):
+    with st.expander(":material/smart_toy: AI Fundamental Analysis (single stock)"):
         st.caption(
             "Select a stock and click **Get AI Analysis** to get a full breakdown. "
             "If ANTHROPIC_API_KEY is set in your .env, Claude AI will analyse it. "
@@ -200,10 +199,8 @@ def render() -> None:
                 metrics = fundamentals_cache.get_fundamentals(selected)
                 judgment = analyst.analyze(selected, metrics)
 
-            bias_emoji = {"BULLISH": "🟢", "BEARISH": "🔴", "NEUTRAL": "🟡"}
-
             col1, col2, col3 = st.columns(3)
-            col1.metric("Bias",           f"{bias_emoji.get(judgment.bias, '')} {judgment.bias}")
+            col1.metric("Bias",           judgment.bias)
             col2.metric("Confidence",     f"{judgment.confidence:.0%}")
             col3.metric("Position Scale", f"{judgment.position_scale:.0%} of normal")
 
