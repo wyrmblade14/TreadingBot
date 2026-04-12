@@ -61,7 +61,7 @@ jobs:
       - name: Build and push React Dashboard image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./web
           target: runner
           file: ./web/Dockerfile
           push: true
