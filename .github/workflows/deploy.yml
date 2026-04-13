@@ -143,6 +143,6 @@ jobs:
             export DASH_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_DASH }}:latest
             
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps bot dashboard-api react-dashboard nginx
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps postgres bot dashboard-api react-dashboard nginx
             
             docker image prune -f
