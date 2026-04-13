@@ -131,18 +131,20 @@ jobs:
           host: ${{ secrets.OCI_HOST }}
           username: ubuntu
           key: ${{ secrets.OCI_SSH_KEY }}
+          command_timeout: 10m
           script: |
             cd ~/TreadingBot
-            
+
             # Log in to GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
+
             # Export and Run in a single execution block
             export BOT_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BOT }}:latest
             export API_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
             export DASH_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_DASH }}:latest
-            
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+
+            # Pull only app images — postgres is a fixed version, skip it to avoid OCI network timeouts
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull bot dashboard-api react-dashboard nginx
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps postgres bot dashboard-api react-dashboard nginx
-            
+
             docker image prune -f
