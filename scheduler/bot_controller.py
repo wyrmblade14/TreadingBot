@@ -16,7 +16,7 @@ Usage (from dashboard):
     from scheduler.bot_controller import get_controller
     ctrl = get_controller()
 
-    ok, msg = ctrl.start(watchlist_size=10, capital=100_000)
+    ok, msg = ctrl.start(watchlist_size=WATCHLIST_SIZE, capital=VIRTUAL_CAPITAL)
     ok, msg = ctrl.stop()
     status  = ctrl.get_status()   # dict — reads state file, works cross-process
     events  = ctrl.get_events()   # list[dict] newest-first (in-process only)
@@ -35,7 +35,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from loguru import logger
 
-from config.settings import IST, VIRTUAL_CAPITAL
+from config.settings import IST, VIRTUAL_CAPITAL, WATCHLIST_SIZE
 import scheduler.bot_state as _state
 
 
@@ -100,7 +100,7 @@ class BotController:
 
     def start(
         self,
-        watchlist_size: int = 10,
+        watchlist_size: int = WATCHLIST_SIZE,
         capital: float = VIRTUAL_CAPITAL,
     ) -> tuple[bool, str]:
         """
@@ -308,7 +308,7 @@ class BotController:
         return {
             "status":         "stopped",
             "started_at":     None,
-            "watchlist_size": 10,
+            "watchlist_size": WATCHLIST_SIZE,
             "capital":        VIRTUAL_CAPITAL,
             "pid":            None,
             "owned_by_ui":    False,

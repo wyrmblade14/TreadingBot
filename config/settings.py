@@ -67,7 +67,8 @@ TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID", "")
 TRADING_MODE = os.getenv("TRADING_MODE", "paper")
 
 # ── Capital ───────────────────────────────────────────────────────────
-VIRTUAL_CAPITAL = float(os.getenv("VIRTUAL_CAPITAL", "100000"))  # ₹1,00,000
+VIRTUAL_CAPITAL  = float(os.getenv("VIRTUAL_CAPITAL",  "500000"))  # ₹5,00,000
+WATCHLIST_SIZE   = int(os.getenv("WATCHLIST_SIZE",   "50"))        # fundamentals-ranked symbols to scan
 
 # ── Risk Management Rules ─────────────────────────────────────────────
 # These values are HARDCODED safety limits.

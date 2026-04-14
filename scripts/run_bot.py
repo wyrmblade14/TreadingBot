@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from loguru import logger
-from config.settings import VIRTUAL_CAPITAL
+from config.settings import VIRTUAL_CAPITAL, WATCHLIST_SIZE
 from scheduler.bot_controller import get_controller
 
 
@@ -76,8 +76,8 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("--watchlist", default=10, type=int,
-                        help="Number of fundamentals-ranked NIFTY50 symbols to scan (default: 10)")
+    parser.add_argument("--watchlist", default=WATCHLIST_SIZE, type=int,
+                        help=f"Number of fundamentals-ranked NIFTY50 symbols to scan (default: {WATCHLIST_SIZE})")
     parser.add_argument("--capital",   default=VIRTUAL_CAPITAL, type=float,
                         help=f"Starting paper capital in INR (default: ₹{VIRTUAL_CAPITAL:,.0f})")
     parser.add_argument("--dry-run",   action="store_true",

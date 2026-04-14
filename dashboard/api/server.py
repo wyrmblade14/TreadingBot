@@ -280,6 +280,38 @@ def _safe_market_overview() -> tuple[dict[str, Any], str | None]:
     return data, None
 
 
+def _safe_logs(lines: int = 80) -> list[str]:
+    """Return the last N lines from the most recent bot log file."""
+    try:
+        log_path: str | None = None
+        try:
+            from scheduler.bot_controller import get_controller
+            status = get_controller().get_status()
+            log_path = status.get("log_path")
+        except Exception:
+            pass
+
+        logs_dir = ROOT / "logs"
+        if not log_path or not Path(log_path).exists():
+            if logs_dir.exists():
+                candidates = sorted(
+                    [f for f in logs_dir.glob("*.log") if f.stat().st_size > 0],
+                    key=lambda f: f.stat().st_mtime,
+                    reverse=True,
+                )
+                if candidates:
+                    log_path = str(candidates[0])
+
+        if not log_path or not Path(log_path).exists():
+            return []
+
+        text = Path(log_path).read_text(encoding="utf-8", errors="replace")
+        all_lines = text.splitlines()
+        return all_lines[-lines:] if len(all_lines) > lines else all_lines
+    except Exception:
+        return []
+
+
 def _health_payload() -> dict[str, Any]:
     return {
         "ok": True,
@@ -314,10 +346,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
             trades, trade_error = _safe_trade_data(limit=500)
             bot, bot_error = _safe_bot_status()
             market, market_error = _safe_market_overview()
+            logs = _safe_logs(lines=80)
             self._send_json({
                 "trades": trades,
                 "bot": bot,
                 "market": market,
+                "logs": logs,
                 "errors": [err for err in (trade_error, bot_error, market_error) if err],
             })
             return
@@ -340,6 +374,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if path == "/api/market/overview":
             overview, error = _safe_market_overview()
             self._send_json({"overview": overview, "error": error})
+            return
+
+        if path == "/api/logs":
+            raw_lines = query.get("lines", ["100"])[0]
+            try:
+                n = max(1, min(500, int(raw_lines)))
+            except (TypeError, ValueError):
+                n = 100
+            self._send_json({"lines": _safe_logs(lines=n), "error": None})
             return
 
         self._send_json({"error": "not found"}, status=404)

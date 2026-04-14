@@ -54,7 +54,13 @@
       "Bash(git commit -m ':*)",
       "Bash(python3 -m pytest tests/ -v --tb=short -q)",
       "Bash(git commit:*)",
-      "Bash(python -m pytest tests/test_signal_pipeline.py -v --tb=short)"
+      "Bash(python -m pytest tests/test_signal_pipeline.py -v --tb=short)",
+      "Bash(npx tsc:*)",
+      "Bash(cat next.config.ts)",
+      "Bash(cat next.config.js)",
+      "Bash(cat next.config.mjs)",
+      "Bash(make down:*)",
+      "Bash(make up:*)"
     ]
   },
   "enabledPlugins": {

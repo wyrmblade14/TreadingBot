@@ -47,6 +47,23 @@ export type StrategySummary = {
   avgPnl: number;
 };
 
+export type MarketMover = {
+  symbol: string;
+  changePct: number;
+};
+
+export type MarketOverview = {
+  niftyPrice: number | null;
+  niftyChange: number | null;
+  niftyChangePct: number | null;
+  advances: number;
+  declines: number;
+  unchanged: number;
+  topGainers: MarketMover[];
+  topLosers: MarketMover[];
+  error: string | null;
+};
+
 export type DashboardData = {
   generatedAt: string;
   source: "api" | "empty";
@@ -57,6 +74,8 @@ export type DashboardData = {
   todayTrades: Trade[];
   recentTrades: Trade[];
   strategies: StrategySummary[];
+  market: MarketOverview;
+  logs: string[];
 };
 
 const API_INTERNAL_BASE =
@@ -75,6 +94,38 @@ const emptyBot: BotStatus = {
   pid: null,
   message: "Dashboard API is not connected"
 };
+
+// ── Per-page focused fetchers ──────────────────────────────────────
+
+export async function getLogsData(lines = 200): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_INTERNAL_BASE}/api/logs?lines=${lines}`, {
+      cache: "no-store",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) return [];
+    const json = await res.json() as { lines?: unknown[] };
+    return (json.lines ?? []).filter((l): l is string => typeof l === "string");
+  } catch {
+    return [];
+  }
+}
+
+export async function getMarketData(): Promise<MarketOverview> {
+  try {
+    const res = await fetch(`${API_INTERNAL_BASE}/api/market/overview`, {
+      cache: "no-store",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) return emptyMarket;
+    const json = await res.json() as { overview?: unknown };
+    return normalizeMarket(asRecord(json.overview));
+  } catch {
+    return emptyMarket;
+  }
+}
+
+// ── Full dashboard data ────────────────────────────────────────────
 
 export async function getDashboardData(): Promise<DashboardData> {
   const payload = await fetchFirstJson([
@@ -113,6 +164,18 @@ async function fetchFirstJson(urls: string[]): Promise<unknown | null> {
   return null;
 }
 
+const emptyMarket: MarketOverview = {
+  niftyPrice: null,
+  niftyChange: null,
+  niftyChangePct: null,
+  advances: 0,
+  declines: 0,
+  unchanged: 0,
+  topGainers: [],
+  topLosers: [],
+  error: null
+};
+
 function emptyDashboard(): DashboardData {
   return {
     generatedAt: new Date().toISOString(),
@@ -128,7 +191,9 @@ function emptyDashboard(): DashboardData {
     dailyPnl: [],
     todayTrades: [],
     recentTrades: [],
-    strategies: []
+    strategies: [],
+    market: emptyMarket,
+    logs: []
   };
 }
 
@@ -153,6 +218,8 @@ function normalizeDashboard(input: unknown): DashboardData {
   );
   const normalizedEquity = equity.length > 0 ? equity : equityFromDailyPnl(dailyPnl, rootTradeRecord);
 
+  const logs = firstArray(record, ["logs"]).filter((l): l is string => typeof l === "string");
+
   return {
     generatedAt: stringValue(record.generatedAt ?? record.generated_at) ?? new Date().toISOString(),
     source: "api",
@@ -167,7 +234,9 @@ function normalizeDashboard(input: unknown): DashboardData {
     dailyPnl,
     todayTrades,
     recentTrades: trades,
-    strategies: strategies.length > 0 ? strategies : normalizeStrategies(firstArray(marketRecord, ["strategies"]))
+    strategies: strategies.length > 0 ? strategies : normalizeStrategies(firstArray(marketRecord, ["strategies"])),
+    market: normalizeMarket(marketRecord),
+    logs
   };
 }
 
@@ -323,6 +392,30 @@ function normalizeStrategies(input: unknown[]): StrategySummary[] {
       };
     })
     .filter((item): item is StrategySummary => item !== null);
+}
+
+function normalizeMarket(record: Record<string, unknown>): MarketOverview {
+  const gainers = firstArray(record, ["top_gainers", "topGainers"]).map((item) => {
+    const r = asRecord(item);
+    return { symbol: stringValue(r.symbol) ?? "", changePct: numberValue(r.change_pct ?? r.changePct) ?? 0 };
+  }).filter((m) => m.symbol);
+
+  const losers = firstArray(record, ["top_losers", "topLosers"]).map((item) => {
+    const r = asRecord(item);
+    return { symbol: stringValue(r.symbol) ?? "", changePct: numberValue(r.change_pct ?? r.changePct) ?? 0 };
+  }).filter((m) => m.symbol);
+
+  return {
+    niftyPrice: numberValue(record.nifty_price ?? record.niftyPrice),
+    niftyChange: numberValue(record.nifty_change ?? record.niftyChange),
+    niftyChangePct: numberValue(record.nifty_change_pct ?? record.niftyChangePct),
+    advances: numberValue(record.advances) ?? 0,
+    declines: numberValue(record.declines) ?? 0,
+    unchanged: numberValue(record.unchanged) ?? 0,
+    topGainers: gainers,
+    topLosers: losers,
+    error: stringValue(record.error) ?? null
+  };
 }
 
 function firstArray(record: Record<string, unknown>, keys: string[]): unknown[] {

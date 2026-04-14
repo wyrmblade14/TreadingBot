@@ -40,7 +40,7 @@ from data.nse_holidays import is_trading_day
 from notifications.telegram_notifier import get_notifier
 from broker.paper_broker import PaperBroker
 from config.settings import (
-    IST, VIRTUAL_CAPITAL, TRADING_MODE,
+    IST, VIRTUAL_CAPITAL, WATCHLIST_SIZE, TRADING_MODE,
     MARKET_OPEN, SQUAREOFF_TIME,
 )
 from data.historical import fetch_ohlcv
@@ -148,7 +148,7 @@ def _refresh_daily_watchlist(watchlist_size: int | None = None) -> None:
     _watchlist = selection.symbols
 
 
-def setup(watchlist_size: int = 10, capital: float = VIRTUAL_CAPITAL) -> None:
+def setup(watchlist_size: int = WATCHLIST_SIZE, capital: float = VIRTUAL_CAPITAL) -> None:
     """
     Initialise all singletons before the scheduler starts.
 
