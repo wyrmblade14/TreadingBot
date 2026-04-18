@@ -20,8 +20,9 @@
 #   make backtest-all SYMBOL=RELIANCE        — all 6 strategies, comparison table
 #   make backtest-wf  SYMBOL=RELIANCE        — walk-forward (6m train / 2m test)
 #   make backtest-symbols                    — list symbols with assigned strategies
-#   make weekly-review                       — backtest + optimize top 25 fundamentals (→ approved_symbols.json)
-#   make weekly-review TOP=30 OPTIMIZE=1     — wider universe, with parameter optimization
+#   make weekly-review                       — backtest top 25 fundamentals, lock to approved_symbols.json
+#   make weekly-review TOP=30 OPTIMIZE=1     — wider universe + Bayesian parameter optimization
+#   make weekly-review DRY_RUN=1             — dry run, nothing written to disk
 #
 # ── Dev ───────────────────────────────────────────────────────────────────────
 #   make test           — run the full pytest suite
@@ -108,10 +109,10 @@ backtest-symbols:
 
 weekly-review:
 	@source .venv/bin/activate 2>/dev/null || true; \
-	python3 scripts/weekly_review.py \
+	python3 scripts/assign_strategies.py \
 	  $(if $(TOP),--top $(TOP),) \
 	  $(if $(OPTIMIZE),--optimize,) \
-	  --start $(START) --end $(END)
+	  $(if $(DRY_RUN),--dry-run,)
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
 

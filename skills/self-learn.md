@@ -177,13 +177,14 @@ python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --opti
 # → runs 50 Optuna trials, re-backtests with improved params if found
 ```
 
-**Option 3: Weekly review (all 6 strategies on top fundamentals)**
+**Option 3: Weekend review (all 6 strategies on top fundamentals, locked for the week)**
 ```bash
-make weekly-review [TOP=25] [OPTIMIZE=1]
-# → gets top N fundamentally-ranked symbols
-# → backtests all 6 strategies on each symbol
-# → if OPTIMIZE=1, runs Bayesian optimizer on best strategy per symbol
-# → saves config/approved_symbols.json with winners for next week's trading
+make weekly-review OPTIMIZE=1
+# → top 25 fundamentally-ranked NIFTY50 symbols
+# → backtests all 6 strategies on each symbol (Kite 60-min or yfinance)
+# → Bayesian optimizer (50 trials) on best strategy per symbol
+# → saves config/approved_symbols.json — bot trades ONLY these symbols next week
+# → auto-runs Saturday 10 AM IST via scheduler
 ```
 
 ### What gets optimized (per strategy)

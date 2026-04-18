@@ -54,8 +54,8 @@ def _make_get_fn(strategies, sym_map, sec_map, hist_path=None):
     # Build a minimal module stub so the function can be exec'd independently
     code = (Path(__file__).parent.parent / "scheduler/job_runner.py").read_text()
 
-    # Extract just the function definition (between def _get_strategies_for_symbol and def _refresh)
-    start = code.index("def _get_strategies_for_symbol(")
+    # Extract both helper + main function (between _load_approved_weekly_strategy and _refresh)
+    start = code.index("def _load_approved_weekly_strategy(")
     end   = code.index("\ndef _refresh_daily_watchlist(")
     fn_src = code[start:end].strip()
 

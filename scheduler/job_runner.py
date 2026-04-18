@@ -130,11 +130,37 @@ def _on_tick_exit(symbol: str, price: float) -> None:
 # The pipeline is a singleton created in setup() and stored in _pipeline.
 
 
+def _load_approved_weekly_strategy(symbol: str) -> str | None:
+    """
+    Return the weekend-review locked strategy for *symbol*, or None if
+    approved_symbols.json is missing, expired, or doesn't include the symbol.
+    """
+    try:
+        import json
+        from datetime import date
+        from pathlib import Path
+        _approved = Path("config/approved_symbols.json")
+        if not _approved.exists():
+            return None
+        data = json.loads(_approved.read_text())
+        from datetime import date as _date
+        expires = _date.fromisoformat(data.get("expires", "2000-01-01"))
+        if _date.today() > expires:
+            return None
+        for entry in data.get("symbols", []):
+            if entry["symbol"] == symbol:
+                return entry["strategy"]
+    except Exception:
+        pass
+    return None
+
+
 def _get_strategies_for_symbol(symbol: str) -> list:
     """
     Return the ordered strategy list to evaluate for *symbol*.
 
     Priority:
+      0. approved_symbols.json — weekend review locked strategy (expires weekly)
       1. SYMBOL_STRATEGY_MAP  — explicit per-symbol override (config/strategies.py)
       2. SECTOR_STRATEGY_MAP  — sector-level default (config/strategies.py)
       3. param_history.json   — optimizer-assigned best strategy
@@ -151,6 +177,14 @@ def _get_strategies_for_symbol(symbol: str) -> list:
             else:
                 logger.debug(f"Strategy map: '{name}' for {symbol} not in active strategies — skipping")
         return result
+
+    # 0. Weekend-review locked strategy (highest priority — bot uses ONLY this)
+    locked = _load_approved_weekly_strategy(symbol)
+    if locked:
+        result = _names_to_instances([locked])
+        if result:
+            logger.debug(f"{symbol}: using weekend-locked strategy '{locked}'")
+            return result
 
     # 1. Manual per-symbol override
     if _SYMBOL_STRATEGY_MAP and symbol in _SYMBOL_STRATEGY_MAP:
@@ -848,6 +882,32 @@ def auto_shutdown() -> None:
     _os.kill(_os.getpid(), _sig.SIGTERM)
 
 
+def weekend_review_job() -> None:
+    """
+    Saturday 10 AM IST — Weekend review: backtest + optimize top fundamentals.
+
+    Flow:
+      1. Run assign_strategies.py --optimize --top 25
+         → Backtests all 6 strategies on top 25 fundamentally-ranked symbols
+         → Runs Bayesian optimizer (50 trials) on best strategy per symbol
+         → Saves param_history.json (optimized params) + approved_symbols.json (locked universe)
+      2. From Monday, bot trades ONLY these symbols with their locked strategies.
+    """
+    import subprocess
+    import sys
+    logger.info("=== WEEKEND REVIEW (Saturday 10:00 IST) ===")
+    try:
+        subprocess.run(
+            [sys.executable, "scripts/assign_strategies.py", "--top", "25", "--optimize"],
+            check=True,
+        )
+        logger.success("Weekend review complete — approved_symbols.json updated for next week")
+    except subprocess.CalledProcessError as exc:
+        logger.error(f"Weekend review failed (exit {exc.returncode}) — approved_symbols.json not updated")
+    except Exception as exc:
+        logger.error(f"Weekend review unexpected error: {exc}")
+
+
 # ── Helper ─────────────────────────────────────────────────────────────
 
 def _get_ltp(yf_sym: str) -> Optional[float]:
@@ -871,14 +931,16 @@ def build_scheduler() -> BlockingScheduler:
     # Only on weekdays (Monday=0 … Friday=4)
     weekdays = "mon-fri"
 
-    sched.add_job(pre_market_scan,  CronTrigger(day_of_week=weekdays, hour=9,  minute=0,  timezone=IST), id="pre_market_scan")
-    sched.add_job(optimize_params,  CronTrigger(day_of_week=weekdays, hour=9,  minute=5,  timezone=IST), id="optimize_params")
-    sched.add_job(market_open,      CronTrigger(day_of_week=weekdays, hour=9,  minute=15, timezone=IST), id="market_open")
-    sched.add_job(signal_check,     CronTrigger(day_of_week=weekdays, hour="9-14", minute="*/1", timezone=IST), id="signal_check")
-    sched.add_job(stop_new_entries, CronTrigger(day_of_week=weekdays, hour=14, minute=30, timezone=IST), id="stop_new_entries")
-    sched.add_job(square_off_all,   CronTrigger(day_of_week=weekdays, hour=15, minute=15, timezone=IST), id="square_off_all")
-    sched.add_job(daily_report,     CronTrigger(day_of_week=weekdays, hour=15, minute=30, timezone=IST), id="daily_report")
-    sched.add_job(auto_shutdown,    CronTrigger(day_of_week=weekdays, hour=15, minute=35, timezone=IST), id="auto_shutdown")
+    sched.add_job(pre_market_scan,   CronTrigger(day_of_week=weekdays, hour=9,  minute=0,  timezone=IST), id="pre_market_scan")
+    sched.add_job(optimize_params,   CronTrigger(day_of_week=weekdays, hour=9,  minute=5,  timezone=IST), id="optimize_params")
+    sched.add_job(market_open,       CronTrigger(day_of_week=weekdays, hour=9,  minute=15, timezone=IST), id="market_open")
+    sched.add_job(signal_check,      CronTrigger(day_of_week=weekdays, hour="9-14", minute="*/1", timezone=IST), id="signal_check")
+    sched.add_job(stop_new_entries,  CronTrigger(day_of_week=weekdays, hour=14, minute=30, timezone=IST), id="stop_new_entries")
+    sched.add_job(square_off_all,    CronTrigger(day_of_week=weekdays, hour=15, minute=15, timezone=IST), id="square_off_all")
+    sched.add_job(daily_report,      CronTrigger(day_of_week=weekdays, hour=15, minute=30, timezone=IST), id="daily_report")
+    sched.add_job(auto_shutdown,     CronTrigger(day_of_week=weekdays, hour=15, minute=35, timezone=IST), id="auto_shutdown")
+    # Weekend: Saturday 10 AM — backtest + optimize top fundamentals, lock symbols for next week
+    sched.add_job(weekend_review_job, CronTrigger(day_of_week="sat",  hour=10, minute=0,  timezone=IST), id="weekend_review")
 
     _scheduler = sched
     return sched

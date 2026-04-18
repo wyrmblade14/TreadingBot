@@ -47,10 +47,12 @@ from strategies.rsi_macd_combo import RSIMACDStrategy
 from strategies.trend_rider import TrendRiderStrategy
 from strategies.vwap_bounce import VWAPBounceStrategy
 
-HISTORY_FILE = Path("config/param_history.json")
-MIN_TRADES   = 15       # minimum trades needed to trust the assignment
-KITE_DAYS    = 380      # ~400 days of 60-min data from Kite (leaves margin)
-RATE_LIMIT_S = 0.35     # ~3 req/sec — stays under Kite's historical API limit
+HISTORY_FILE   = Path("config/param_history.json")
+APPROVED_FILE  = Path("config/approved_symbols.json")
+MIN_TRADES     = 15       # minimum trades needed to trust the assignment
+KITE_DAYS      = 380      # ~400 days of 60-min data from Kite (leaves margin)
+RATE_LIMIT_S   = 0.35     # ~3 req/sec — stays under Kite's historical API limit
+LOCK_DAYS      = 7        # approved_symbols.json valid for 7 days
 
 STRATEGY_MAP = {
     "ema_crossover":          EMACrossoverStrategy,
@@ -207,6 +209,55 @@ def save_assignment(symbol: str, strategy: str, meta: dict, dry_run: bool) -> No
         json.dump(data, f, indent=2)
 
 
+def save_approved_symbols(summary: list[tuple[str, str, dict]], dry_run: bool) -> None:
+    """Write approved_symbols.json with the locked universe for the next LOCK_DAYS days."""
+    approved = {
+        "week_of":      date.today().isoformat(),
+        "generated_at": date.today().isoformat(),
+        "expires":      (date.today() + timedelta(days=LOCK_DAYS)).isoformat(),
+        "symbols": [
+            {
+                "symbol":        sym,
+                "strategy":      strat,
+                "sharpe":        meta.get("sharpe", 0.0),
+                "win_rate":      meta.get("win_rate", 0.0),
+                "num_trades":    meta.get("num_trades", 0),
+                "score":         meta.get("score", 0.0),
+            }
+            for sym, strat, meta in summary
+        ],
+    }
+    if dry_run:
+        logger.info(f"[dry-run] Would write {APPROVED_FILE} with {len(summary)} symbols")
+        return
+    APPROVED_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(APPROVED_FILE, "w") as f:
+        json.dump(approved, f, indent=2)
+    logger.success(f"Saved approved universe ({len(summary)} symbols) → {APPROVED_FILE} (expires {approved['expires']})")
+
+
+def _run_optimizer(symbol: str, strategy: str, n_trials: int = 50) -> bool:
+    """Run Bayesian optimizer for strategy on symbol. Returns True if improvement saved."""
+    try:
+        from learning.param_optimizer import ParamOptimizer
+        optimizer = ParamOptimizer()
+        method_map = {
+            "ema_crossover":          optimizer.optimize_ema_crossover,
+            "rsi_macd_combo":         optimizer.optimize_rsi_macd_combo,
+            "opening_range_breakout": optimizer.optimize_opening_range_breakout,
+            "vwap_bounce":            optimizer.optimize_vwap_bounce,
+            "trend_rider":            optimizer.optimize_trend_rider,
+            "bb_mean_reversion":      optimizer.optimize_bb_mean_reversion,
+        }
+        fn = method_map.get(strategy)
+        if fn is None:
+            return False
+        return fn(symbol, n_trials=n_trials) is not None
+    except Exception as exc:
+        logger.warning(f"  {symbol}/{strategy}: optimizer failed — {exc}")
+        return False
+
+
 # ── Universe selection ────────────────────────────────────────────────────────
 
 def get_sweep_universe(top_n: int) -> list[str]:
@@ -237,7 +288,8 @@ def main() -> None:
     parser.add_argument("--symbol",  default=None,            help="Single symbol to sweep (overrides --top)")
     parser.add_argument("--days",    default=KITE_DAYS, type=int, help=f"Lookback days for data (default: {KITE_DAYS})")
     parser.add_argument("--capital", default=100_000, type=float, help="Backtest capital in INR (default: 100000)")
-    parser.add_argument("--dry-run", action="store_true",     help="Print results but do not write to param_history.json")
+    parser.add_argument("--optimize", action="store_true",     help="Run Bayesian optimizer (50 trials) on best strategy per symbol after sweep")
+    parser.add_argument("--dry-run", action="store_true",     help="Print results but do not write to param_history.json or approved_symbols.json")
     args = parser.parse_args()
 
     end_date   = date.today().isoformat()
@@ -246,9 +298,10 @@ def main() -> None:
     symbols = [args.symbol.upper()] if args.symbol else get_sweep_universe(args.top)
 
     print(f"\n{'='*70}")
-    print(f"  Strategy Assignment Sweep")
+    print(f"  Weekend Review — Strategy Assignment Sweep")
     print(f"  Universe : {len(symbols)} symbols")
     print(f"  Period   : {start_date} → {end_date} ({args.days} days)")
+    print(f"  Optimize : {args.optimize} (Bayesian, 50 trials per symbol)")
     print(f"  Min trades gate : {MIN_TRADES}")
     print(f"  Dry run  : {args.dry_run}")
     print(f"{'='*70}\n")
@@ -268,6 +321,13 @@ def main() -> None:
         results  = sweep_symbol(symbol, df, start_date, end_date, args.capital)
         best_name, best_meta = pick_best(results)
         save_assignment(symbol, best_name, best_meta, args.dry_run)
+
+        # Optional: Bayesian parameter optimization on best strategy
+        if args.optimize and best_meta.get("num_trades", 0) >= MIN_TRADES:
+            print(f"       Optimizing {best_name} (50 trials)...")
+            improved = _run_optimizer(symbol, best_name, n_trials=50)
+            print(f"       Optimizer: {'✅ improved params saved' if improved else 'ℹ️  no significant gain'}")
+
         summary.append((symbol, best_name, best_meta))
 
         marker = "✅" if best_meta.get("num_trades", 0) >= MIN_TRADES else "⚠️ (low trades)"
@@ -290,9 +350,13 @@ def main() -> None:
             f"{meta.get('score', 0):>7.3f}"
         )
 
+    # Save approved universe (valid for LOCK_DAYS days)
+    save_approved_symbols(summary, args.dry_run)
+
     if not args.dry_run:
         print(f"\n  Saved to {HISTORY_FILE}")
-        print(f"  Bot will pick up assignments on next restart.\n")
+        print(f"  Approved universe locked → {APPROVED_FILE} (expires in {LOCK_DAYS} days)")
+        print(f"  Bot will use ONLY these symbols and strategies until next weekend review.\n")
     else:
         print(f"\n  [dry-run] Nothing written to disk.\n")
 

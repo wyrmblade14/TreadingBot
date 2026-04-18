@@ -74,56 +74,47 @@ Score 0.0–1.0:
 ### Static fallback
 If fundamentals data is unavailable (API down), system falls back to the hardcoded NIFTY50 order. This is intentional — the bot never stops trading due to stale fundamentals.
 
-## Weekly Approved Symbols (Phase 3.5)
+## Weekend Review & Locked Universe
 
-Once per week (Saturday 10 AM), run the **Weekly Saturday Review** to backtest + optimize all 6 strategies on top fundamentals, then lock in the best performers for the next week's trading.
+Every Saturday 10 AM IST the scheduler auto-runs the **weekend review**. You can also run it manually any time.
 
-### Generate approved symbols
+### How it works (DONE — fully integrated)
+```
+Saturday 10 AM IST
+  → scripts/assign_strategies.py --top 25 --optimize
+  → [1] Fundamental analysis: top 25 NIFTY50 by sector-relative score
+  → [2] Backtest all 6 strategies per symbol (Kite 60-min or yfinance fallback)
+  → [3] Bayesian optimizer (50 trials) on best strategy per symbol
+  → [4] Save config/approved_symbols.json (expires in 7 days)
+  → [5] Save config/param_history.json (optimized params)
+
+Mon–Fri trading:
+  → watchlist loads approved_symbols.json (Priority 1)
+  → bot trades ONLY those symbols
+  → _get_strategies_for_symbol() uses locked strategy per symbol
+  → Expires after 7 days → falls back to fundamentals selector
+```
+
+### Run manually
 ```bash
-make weekly-review [TOP=25] [OPTIMIZE=1]
-# Creates config/approved_symbols.json:
-# {
-#   "week_of": "2026-04-18",
-#   "symbols": [
-#     {"symbol": "RELIANCE", "strategy": "ema_crossover", "sharpe": 1.43, "win_rate": 52.3},
-#     ...
-#   ]
-# }
+make weekly-review                   # top 25, no optimization
+make weekly-review OPTIMIZE=1        # top 25 + Bayesian param tuning (recommended)
+make weekly-review TOP=30 OPTIMIZE=1 # wider universe
+make weekly-review DRY_RUN=1         # dry run, nothing written to disk
 ```
 
-### Prioritize in daily watchlist
-Modify `scheduler/watchlist.py`:
-1. In `DailyWatchlist.__init__()`, add:
-```python
-self.approved = self._load_approved_symbols()  # from config/approved_symbols.json
+### Watchlist priority (LIVE)
+1. `approved_symbols.json` (current week, not expired) → `source="approved_weekly"`
+2. `select_fundamental_watchlist()` → `source="fundamental"`
+3. `static_watchlist()` → `source="static_fallback"`
+
+### Debug: check current source
+```bash
+source .venv/bin/activate
+python - <<'EOF'
+from scheduler.watchlist import select_daily_watchlist
+wl = select_daily_watchlist(10)
+print(f"Source: {wl.source}")
+print(f"Symbols: {wl.symbols}")
+EOF
 ```
-
-2. In `select_daily_watchlist()`, sort priority:
-```python
-# Tier 1: approved symbols from this week
-approved_syms = [s["symbol"] for s in self.approved["symbols"]] if self.approved else []
-tier1 = [s for s in ranked_by_fundamentals if s in approved_syms]
-
-# Tier 2: all fundamentals-ranked symbols (rest of NIFTY50)
-tier2 = [s for s in ranked_by_fundamentals if s not in approved_syms]
-
-# Combine and take top N
-watchlist = (tier1 + tier2)[:self.size]
-```
-
-3. When executing a signal on an approved symbol, use the pre-optimized strategy from approved_symbols.json if available:
-```python
-def get_strategy_for_symbol(self, symbol: str) -> str | None:
-    if self.approved:
-        for entry in self.approved["symbols"]:
-            if entry["symbol"] == symbol:
-                return entry["strategy"]
-    return None  # fallback to default or assignment from param_history.json
-```
-
-### What this does
-- **Weekly review** backtests all 6 strategies on top-25 fundamental stocks
-- **Optimization** runs 50 Optuna trials per strategy to find best parameter tuning
-- **Lock in winners** → saves to `config/approved_symbols.json` (valid for 7 days)
-- **Next week**: bot only trades approved symbols + their vetted strategies
-- **Result**: higher win rate, fewer surprises, automated strategy selection per symbol
