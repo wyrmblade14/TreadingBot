@@ -43,6 +43,8 @@ from config.settings import (
     IST, VIRTUAL_CAPITAL, WATCHLIST_SIZE, TRADING_MODE,
     MARKET_OPEN, SQUAREOFF_TIME,
 )
+from config.strategies import SYMBOL_STRATEGY_MAP as _SYMBOL_STRATEGY_MAP
+from config.strategies import SECTOR_STRATEGY_MAP as _SECTOR_STRATEGY_MAP
 from data.historical import fetch_ohlcv
 from data.instruments import KITE_TO_YF
 from data.kite_auth import is_kite_available
@@ -126,6 +128,58 @@ def _on_tick_exit(symbol: str, price: float) -> None:
 
 # Signal dedup state has moved into DedupFilter (execution/signal_pipeline.py).
 # The pipeline is a singleton created in setup() and stored in _pipeline.
+
+
+def _get_strategies_for_symbol(symbol: str) -> list:
+    """
+    Return the ordered strategy list to evaluate for *symbol*.
+
+    Priority:
+      1. SYMBOL_STRATEGY_MAP  — explicit per-symbol override (config/strategies.py)
+      2. SECTOR_STRATEGY_MAP  — sector-level default (config/strategies.py)
+      3. param_history.json   — optimizer-assigned best strategy
+      4. All active strategies — existing behaviour (no assignment found)
+    """
+    from data.instruments import SYMBOL_TO_SECTOR
+
+    def _names_to_instances(names: list[str]) -> list:
+        result = []
+        for name in names:
+            matched = [s for s in _strategies if s.name == name]
+            if matched:
+                result.append(matched[0])
+            else:
+                logger.debug(f"Strategy map: '{name}' for {symbol} not in active strategies — skipping")
+        return result
+
+    # 1. Manual per-symbol override
+    if _SYMBOL_STRATEGY_MAP and symbol in _SYMBOL_STRATEGY_MAP:
+        return _names_to_instances(_SYMBOL_STRATEGY_MAP[symbol])
+
+    # 2. Sector-level override
+    if _SECTOR_STRATEGY_MAP:
+        sector = SYMBOL_TO_SECTOR.get(symbol, "")
+        if sector and sector in _SECTOR_STRATEGY_MAP:
+            return _names_to_instances(_SECTOR_STRATEGY_MAP[sector])
+
+    # 3. Optimizer-assigned strategy from param_history.json
+    try:
+        import json
+        from pathlib import Path
+        _hist = Path("config/param_history.json")
+        if _hist.exists():
+            with open(_hist) as _f:
+                _data = json.load(_f)
+            _assigned = _data.get("strategy_assignment", {}).get(symbol, {}).get("strategy")
+            if _assigned:
+                result = _names_to_instances([_assigned])
+                if result:
+                    return result
+    except Exception:
+        pass
+
+    # 4. Default: all active strategies
+    return _strategies
 
 
 def _refresh_daily_watchlist(watchlist_size: int | None = None) -> None:
@@ -384,6 +438,22 @@ def pre_market_scan() -> None:
         get_notifier().notify_error(f"Pre-market catalyst scan failed: {exc}")
 
 
+def optimize_params() -> None:
+    """09:05 — Optimize strategy parameters based on last 30 days of data."""
+    if not _is_market_day():
+        return
+    logger.info("=== PARAMETER OPTIMIZATION (09:05 IST) ===")
+    
+    from learning.param_optimizer import ParamOptimizer
+    optimizer = ParamOptimizer()
+    
+    for symbol in _watchlist:
+        try:
+            optimizer.optimize_all(symbol, n_trials=30)
+        except Exception as e:
+            logger.warning(f"Optimization failed for {symbol}: {e}")
+
+
 def market_open() -> None:
     """09:15 — Market opens. Reset risk state and start Kite live tick feed."""
     if not _is_market_day():
@@ -501,6 +571,27 @@ def signal_check() -> None:
             sym, df, ltp = future.result()
             symbol_data[sym] = (df, ltp)
 
+    # ── Stale-data guard ─────────────────────────────────────────────
+    # If every symbol's most-recent candle is from a prior calendar day,
+    # the exchange is closed (unrecognised holiday or weekend).  Trading on
+    # yesterday's candles produces phantom crossovers and would be wrong.
+    # We check a majority (>50%) of symbols rather than requiring all, to
+    # tolerate a handful of symbols that lag due to yfinance quirks.
+    today = now_ist.date()
+    fresh_count = sum(
+        1
+        for sym, (df, _) in symbol_data.items()
+        if df is not None and not df.empty and df.index[-1].date() == today
+    )
+    total_fetched = sum(1 for df, _ in symbol_data.values() if df is not None)
+    if total_fetched > 0 and fresh_count == 0:
+        logger.warning(
+            f"signal_check: all {total_fetched} symbol(s) have stale data "
+            f"(newest candle is NOT from {today}). "
+            f"Market may be closed for an unregistered holiday — skipping signal generation."
+        )
+        return
+
     # Fetch NIFTY's intraday % change, regime and direction once per cycle
     _nifty_chg = 0.0
     _regime_val = ""
@@ -600,7 +691,7 @@ def signal_check() -> None:
         # 5m candle timestamp — used to deduplicate signals across 1-min checks
         last_candle_ts = df.index[-1] if df is not None and not df.empty else None
 
-        for strategy in _strategies:
+        for strategy in _get_strategies_for_symbol(kite_sym):
             try:
                 signal: Signal = strategy.generate_signal(kite_sym, df)
                 if signal.action == Action.HOLD:
@@ -668,8 +759,8 @@ def signal_check() -> None:
                         trade_num=_trade_num,
                         day_pnl=_day_pnl,
                         adaptive_mode=_adp_mode,
-                        judgment=_judgment.judgment if _judgment else "",
-                        score=_judgment.score if _judgment else 0.0,
+                        judgment=_judgment.bias if _judgment else "",
+                        score=_judgment.position_scale if _judgment else 0.0,
                         regime=_regime_val,
                         direction=_direction_val,
                     )
@@ -781,6 +872,7 @@ def build_scheduler() -> BlockingScheduler:
     weekdays = "mon-fri"
 
     sched.add_job(pre_market_scan,  CronTrigger(day_of_week=weekdays, hour=9,  minute=0,  timezone=IST), id="pre_market_scan")
+    sched.add_job(optimize_params,  CronTrigger(day_of_week=weekdays, hour=9,  minute=5,  timezone=IST), id="optimize_params")
     sched.add_job(market_open,      CronTrigger(day_of_week=weekdays, hour=9,  minute=15, timezone=IST), id="market_open")
     sched.add_job(signal_check,     CronTrigger(day_of_week=weekdays, hour="9-14", minute="*/1", timezone=IST), id="signal_check")
     sched.add_job(stop_new_entries, CronTrigger(day_of_week=weekdays, hour=14, minute=30, timezone=IST), id="stop_new_entries")

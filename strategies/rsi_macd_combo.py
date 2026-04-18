@@ -56,41 +56,38 @@ class RSIMACDStrategy(BaseStrategy):
     Buys on MACD bullish crossover when RSI is in the neutral zone.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, params: dict | None = None) -> None:
         super().__init__(name="rsi_macd_combo")
-        params = cfg.STRATEGY_CONFIGS["rsi_macd_combo"]
+        self.default_params = params or cfg.STRATEGY_CONFIGS["rsi_macd_combo"]
+        # Cache: symbol → (indicators_dict, config_dict)
+        self._symbol_cache: dict[str, tuple[dict, dict]] = {}
+        # Dedup: symbol → last crossover bar index (persists independently of param cache)
+        self._last_crossover_bar: dict[str, object] = {}
 
-        self.rsi_buy_min           = params["rsi_buy_min"]
-        self.rsi_buy_max           = params["rsi_buy_max"]
-        self.rsi_exit              = params["rsi_exit"]
-        self.rsi_sell_min          = params.get("rsi_sell_min", 40)
-        self.require_ema_alignment = params.get("require_ema_alignment", True)
-        self.use_vwap_filter       = params.get("use_vwap_filter", True)
-        self.min_sl_pct            = params.get("min_sl_pct", 0.0075)
+    def _get_config(self, symbol: str) -> dict:
+        """Return merged config: global defaults (incl. adaptive changes) + per-symbol overrides."""
+        base = dict(cfg.STRATEGY_CONFIGS[self.name])
+        try:
+            from learning.param_optimizer import load_optimized_params
+            optimized = load_optimized_params(self.name, symbol)
+            if optimized:
+                base.update(optimized)
+        except Exception:
+            pass
+        return base
 
-        self._rsi  = RSIIndicator(
-            period=params["rsi_period"],
-            overbought=params["rsi_exit"],
-        )
-        self._macd = MACDIndicator(
-            fast=params["macd_fast"],
-            slow=params["macd_slow"],
-            signal=params["macd_signal"],
-        )
-
-    def _reload_params(self) -> None:
-        """
-        Re-read parameters from cfg.STRATEGY_CONFIGS so that runtime changes
-        made by AdaptiveStrategyManager take effect without a bot restart.
-        """
-        params = cfg.STRATEGY_CONFIGS["rsi_macd_combo"]
-        self.rsi_buy_min           = params["rsi_buy_min"]
-        self.rsi_buy_max           = params["rsi_buy_max"]
-        self.rsi_exit              = params["rsi_exit"]
-        self.rsi_sell_min          = params.get("rsi_sell_min", 40)
-        self.require_ema_alignment = params.get("require_ema_alignment", True)
-        self.use_vwap_filter       = params.get("use_vwap_filter", True)
-        self.min_sl_pct            = params.get("min_sl_pct", 0.0075)
+    def _init_indicators(self, params: dict) -> dict:
+        return {
+            "rsi": RSIIndicator(
+                period=params["rsi_period"],
+                overbought=params["rsi_exit"],
+            ),
+            "macd": MACDIndicator(
+                fast=params["macd_fast"],
+                slow=params["macd_slow"],
+                signal=params["macd_signal"],
+            ),
+        }
 
     def generate_signal(self, symbol: str, df: pd.DataFrame) -> Signal:
         """
@@ -100,8 +97,18 @@ class RSIMACDStrategy(BaseStrategy):
             symbol: e.g. "TCS"
             df:     OHLCV DataFrame (needs at least 35 candles for MACD)
         """
-        # Pick up any live parameter adjustments from AdaptiveStrategyManager
-        self._reload_params()
+        config = self._get_config(symbol)
+
+        if symbol not in self._symbol_cache or self._symbol_cache[symbol][1] != config:
+            self._symbol_cache[symbol] = (self._init_indicators(config), config)
+        inds, params = self._symbol_cache[symbol]
+
+        rsi_buy_min           = params["rsi_buy_min"]
+        rsi_buy_max           = params["rsi_buy_max"]
+        rsi_sell_min          = params.get("rsi_sell_min", 40)
+        require_ema_alignment = params.get("require_ema_alignment", True)
+        use_vwap_filter       = params.get("use_vwap_filter", True)
+        min_sl_pct            = params.get("min_sl_pct", 0.0075)
 
         current_price = df["close"].iloc[-1]
 
@@ -117,19 +124,36 @@ class RSIMACDStrategy(BaseStrategy):
                 return self.hold_signal(symbol, current_price)
 
         # Need enough candles for both indicators
-        min_candles = self._macd.min_candles + 2
+        min_candles = inds["macd"].min_candles + 2
         if len(df) < min_candles:
             return self.hold_signal(symbol, current_price)
 
         # Get current RSI value
-        rsi_val = self._rsi.get_value(df)
+        rsi_val = inds["rsi"].get_value(df)
         if rsi_val is None:
             return self.hold_signal(symbol, current_price)
 
         # Get MACD signal and histogram acceleration
-        macd_signal = self._macd.get_signal(df)
-        macd_val, signal_val, hist_curr = self._macd.get_values(df)
-        _, _, hist_prev = self._macd.get_values(df.iloc[:-1]) if len(df) > 1 else (None, None, None)
+        macd_signal = inds["macd"].get_signal(df)
+
+        # ── Crossover dedup ──────────────────────────────────────────
+        # A crossover is a one-candle event.  When yfinance returns stale/
+        # cached data the same closing candle re-appears every minute, causing
+        # the crossover condition to re-fire hundreds of times on a single bar.
+        # We track the last bar index (timestamp) that produced a crossover and
+        # suppress re-fires on the same bar.
+        if macd_signal != 0:
+            bar_key = df.index[-1]
+            if self._last_crossover_bar.get(symbol) == bar_key:
+                logger.debug(
+                    f"RSI+MACD {'BUY' if macd_signal == 1 else 'SELL'} skipped | "
+                    f"{symbol} | duplicate crossover on same bar {bar_key}"
+                )
+                macd_signal = 0
+            else:
+                self._last_crossover_bar[symbol] = bar_key
+        macd_val, signal_val, hist_curr = inds["macd"].get_values(df)
+        _, _, hist_prev = inds["macd"].get_values(df.iloc[:-1]) if len(df) > 1 else (None, None, None)
 
         # Histogram acceleration: histogram must be positive AND growing for 2 bars.
         # This filters momentum crossovers that immediately stall — a common noise source.
@@ -147,7 +171,7 @@ class RSIMACDStrategy(BaseStrategy):
         # Safety: if EMA can't be computed (< 21 candles), reject the signal —
         # early-morning trades on thin data cause the most random losses.
         ema_bullish = ema_bearish = True  # default: allow if filter disabled
-        if self.require_ema_alignment:
+        if require_ema_alignment:
             if len(df) < 21:
                 return self.hold_signal(symbol, current_price)
             close = df["close"]
@@ -166,7 +190,7 @@ class RSIMACDStrategy(BaseStrategy):
         # Lesson from 2026-04-02: every single losing short was entered BELOW
         # VWAP, meaning the stock had already fallen and was due for a bounce.
         vwap_val = None
-        if self.use_vwap_filter:
+        if use_vwap_filter:
             try:
                 vwap_series = compute_vwap(df)
                 v = vwap_series.iloc[-1]
@@ -177,7 +201,7 @@ class RSIMACDStrategy(BaseStrategy):
 
         # ── BUY signal ──────────────────────────────────────────────
         # MACD crossed up AND RSI neutral AND histogram accelerating
-        if macd_signal == 1 and self.rsi_buy_min <= rsi_val <= self.rsi_buy_max and hist_accelerating:
+        if macd_signal == 1 and rsi_buy_min <= rsi_val <= rsi_buy_max and hist_accelerating:
             if not ema_bullish:
                 logger.debug(f"RSI+MACD BUY skipped | {symbol} | EMA downtrend → no long")
                 return self.hold_signal(symbol, current_price)
@@ -191,7 +215,7 @@ class RSIMACDStrategy(BaseStrategy):
 
             atr = self._compute_atr(df)
             # Minimum SL distance: at least min_sl_pct of price to avoid noise hits
-            sl_dist  = max(1.5 * atr, current_price * self.min_sl_pct)
+            sl_dist  = max(1.5 * atr, current_price * min_sl_pct)
             tgt_dist = sl_dist * 2.0   # 2:1 reward:risk
             stop_loss = round(current_price - sl_dist, 2)
             target    = round(current_price + tgt_dist, 2)
@@ -209,17 +233,22 @@ class RSIMACDStrategy(BaseStrategy):
                 strategy=self.name,
                 reason=(
                     f"MACD bullish crossover (MACD={macd_val:.4f} > Signal={signal_val:.4f}), "
-                    f"RSI={rsi_val:.1f} in neutral zone [{self.rsi_buy_min}–{self.rsi_buy_max}]"
+                    f"RSI={rsi_val:.1f} in neutral zone [{rsi_buy_min}–{rsi_buy_max}]"
                 ),
             )
 
         # ── SELL signal ─────────────────────────────────────────────
-        # MACD crossed down OR RSI overbought
+        # Only MACD bearish crossover triggers a new short entry.
+        #
+        # RSI overbought (≥ rsi_exit) is intentionally NOT used here.
+        # RSI ≥ 80 means strong upward momentum — entering a short against that
+        # momentum leads to immediate stop-outs (confirmed by every Apr-02 RSI
+        # overbought short: IDs 19–24 all lost ₹400–₹1,700 each).
+        # The correct place to act on RSI extremes is exit monitoring for open
+        # longs — not a fresh SHORT entry.
         sell_reason = None
         if macd_signal == -1:
             sell_reason = f"MACD bearish crossover (MACD={macd_val:.4f} < Signal={signal_val:.4f})"
-        elif rsi_val >= self.rsi_exit:
-            sell_reason = f"RSI overbought exit (RSI={rsi_val:.1f} >= {self.rsi_exit})"
 
         if sell_reason:
             if not ema_bearish:
@@ -230,14 +259,15 @@ class RSIMACDStrategy(BaseStrategy):
             # and is primed for a bounce — entering a short here is chasing.
             # ICICIBANK RSI=16.2, AXISBANK RSI=16.5 on 2026-04-02 were the clearest
             # examples: both already crashed and promptly reversed upward.
-            if rsi_val < self.rsi_sell_min:
+            if rsi_val < rsi_sell_min:
                 logger.debug(
-                    f"RSI+MACD SELL skipped | {symbol} | RSI={rsi_val:.1f} < {self.rsi_sell_min} "
+                    f"RSI+MACD SELL skipped | {symbol} | RSI={rsi_val:.1f} < {rsi_sell_min} "
                     f"(already oversold — likely to bounce)"
                 )
                 return self.hold_signal(symbol, current_price)
 
             # VWAP: only short when price is above VWAP (shorting relative strength)
+            # No band for SELL — shorting into weakness below VWAP leads to bounce stop-outs
             if vwap_val is not None and current_price < vwap_val:
                 logger.debug(
                     f"RSI+MACD SELL skipped | {symbol} | price={current_price:.2f} < VWAP={vwap_val:.2f} "
@@ -246,7 +276,7 @@ class RSIMACDStrategy(BaseStrategy):
                 return self.hold_signal(symbol, current_price)
 
             atr = self._compute_atr(df)
-            sl_dist  = max(1.5 * atr, current_price * self.min_sl_pct)
+            sl_dist  = max(1.5 * atr, current_price * min_sl_pct)
             tgt_dist = sl_dist * 2.0
             stop_loss = round(current_price + sl_dist, 2)
             target    = round(current_price - tgt_dist, 2)

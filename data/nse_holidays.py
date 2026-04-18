@@ -53,12 +53,20 @@ NSE_HOLIDAYS: dict[date, str] = {
     date(2025, 11, 5):  "Gurunanak Jayanti",
     date(2025, 12, 25): "Christmas",
 
-    # ── 2026 (tentative — update when NSE publishes official list) ────
+    # ── 2026 ──────────────────────────────────────────────────────────
     date(2026, 1, 26):  "Republic Day",
     date(2026, 3, 3):   "Mahashivratri",
+    date(2026, 3, 20):  "Id-ul-Fitr (Ramadan Eid)",
     date(2026, 4, 3):   "Good Friday",
+    date(2026, 4, 14):  "Dr. Ambedkar Jayanti",
+    # date(2026, 4, 15):  "Ram Navami",  # NSE did not close — removed
+    date(2026, 5, 1):   "Maharashtra Day",
     date(2026, 8, 15):  "Independence Day",
+    date(2026, 8, 17):  "Ganesh Chaturthi",
     date(2026, 10, 2):  "Mahatma Gandhi Jayanti",
+    date(2026, 11, 9):  "Diwali Laxmi Pujan",
+    date(2026, 11, 10): "Diwali Balipratipada",
+    date(2026, 11, 25): "Gurunanak Jayanti",
     date(2026, 12, 25): "Christmas",
 }
 

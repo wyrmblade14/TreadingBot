@@ -39,29 +39,6 @@ from config.settings import IST, VIRTUAL_CAPITAL, WATCHLIST_SIZE
 import scheduler.bot_state as _state
 
 
-def _oci_backup() -> None:
-    """
-    02:00 IST daily — dump PostgreSQL to Oracle Object Storage.
-    Silently skipped if OCI CLI is not configured (local dev, non-Oracle deploys).
-    """
-    import subprocess
-    script = Path(__file__).parent.parent / "oci" / "backup.sh"
-    if not script.exists():
-        return
-    try:
-        result = subprocess.run(
-            ["bash", str(script)],
-            capture_output=True, text=True, timeout=300,
-        )
-        if result.returncode == 0:
-            logger.info(f"OCI backup: {result.stdout.strip().splitlines()[-1]}")
-        else:
-            logger.warning(f"OCI backup failed: {result.stderr.strip()[:200]}")
-    except FileNotFoundError:
-        pass   # bash not available — skip silently
-    except Exception as exc:
-        logger.debug(f"OCI backup skipped: {exc}")
-
 _RUNS_DIR = Path(__file__).parent.parent / "logs" / "runs"
 _LOG_FMT  = "{time:YYYY-MM-DD HH:mm:ss} IST | {level:<8} | {message}"
 
@@ -166,7 +143,6 @@ class BotController:
                 stop_new_entries, square_off_all, daily_report, auto_shutdown,
             )
 
-            sched.add_job(_oci_backup,         CronTrigger(hour=2, minute=0, timezone=IST),   id="oci_backup")
             sched.add_job(kite_login_reminder, CronTrigger(day_of_week=weekdays, hour=8,      minute=30,   timezone=IST), id="kite_login_reminder")
             sched.add_job(pre_market_scan,     CronTrigger(day_of_week=weekdays, hour=9,      minute=0,    timezone=IST), id="pre_market_scan")
             sched.add_job(market_open,      CronTrigger(day_of_week=weekdays, hour=9,      minute=15,   timezone=IST), id="market_open")

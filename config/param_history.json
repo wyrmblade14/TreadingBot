@@ -1,0 +1,2 @@
+{"rsi_macd_combo":{"INFY":{"params":{"rsi_period":4,"macd_fast":8,"macd_slow":26,"macd_signal":9,"rsi_buy_min":35,"rsi_buy_max":65,"rsi_exit":80,"rsi_sell_min":40,"require_
+  ema_alignment":true,"use_vwap_filter":true,"vwap_band_pct":0.005,"min_sl_pct":0.0075},"optimized_at":"2026-04-17"}}}

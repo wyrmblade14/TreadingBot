@@ -20,14 +20,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Load secrets from OCI Vault (if configured) — must run before any os.getenv() below.
-# Falls back to .env silently if Vault is not configured or unreachable.
-try:
-    from config.secrets import load_vault_secrets
-    load_vault_secrets()
-except Exception:
-    pass  # fail-open: .env values already loaded above
-
 # ── Timezone ──────────────────────────────────────────────────────────
 IST = pytz.timezone("Asia/Kolkata")
 
@@ -126,7 +118,7 @@ STAMP_DUTY_BUY             = 0.00003    # 0.003% on buy-side turnover
 # ── Slippage Simulation ───────────────────────────────────────────────
 # In real markets, you never get the exact last-traded price when placing orders.
 # Market orders fill slightly worse than the displayed price.
-SLIPPAGE_PCT = 0.002  # 0.2% per side — realistic for NSE intraday market orders
+SLIPPAGE_PCT = 0.0002  # 0.02% per side — realistic for NSE intraday market orders
 
 # ── Partial Fill Simulation ───────────────────────────────────────────
 # In real markets, large orders "sweep" through multiple price levels in the

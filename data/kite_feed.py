@@ -55,6 +55,7 @@ from data.kite_auth import get_kite_client
 # Populated lazily on first use; lives for the process lifetime.
 _token_cache: dict[str, int] = {}
 _token_lock  = threading.Lock()
+_token_fetch_failed_until: float = 0.0   # monotonic time — skip fetch until this passes
 _PANDAS_IST = ZoneInfo("Asia/Kolkata")
 
 
@@ -79,11 +80,16 @@ def _load_instrument_tokens(kite, symbols: list[str]) -> dict[str, int]:
     Fetch NSE instrument list from Kite and extract tokens for requested symbols.
     This hits the Kite API once and caches results — subsequent calls are instant.
     """
-    global _token_cache
+    global _token_cache, _token_fetch_failed_until
 
     # Return from cache if all symbols already known
     missing = [s for s in symbols if s not in _token_cache]
     if not missing:
+        return {s: _token_cache[s] for s in symbols if s in _token_cache}
+
+    # Skip API call if we're in a cooldown from a recent failure
+    import time as _t
+    if _t.monotonic() < _token_fetch_failed_until:
         return {s: _token_cache[s] for s in symbols if s in _token_cache}
 
     logger.debug(f"Kite: fetching instrument tokens for {len(missing)} symbols...")
@@ -106,6 +112,7 @@ def _load_instrument_tokens(kite, symbols: list[str]) -> dict[str, int]:
 
     except Exception as exc:
         logger.warning(f"Kite: instrument fetch failed — {exc}")
+        _token_fetch_failed_until = _t.monotonic() + 300  # 5-min cooldown
 
     return {s: _token_cache[s] for s in symbols if s in _token_cache}
 

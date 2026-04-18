@@ -1,4 +1,4 @@
-name: CI/CD Build & Deploy
+name: CI — Build & Push Images
 
 on:
   push:
@@ -35,7 +35,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ── Build Bot Image ──────────────────────────────────────────
       - name: Build and push Bot image
         uses: docker/build-push-action@v5
         with:
@@ -46,7 +45,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ── Build Dashboard API Image ────────────────────────────────
       - name: Build and push Dashboard API image
         uses: docker/build-push-action@v5
         with:
@@ -57,7 +55,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ── Build React Dashboard Image ─────────────────────────────
       - name: Build and push React Dashboard image
         uses: docker/build-push-action@v5
         with:
@@ -70,81 +67,3 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NEXT_PUBLIC_DASHBOARD_API_URL=${{ secrets.NEXT_PUBLIC_DASHBOARD_API_URL }}
-
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set lower case image names
-        run: |
-          echo "IMAGE_NAME_BOT=$(echo ${{ github.repository }}-bot | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-          echo "IMAGE_NAME_API=$(echo ${{ github.repository }}-api | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-          echo "IMAGE_NAME_DASH=$(echo ${{ github.repository }}-dash | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Copy docker-compose files to remote
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ubuntu
-          key: ${{ secrets.OCI_SSH_KEY }}
-          source: "docker-compose.yml,docker-compose.prod.yml,config/nginx/nginx.conf"
-          target: "~/TreadingBot"
-
-      - name: Write .env to OCI host
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ubuntu
-          key: ${{ secrets.OCI_SSH_KEY }}
-          script: |
-            mkdir -p ~/TreadingBot
-            cat > ~/TreadingBot/.env << 'ENVEOF'
-            KITE_API_KEY=${{ secrets.KITE_API_KEY }}
-            KITE_API_SECRET=${{ secrets.KITE_API_SECRET }}
-            KITE_ACCESS_TOKEN=
-            ZERODHA_USER_ID=${{ secrets.ZERODHA_USER_ID }}
-            ZERODHA_PASSWORD=${{ secrets.ZERODHA_PASSWORD }}
-            ZERODHA_TOTP_SECRET=${{ secrets.ZERODHA_TOTP_SECRET }}
-            TRADING_MODE=${{ secrets.TRADING_MODE }}
-            VIRTUAL_CAPITAL=${{ secrets.VIRTUAL_CAPITAL }}
-            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-            TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            NEXT_PUBLIC_DASHBOARD_API_URL=${{ secrets.NEXT_PUBLIC_DASHBOARD_API_URL }}
-            DASHBOARD_API_INTERNAL_URL=http://dashboard-api:8000
-            DASHBOARD_API_HOST=0.0.0.0
-            DASHBOARD_API_PORT=8000
-            OCI_VAULT_ID=${{ secrets.OCI_VAULT_ID }}
-            ENVEOF
-
-      - name: SSH Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.OCI_HOST }}
-          username: ubuntu
-          key: ${{ secrets.OCI_SSH_KEY }}
-          command_timeout: 10m
-          script: |
-            cd ~/TreadingBot
-
-            # Log in to GHCR
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # Export and Run in a single execution block
-            export BOT_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BOT }}:latest
-            export API_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}:latest
-            export DASH_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_DASH }}:latest
-
-            # Pull only app images — postgres is a fixed version, skip it to avoid OCI network timeouts
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull bot dashboard-api react-dashboard nginx
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps postgres bot dashboard-api react-dashboard nginx
-
-            docker image prune -f

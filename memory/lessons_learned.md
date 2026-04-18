@@ -261,3 +261,52 @@ type: project
   while building a DataFrame from those with `'NoneType' object has no attribute 'timezone'`.
 - Fix in `data/kite_feed.py`: normalise each Kite record's `date` to stdlib
   `ZoneInfo("Asia/Kolkata")` before `pd.DataFrame(records)`.
+
+## Paper Trading Slippage — The 0.2% Pitfall
+- Before fix: `SLIPPAGE_PCT` was set to `0.002` (0.2%).
+- Effect: on a round-trip trade, this created a 0.4% artificial drag. For strategies with tight
+  stops (e.g. EMA crossover on 5m candles), the slippage alone was often larger than the
+  risk-per-share, causing immediate stop-loss hits as soon as the trade opened.
+- Fix: Reduced `SLIPPAGE_PCT` to `0.0002` (0.02%). This is much more realistic for liquid
+  NIFTY50 stocks and allows strategies to actually survive their initial entry volatility.
+
+## Self-Learning Parameter Optimization (Bayesian)
+- Fixed strategy parameters (EMA 9/21) are "static maps for a dynamic territory."
+- Optuna-based Bayesian optimization is exponentially faster than grid search for finding
+  optimal periods and multipliers.
+- Safety gate: only apply new parameters if they improve the Sharpe Ratio by >10% over the
+  last 30 days of data. This prevents "over-fitting to noise" (curve fitting).
+- Strategy architecture: indicators must be cached per-symbol to allow different stocks
+  (e.g. high-beta vs low-beta) to use their own mathematically optimal parameters.
+
+## Per-Symbol `_get_config` Pattern — Adaptive Mode Compatibility
+- Key invariant: `_get_config(symbol)` must START from live `cfg.STRATEGY_CONFIGS` (not
+  `self.default_params` frozen at `__init__` time), then overlay per-symbol optimized params.
+- Reason: `AdaptiveStrategyManager` modifies `cfg.STRATEGY_CONFIGS` in-place at runtime
+  (e.g. rsi_buy_min, min_sl_pct). If `_get_config` returns `self.default_params`, the
+  adaptive mode changes are invisible to all but the very first symbol evaluated.
+- Only overlay *structural* params (periods, multipliers) from `param_history.json` — never
+  override adaptive-controlled thresholds (RSI levels, SL percentages).
+
+## Indicator Cache Invalidation via Dict Equality
+- `_symbol_cache[symbol][1] != config` uses Python dict `==` (value equality, not identity).
+- Any change to config — from optimizer, adaptive mode, or a fresh `param_history.json` write —
+  automatically triggers a cache rebuild. No manual version counter needed.
+- This is cheaper than rebuilding every candle while still reacting to parameter changes.
+
+## Strategies Without Long-Lived Indicator Objects Need No Cache
+- `vwap_bounce.py` computes all indicators inline via the `ta` library with params passed
+  directly. There are no period-baked indicator objects to rebuild.
+- For these, `_get_config(symbol)` is still needed (for per-symbol params), but `_init_indicators`
+  and `_symbol_cache` are unnecessary overhead. Don't add them.
+
+## Relative Paths Break After `monkeypatch.chdir(tmp_path)` in Tests
+- `_make_get_fn()` in `tests/test_symbol_strategy_map.py` reads `scheduler/job_runner.py`
+  to extract `_get_strategies_for_symbol`. Using `Path("scheduler/job_runner.py")` (relative)
+  breaks when a test changes CWD via `monkeypatch.chdir(tmp_path)`.
+- Fix: always resolve the source file with `Path(__file__).parent.parent / "scheduler/job_runner.py"`
+  (absolute path derived from the test file's own location).
+
+## venv Location Is `.venv/` (Leading Dot)
+- The virtual environment is at `.venv/`, not `venv/`. Activate with `source .venv/bin/activate`.
+- Memory/docs previously said `venv/` — that was wrong and caused "command not found" errors.

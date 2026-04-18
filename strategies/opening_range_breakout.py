@@ -74,23 +74,39 @@ class ORBStrategy(BaseStrategy):
     Trades breakouts from the 9:15–9:30 AM price range.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, params: dict | None = None) -> None:
         super().__init__(name="opening_range_breakout")
-        params = cfg.STRATEGY_CONFIGS["opening_range_breakout"]
+        self.default_params = params or cfg.STRATEGY_CONFIGS["opening_range_breakout"]
+        # Cache: symbol → (indicators_dict, config_dict)
+        self._symbol_cache: dict[str, tuple[dict, dict]] = {}
 
-        self.volume_multiplier = params["volume_multiplier"]
-        _orb_minutes  = params["orb_duration_minutes"]
-        _orb_end_time = (
-            datetime.combine(date.today(), time(9, 15)) + timedelta(minutes=_orb_minutes)
+    def _get_config(self, symbol: str) -> dict:
+        """Return merged config: global defaults (incl. adaptive changes) + per-symbol overrides."""
+        base = dict(cfg.STRATEGY_CONFIGS[self.name])
+        try:
+            from learning.param_optimizer import load_optimized_params
+            optimized = load_optimized_params(self.name, symbol)
+            if optimized:
+                base.update(optimized)
+        except Exception:
+            pass
+        return base
+
+    def _init_indicators(self, params: dict) -> dict:
+        orb_minutes = params["orb_duration_minutes"]
+        orb_end_time = (
+            datetime.combine(date.today(), time(9, 15)) + timedelta(minutes=orb_minutes)
         ).time()
-        self._indicator = ORBIndicator(
-            orb_end_time=_orb_end_time,
-            volume_multiplier=self.volume_multiplier,
-        )
-        self._supertrend = SupertrendIndicator(
-            period=params["supertrend_period"],
-            multiplier=params["supertrend_multiplier"],
-        )
+        return {
+            "indicator": ORBIndicator(
+                orb_end_time=orb_end_time,
+                volume_multiplier=params["volume_multiplier"],
+            ),
+            "supertrend": SupertrendIndicator(
+                period=params["supertrend_period"],
+                multiplier=params["supertrend_multiplier"],
+            ),
+        }
 
     def generate_signal(self, symbol: str, df: pd.DataFrame) -> Signal:
         """
@@ -100,6 +116,12 @@ class ORBStrategy(BaseStrategy):
             symbol: e.g. "INFY"
             df:     OHLCV DataFrame with IST-timezone index (5-minute candles)
         """
+        config = self._get_config(symbol)
+
+        if symbol not in self._symbol_cache or self._symbol_cache[symbol][1] != config:
+            self._symbol_cache[symbol] = (self._init_indicators(config), config)
+        inds, params = self._symbol_cache[symbol]
+
         current_price = df["close"].iloc[-1]
 
         if len(df) < 4:
@@ -124,7 +146,7 @@ class ORBStrategy(BaseStrategy):
         if current_time >= _LATE_ENTRY_CUTOFF:
             return self.hold_signal(symbol, current_price)
 
-        orb_range = self._indicator.get_range(df)
+        orb_range = inds["indicator"].get_range(df)
         if orb_range is None:
             return self.hold_signal(symbol, current_price)
 
@@ -134,13 +156,13 @@ class ORBStrategy(BaseStrategy):
         if orb_width <= 0:
             return self.hold_signal(symbol, current_price)
 
-        orb_signal = self._indicator.get_signal(df)
+        orb_signal = inds["indicator"].get_signal(df)
         vwap_bias  = get_vwap_signal(df)   # 0 = daily/unavailable (skip filter)
 
         # Supertrend trend filter: ensures the breakout aligns with the day's
         # underlying trend. A bullish ORB breakout against a bearish Supertrend
         # often fails — institutions are not actually buying.
-        st_signal = self._supertrend.get_signal(df)
+        st_signal = inds["supertrend"].get_signal(df)
 
         # ── BUY signal ──────────────────────────────────────────────
         # Supertrend bullish (+1) AND VWAP confirms (institutional buy bias)

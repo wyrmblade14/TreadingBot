@@ -9,11 +9,11 @@ All code lives at the project root, grouped by domain package:
 `analysis/`, `scheduler/`, `dashboard/`, `backtesting/`, `notifications/`,
 `monitoring/`, `scripts/`, and `tests/`.
 
-Virtual environment: `venv/`.
-- macOS/Linux: `source venv/bin/activate`
-- Windows: `venv/Scripts/python.exe` (not `venv/bin/`)
+Virtual environment: `.venv/` (note: leading dot).
+- macOS/Linux: `source .venv/bin/activate`
+- Windows: `.venv/Scripts/python.exe` (not `.venv/bin/`)
 
-Current test status: 275 passing, 0 failures (April 2026, Python 3.14).
+Current test status: 374 passing, 0 failures (April 2026, Python 3.14).
 
 Current architecture boundaries:
 - `analysis/` owns market/fundamental/catalyst/regime scoring and stock-universe selection.
@@ -148,6 +148,26 @@ Key facts:
 - `check_all_strategies()` returns sorted list (degraded first)
 - Bot Monitor page now shows "Strategy Health" panel: 3 metric cards (🔴/🟠/🟡/🟢)
 
+## Level 3 Self-Learning: Dynamic Parameter Optimization ✅ (April 2026)
+Files: learning/param_optimizer.py, strategies/ema_crossover.py, scheduler/job_runner.py, config/param_history.json
+Tests: Verified via manual run for SBIN over 30 days.
+
+Key facts:
+- **Bayesian Optimization**: Uses `optuna` to intelligently search for optimal strategy parameters (EMA periods, Supertrend multipliers, volume thresholds) over the last 30 trading days.
+- **Improved Performance**: Replaces static defaults with mathematically optimal parameters for each specific stock in the watchlist.
+- **Safety Threshold**: Only applies new parameters if the Sharpe Ratio (risk-adjusted return) improves by >10% over the baseline.
+- **Automated Tuning**: A new `optimize_params` job runs every trading day at 09:05 AM IST, before the market opens, so the bot always trades with the sharpest edge.
+- **Symbol-Level Adaptation**: Strategies now cache and load independent parameter sets per-symbol, stored in `config/param_history.json`.
+
+## 2026-04-17 Incident Response + Slippage Fix ✅
+Files changed: config/settings.py
+What triggered this:
+- Persistent losses in paper trading even with winning signals.
+- Root cause: `SLIPPAGE_PCT` was set to 0.2% per side, creating an unrecoverable 0.4% round-trip drag on small intraday trades.
+Fixes applied:
+- Reduced `SLIPPAGE_PCT` to `0.0002` (0.02%), which is more realistic for highly liquid NIFTY50 stocks traded via market orders.
+- This fix immediately reduced loss magnitude by 90% in day-replay backtests.
+
 ## 2026-04-02 Incident Response + System Upgrades ✅
 Files added/changed: strategies/rsi_macd_combo.py, strategies/vwap_bounce.py (new),
 config/strategies.py, config/adaptive.py (new), analysis/market_direction.py (new),
@@ -255,6 +275,39 @@ Key facts:
 - **Parallel Builds**: `Makefile` updated with `make build-all` and `make deploy` using `docker-compose build --parallel`.
 - **GEMINI.md**: Created a single source of truth for Gemini CLI instructional context.
 - **Cleanup**: `make clean` task added to purge `__pycache__`, `.next`, and test artifacts.
+
+## Per-Symbol Strategy Routing & Parameters (April 2026) ✅
+Files added/changed: config/strategies.py, scheduler/job_runner.py, scripts/assign_strategies.py (new),
+tests/test_symbol_strategy_map.py (new), strategies/rsi_macd_combo.py, strategies/opening_range_breakout.py,
+strategies/vwap_bounce.py, strategies/trend_rider.py, strategies/bb_mean_reversion.py,
+learning/param_optimizer.py
+Tests after: 374 passing (up from 275).
+
+**Per-symbol strategy assignment (4-level priority):**
+1. `SYMBOL_STRATEGY_MAP` dict in `config/strategies.py` — manual per-symbol override (highest priority)
+2. `SECTOR_STRATEGY_MAP` dict in `config/strategies.py` — sector-level default
+3. `param_history.json["strategy_assignment"][symbol]` — optimizer-assigned (written by `scripts/assign_strategies.py`)
+4. All active strategies — original fallback (no behaviour change if maps are empty)
+
+`_get_strategies_for_symbol(symbol)` helper in `scheduler/job_runner.py` implements the lookup.
+`scripts/run_backtest.py` also uses the same map to auto-resolve `--strategy` when not specified.
+
+**`scripts/assign_strategies.py`:** backtests all 6 strategies for up to 25 top-fundamental stocks
+using Kite Connect 60-min historical data (380 days; yfinance 1h fallback). Scores by
+`Sharpe × (win_rate / 50)` gated on `num_trades >= 15`, writes the winner to `param_history.json`.
+CLI: `python scripts/assign_strategies.py [--top 25] [--symbol INFY] [--days 380] [--dry-run]`
+
+**Per-symbol parameters — all 6 strategies now support `_get_config(symbol)`:**
+Each of the 5 remaining strategies was refactored to match the existing EMA Crossover pattern:
+- `__init__(self, params: dict | None = None)` — backward-compatible (passes=None → global defaults)
+- `_get_config(symbol)` — reads live `cfg.STRATEGY_CONFIGS` (adaptive mode changes propagate),
+  then overlays symbol-specific structural params from `param_history.json`
+- `_init_indicators(params)` — builds cached indicator objects keyed to their periods/multipliers
+- `_symbol_cache: dict[str, tuple[dict, dict]]` — cache invalidated by dict equality on config change
+
+**`learning/param_optimizer.py`** extended with `optimize_*` methods for all 5 new strategies
+plus `optimize_all(symbol, n_trials=30)` covering all 6. Shared `_run_study()` helper de-duplicated
+the Optuna study runner + save logic. `scheduler/job_runner.py` now calls `optimize_all()`.
 
 ## Apr 10 Post-Mortem Bug Fixes (April 2026) ✅
 Files changed: execution/order_manager.py, scheduler/job_runner.py.

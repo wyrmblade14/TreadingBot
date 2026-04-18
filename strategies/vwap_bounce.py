@@ -70,29 +70,32 @@ class VWAPBounceStrategy(BaseStrategy):
     _ENTRY_START = time(9, 45)   # after ORB settles
     _ENTRY_END   = time(13, 30)  # before choppy afternoon close
 
-    def __init__(self) -> None:
+    def __init__(self, params: dict | None = None) -> None:
         super().__init__(name="vwap_bounce")
-        params = cfg.STRATEGY_CONFIGS.get("vwap_bounce", {})
+        self.default_params = params or cfg.STRATEGY_CONFIGS.get("vwap_bounce", {})
 
-        self.vwap_tolerance   = params.get("vwap_tolerance_pct", 0.003)  # 0.3%
-        self.rsi_min          = params.get("rsi_min", 35)
-        self.rsi_max          = params.get("rsi_max", 65)
-        self.volume_mult      = params.get("volume_multiplier", 1.2)
-        self.min_sl_pct       = params.get("min_sl_pct", 0.0075)
-        self.rsi_period       = params.get("rsi_period", 6)
-
-    def _reload_params(self) -> None:
-        """Re-read live params — picked up by AdaptiveStrategyManager changes."""
-        params = cfg.STRATEGY_CONFIGS.get("vwap_bounce", {})
-        self.vwap_tolerance = params.get("vwap_tolerance_pct", 0.003)
-        self.rsi_min        = params.get("rsi_min", 35)
-        self.rsi_max        = params.get("rsi_max", 65)
-        self.volume_mult    = params.get("volume_multiplier", 1.2)
-        self.min_sl_pct     = params.get("min_sl_pct", 0.0075)
-        self.rsi_period     = params.get("rsi_period", 6)
+    def _get_config(self, symbol: str) -> dict:
+        """Return merged config: global defaults (incl. adaptive changes) + per-symbol overrides."""
+        base = dict(cfg.STRATEGY_CONFIGS.get(self.name, {}))
+        try:
+            from learning.param_optimizer import load_optimized_params
+            optimized = load_optimized_params(self.name, symbol)
+            if optimized:
+                base.update(optimized)
+        except Exception:
+            pass
+        return base
 
     def generate_signal(self, symbol: str, df: pd.DataFrame) -> Signal:
-        self._reload_params()
+        config = self._get_config(symbol)
+
+        vwap_tolerance = config.get("vwap_tolerance_pct", 0.003)
+        rsi_min        = config.get("rsi_min", 35)
+        rsi_max        = config.get("rsi_max", 65)
+        volume_mult    = config.get("volume_multiplier", 1.2)
+        min_sl_pct     = config.get("min_sl_pct", 0.0075)
+        rsi_period     = config.get("rsi_period", 6)
+
         current_price = df["close"].iloc[-1]
 
         # ── Regime filter ────────────────────────────────────────────
@@ -141,7 +144,7 @@ class VWAPBounceStrategy(BaseStrategy):
         if math.isnan(ema9_val) or math.isnan(ema21_val):
             return self.hold_signal(symbol, current_price)
 
-        rsi_val = float(ta.momentum.RSIIndicator(close, window=self.rsi_period).rsi().iloc[-1])
+        rsi_val = float(ta.momentum.RSIIndicator(close, window=rsi_period).rsi().iloc[-1])
         if math.isnan(rsi_val):
             return self.hold_signal(symbol, current_price)
 
@@ -149,7 +152,7 @@ class VWAPBounceStrategy(BaseStrategy):
         if "volume" in df.columns and len(df) >= 20:
             vol_avg = float(df["volume"].rolling(20).mean().iloc[-1])
             vol_now = float(df["volume"].iloc[-1])
-            vol_ok  = vol_now >= vol_avg * self.volume_mult
+            vol_ok  = vol_now >= vol_avg * volume_mult
         else:
             vol_ok = True  # skip if volume data unavailable
 
@@ -176,13 +179,13 @@ class VWAPBounceStrategy(BaseStrategy):
 
         # ── BUY: price pulled back to VWAP, uptrend confirmed ─────────
         if (
-            dist_pct <= self.vwap_tolerance
+            dist_pct <= vwap_tolerance
             and bounced_up                       # confirmed cross: was below, now above
             and ema_bullish                      # short-term uptrend
-            and self.rsi_min <= rsi_val <= self.rsi_max
+            and rsi_min <= rsi_val <= rsi_max
             and vol_ok
         ):
-            sl_dist  = max(1.5 * atr, current_price * self.min_sl_pct)
+            sl_dist  = max(1.5 * atr, current_price * min_sl_pct)
             tgt_dist = sl_dist * 2.0
             stop_loss = round(current_price - sl_dist, 2)
             target    = round(current_price + tgt_dist, 2)
@@ -208,13 +211,13 @@ class VWAPBounceStrategy(BaseStrategy):
 
         # ── SELL: price rejected at VWAP, downtrend confirmed ─────────
         if (
-            dist_pct <= self.vwap_tolerance
+            dist_pct <= vwap_tolerance
             and rejected_dn                      # confirmed cross: was above, now below
             and ema_bearish                      # short-term downtrend
-            and self.rsi_min <= rsi_val <= self.rsi_max
+            and rsi_min <= rsi_val <= rsi_max
             and vol_ok
         ):
-            sl_dist  = max(1.5 * atr, current_price * self.min_sl_pct)
+            sl_dist  = max(1.5 * atr, current_price * min_sl_pct)
             tgt_dist = sl_dist * 2.0
             stop_loss = round(current_price + sl_dist, 2)
             target    = round(current_price - tgt_dist, 2)

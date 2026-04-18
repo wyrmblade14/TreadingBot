@@ -67,9 +67,18 @@ ATR_VOLATILE_RATIO     = 1.5    # ATR today > 1.5× its 20-day avg = spike day
 # Strategy names that are ALLOWED in each non-trending regime:
 #   RANGING:  RSI+MACD and BB Mean Reversion catch range-extreme reversals.
 #             VWAP Bounce is NOT allowed in ranging — VWAP is crossed too often.
+#             Trend Rider is NOT allowed in ranging — Supertrend flips on every wiggle.
 #   VOLATILE: none allowed (price spikes hit stops before targets)
 _RANGING_ALLOWED: set[str]  = {"rsi_macd_combo", "bb_mean_reversion"}
 _VOLATILE_ALLOWED: set[str] = set()
+
+# BB Mean Reversion is a counter-trend strategy — it bets on price snapping
+# back to the mean after an extreme move. In a confirmed TRENDING market
+# (ADX > 25) those "extreme moves" are momentum, not noise: every BB "buy the
+# dip" signal just catches a falling knife.
+# Backtest Apr 6-13: TRENDING regime, BB generated 74 trades at 19% win rate
+# = -₹65,793 across 10 symbols in 6 days.
+_TRENDING_SUPPRESSED: set[str] = {"bb_mean_reversion"}
 
 
 # ── Simple TTL cache ──────────────────────────────────────────────────
@@ -229,13 +238,17 @@ def regime_allows_strategy(regime: MarketRegime, strategy_name: str) -> bool:
         False → strategy should return HOLD without computing indicators.
 
     Rules:
-        TRENDING → all strategies allowed (strong directional market)
-        RANGING  → only rsi_macd_combo allowed (RSI catches range extremes)
+        TRENDING → trend-following strategies allowed; BB Mean Reversion
+                   suppressed (counter-trend in a trending market = losses)
+        RANGING  → rsi_macd_combo + bb_mean_reversion allowed;
+                   EMA Crossover + ORB suppressed (crossovers too noisy)
         VOLATILE → no strategy allowed (stops hit by noise, not reversals)
         UNKNOWN  → all allowed (fail-safe: don't suppress when unsure)
     """
-    if regime == MarketRegime.TRENDING or regime == MarketRegime.UNKNOWN:
+    if regime == MarketRegime.UNKNOWN:
         return True
+    if regime == MarketRegime.TRENDING:
+        return strategy_name not in _TRENDING_SUPPRESSED
     if regime == MarketRegime.RANGING:
         return strategy_name in _RANGING_ALLOWED
     if regime == MarketRegime.VOLATILE:

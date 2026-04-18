@@ -118,81 +118,45 @@ with patch("risk.risk_manager.datetime") as mock_dt:
 - `broker/kite_broker.py`: deferred live order execution
 - Daily re-auth: **fully automated** — see "Zero-Touch Daily Operations" below
 
-## Oracle Cloud Deployment via OCI CLI (Fully Automated)
+## Local Docker Deployment (One-Time Setup)
 
-**One command to provision everything** (VCN, subnet, firewall, instance, Docker, Tailscale):
-
+**Step 1 — Install Docker**
 ```bash
-# 1. Install OCI CLI (once)
-pip install oci-cli
-oci setup config          # follow prompts — needs tenancy OCID, user OCID, API key
-
-# 2. Provision
-make oci-provision        # ~5 min, prints SSH command when done
-
-# 3. SSH in, activate Tailscale, clone repo, set .env, deploy
-make oci-ssh              # connects automatically
-```
-
-Other OCI commands:
-```bash
-make oci-ssh              # SSH into the instance
-make oci-destroy          # terminate instance (asks for confirmation)
-make oci-provision ARGS="--compartment-id ocid1.compartment..."  # specific compartment
-```
-
-The provisioning script (`oci/provision.sh`) is idempotent — safe to run multiple times.
-
-## Oracle Cloud Deployment (One-Time Setup)
-
-**Step 1 — Provision Oracle Free Tier instance**
-- Shape: `VM.Standard.A1.Flex` (Ampere ARM) — 4 OCPU + 24 GB RAM, always free
-- OS: Ubuntu 22.04 LTS
-- VCN Security List: **delete all inbound rules** — block everything from internet
-
-**Step 2 — Install Tailscale (private VPN)**
-```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up
-# Open the auth URL on your phone/laptop to approve
-```
-Install Tailscale on your phone and laptop too. All devices share a private network.
-
-**Step 3 — Install Docker**
-```bash
+# Mac/Windows: install Docker Desktop
+# Linux:
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER && newgrp docker
-sudo apt-get install -y docker-compose-plugin
 ```
 
-**Step 4 — Clone and configure**
+**Step 2 — Clone and configure**
 ```bash
 git clone <your-repo> TreadingBot && cd TreadingBot
 cp .env.example .env
 ```
-Edit `.env` — set every value including:
+Edit `.env` — set:
 ```
-ZERODHA_USER_ID=...          # enables auto-login — no manual token refresh ever
+KITE_API_KEY=...
+KITE_API_SECRET=...
+ZERODHA_USER_ID=...        # enables auto-login — no manual token refresh
 ZERODHA_PASSWORD=...
-ZERODHA_TOTP_SECRET=...      # base32 key from Zerodha Console → Security
-NEXT_PUBLIC_DASHBOARD_API_URL=http://$(tailscale ip -4)  # your Tailscale IP, no port
+ZERODHA_TOTP_SECRET=...    # base32 key from Zerodha Console → Security
 ```
 
-**Step 5 — Deploy**
+**Step 3 — Start**
 ```bash
-make prod-up
+make up
 ```
-Builds images, starts all containers, prints your Tailscale dashboard URL. Done.
+Builds images, starts all containers (bot + dashboard + API + postgres).
 
-**Access from any Tailscale device:**
-- Dashboard: `http://100.x.x.x` (Tailscale IP)
-- API health: `http://100.x.x.x/api/health`
-- Public internet: cannot reach anything — VCN blocks all inbound
+**Access:**
+- Dashboard: `http://localhost:3000`
+- API: `http://localhost:8000`
 
-**After first deploy:**
-- Code changes: `make prod-deploy` (redeploys, postgres untouched)
-- Server reboots: `restart: unless-stopped` brings everything back automatically
-- Daily token: fully automated at 8:30 AM via TOTP — no action needed
+**Day-to-day:**
+- Kite login: `make login` (auto) or `make login-manual` (browser)
+- Restart bot only: `make bot`
+- Logs: `make logs`
+- Stop everything: `make down`
 
 ## Zero-Touch Daily Operations
 Set these once in `.env`; the bot handles everything after:

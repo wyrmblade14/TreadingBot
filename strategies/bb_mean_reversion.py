@@ -68,17 +68,28 @@ class BBMeanReversionStrategy(BaseStrategy):
     Targets the middle band (20-period SMA) with a minimum 2:1 RR.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, params: dict | None = None) -> None:
         super().__init__(name="bb_mean_reversion")
-        params = cfg.STRATEGY_CONFIGS["bb_mean_reversion"]
+        self.default_params = params or cfg.STRATEGY_CONFIGS["bb_mean_reversion"]
+        # Cache: symbol → (indicators_dict, config_dict)
+        self._symbol_cache: dict[str, tuple[dict, dict]] = {}
 
-        self.bb_period      = params["bb_period"]        # SMA window for middle band
-        self.bb_std_dev     = params["bb_std_dev"]       # Band width in standard deviations
-        self.rsi_period     = params["rsi_period"]       # RSI lookback
-        self.rsi_oversold   = params["rsi_oversold"]     # RSI below this → oversold (BUY filter)
-        self.rsi_overbought = params["rsi_overbought"]   # RSI above this → overbought (SELL filter)
+    def _get_config(self, symbol: str) -> dict:
+        """Return merged config: global defaults (incl. adaptive changes) + per-symbol overrides."""
+        base = dict(cfg.STRATEGY_CONFIGS[self.name])
+        try:
+            from learning.param_optimizer import load_optimized_params
+            optimized = load_optimized_params(self.name, symbol)
+            if optimized:
+                base.update(optimized)
+        except Exception:
+            pass
+        return base
 
-        self._rsi = RSIIndicator(period=self.rsi_period)
+    def _init_indicators(self, params: dict) -> dict:
+        return {
+            "rsi": RSIIndicator(period=params["rsi_period"]),
+        }
 
     # ── Public API ────────────────────────────────────────────────────
 
@@ -91,6 +102,17 @@ class BBMeanReversionStrategy(BaseStrategy):
             df:     OHLCV DataFrame — at least 25 candles needed.
                     Works on any timeframe (5-min, hourly, daily).
         """
+        config = self._get_config(symbol)
+
+        if symbol not in self._symbol_cache or self._symbol_cache[symbol][1] != config:
+            self._symbol_cache[symbol] = (self._init_indicators(config), config)
+        inds, params = self._symbol_cache[symbol]
+
+        bb_period      = params["bb_period"]
+        bb_std_dev     = params["bb_std_dev"]
+        rsi_oversold   = params["rsi_oversold"]
+        rsi_overbought = params["rsi_overbought"]
+
         current_price = df["close"].iloc[-1]
 
         # ── Regime filter ────────────────────────────────────────────
@@ -105,15 +127,15 @@ class BBMeanReversionStrategy(BaseStrategy):
                 return self.hold_signal(symbol, current_price)
 
         # ── Data sufficiency check ────────────────────────────────────
-        min_needed = max(self.bb_period, self.rsi_period) + 5
+        min_needed = max(bb_period, params["rsi_period"]) + 5
         if len(df) < min_needed:
             return self.hold_signal(symbol, current_price)
 
         # ── Compute Bollinger Bands ───────────────────────────────────
         bb = ta.volatility.BollingerBands(
             df["close"],
-            window=self.bb_period,
-            window_dev=self.bb_std_dev,
+            window=bb_period,
+            window_dev=bb_std_dev,
             fillna=False,
         )
         upper_band  = bb.bollinger_hband().iloc[-1]
@@ -124,7 +146,7 @@ class BBMeanReversionStrategy(BaseStrategy):
             return self.hold_signal(symbol, current_price)
 
         # ── Compute RSI ───────────────────────────────────────────────
-        rsi_val = self._rsi.get_value(df)
+        rsi_val = inds["rsi"].get_value(df)
         if rsi_val is None:
             return self.hold_signal(symbol, current_price)
 
@@ -135,9 +157,9 @@ class BBMeanReversionStrategy(BaseStrategy):
         # RSI < rsi_oversold confirms the move is genuinely oversold.
         # We expect a bounce back toward the middle band (mean reversion).
         at_lower_band = current_price <= lower_band
-        rsi_oversold  = rsi_val < self.rsi_oversold
+        is_oversold   = rsi_val < rsi_oversold
 
-        if at_lower_band and rsi_oversold:
+        if at_lower_band and is_oversold:
             stop_loss = round(current_price - 1.5 * atr, 2)
             # Target = middle band, but never less than 2:1 RR
             min_target = round(current_price + 3.0 * atr, 2)
@@ -157,7 +179,7 @@ class BBMeanReversionStrategy(BaseStrategy):
                 strategy=self.name,
                 reason=(
                     f"Price ({current_price:.2f}) at/below lower BB ({lower_band:.2f}), "
-                    f"RSI={rsi_val:.1f} (oversold < {self.rsi_oversold}). "
+                    f"RSI={rsi_val:.1f} (oversold < {rsi_oversold}). "
                     f"Target: mean reversion to middle band ({middle_band:.2f})"
                 ),
             )
@@ -167,9 +189,9 @@ class BBMeanReversionStrategy(BaseStrategy):
         # RSI > rsi_overbought confirms the move is genuinely overbought.
         # We expect a pull-back toward the middle band.
         at_upper_band  = current_price >= upper_band
-        rsi_overbought = rsi_val > self.rsi_overbought
+        is_overbought  = rsi_val > rsi_overbought
 
-        if at_upper_band and rsi_overbought:
+        if at_upper_band and is_overbought:
             stop_loss  = round(current_price + 1.5 * atr, 2)
             # Target = middle band, but never less than 2:1 RR on the downside
             min_target = round(current_price - 3.0 * atr, 2)
@@ -189,7 +211,7 @@ class BBMeanReversionStrategy(BaseStrategy):
                 strategy=self.name,
                 reason=(
                     f"Price ({current_price:.2f}) at/above upper BB ({upper_band:.2f}), "
-                    f"RSI={rsi_val:.1f} (overbought > {self.rsi_overbought}). "
+                    f"RSI={rsi_val:.1f} (overbought > {rsi_overbought}). "
                     f"Target: mean reversion to middle band ({middle_band:.2f})"
                 ),
             )

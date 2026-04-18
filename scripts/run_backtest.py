@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from backtesting.engine import BacktestEngine
+from config.strategies import SYMBOL_STRATEGY_MAP, SECTOR_STRATEGY_MAP
 from backtesting.performance import calculate
 from backtesting.report import generate_report
 from backtesting.walk_forward import WalkForwardEngine
@@ -33,6 +34,7 @@ from strategies.bb_mean_reversion import BBMeanReversionStrategy
 from strategies.ema_crossover import EMACrossoverStrategy
 from strategies.opening_range_breakout import ORBStrategy
 from strategies.rsi_macd_combo import RSIMACDStrategy
+from strategies.trend_rider import TrendRiderStrategy
 from strategies.vwap_bounce import VWAPBounceStrategy
 
 STRATEGY_MAP = {
@@ -40,6 +42,7 @@ STRATEGY_MAP = {
     "rsi_macd_combo":         RSIMACDStrategy,
     "opening_range_breakout": ORBStrategy,
     "bb_mean_reversion":      BBMeanReversionStrategy,
+    "trend_rider":            TrendRiderStrategy,
     "vwap_bounce":            VWAPBounceStrategy,
 }
 
@@ -158,6 +161,46 @@ def run_walk_forward(
     print(f"\n  Verdict: {wf.verdict()}\n")
 
 
+def _list_symbols() -> None:
+    """Print all symbols that have an assigned strategy."""
+    import json
+    from pathlib import Path as _Path
+
+    rows: list[tuple[str, str, str]] = []
+
+    # From SYMBOL_STRATEGY_MAP
+    for sym, strats in (SYMBOL_STRATEGY_MAP or {}).items():
+        rows.append((sym, strats[0] if strats else "—", "SYMBOL_MAP"))
+
+    # From param_history.json (may override or add)
+    hist_path = _Path("config/param_history.json")
+    if hist_path.exists():
+        try:
+            data = json.loads(hist_path.read_text())
+            for sym, info in data.get("strategy_assignment", {}).items():
+                strat = info.get("strategy", "—")
+                existing = next((r for r in rows if r[0] == sym), None)
+                if existing:
+                    rows = [r if r[0] != sym else (sym, strat, "param_history") for r in rows]
+                else:
+                    rows.append((sym, strat, "param_history"))
+        except Exception:
+            pass
+
+    if not rows:
+        print("No strategy assignments found. Run `make backtest SYMBOL=X` or `scripts/assign_strategies.py`.")
+        return
+
+    rows.sort(key=lambda r: r[0])
+    col = max(len(r[0]) for r in rows)
+    col2 = max(len(r[1]) for r in rows)
+    print(f"\n  {'Symbol':<{col}}  {'Strategy':<{col2}}  Source")
+    print(f"  {'─'*col}  {'─'*col2}  ──────────────")
+    for sym, strat, src in rows:
+        print(f"  {sym:<{col}}  {strat:<{col2}}  {src}")
+    print(f"\n  {len(rows)} symbol(s). Run: make backtest SYMBOL=<symbol>\n")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="TreadingBot Backtest Runner",
@@ -165,7 +208,8 @@ def main() -> None:
         epilog=__doc__,
     )
     parser.add_argument("--symbol",   default="RELIANCE",       help="NSE symbol (default: RELIANCE)")
-    parser.add_argument("--strategy", default="ema_crossover",  help="Strategy name", choices=list(STRATEGY_MAP))
+    parser.add_argument("--strategy", default=None,
+                        help="Strategy name. Omit to auto-select from SYMBOL_STRATEGY_MAP / SECTOR_STRATEGY_MAP / param_history.json (fallback: ema_crossover).")
     parser.add_argument("--start",    default="2023-01-01",     help="Start date YYYY-MM-DD")
     parser.add_argument("--end",      default="2024-12-31",     help="End date YYYY-MM-DD")
     parser.add_argument("--capital",  default=100_000, type=float, help="Starting capital in INR")
@@ -174,8 +218,57 @@ def main() -> None:
     parser.add_argument("--walk-forward",  action="store_true", help="Run walk-forward analysis instead of single backtest")
     parser.add_argument("--train-months",  default=6,  type=int, help="Walk-forward: training window in months (default: 6)")
     parser.add_argument("--test-months",   default=2,  type=int, help="Walk-forward: test window in months (default: 2)")
+    parser.add_argument("--list-symbols",  action="store_true", help="List all symbols with assigned strategies from param_history.json and exit")
 
     args = parser.parse_args()
+
+    if args.list_symbols:
+        _list_symbols()
+        return
+
+    # Auto-resolve strategy when --strategy is not provided
+    if args.strategy is None and not args.all_strategies:
+        sym = args.symbol.upper()
+        resolved = None
+
+        # 1. Manual per-symbol map
+        if SYMBOL_STRATEGY_MAP and sym in SYMBOL_STRATEGY_MAP:
+            resolved = SYMBOL_STRATEGY_MAP[sym][0]
+            print(f"  [map] Auto-selected '{resolved}' for {sym} (SYMBOL_STRATEGY_MAP)")
+
+        # 2. Sector map
+        if resolved is None and SECTOR_STRATEGY_MAP:
+            try:
+                from data.instruments import SYMBOL_TO_SECTOR
+                sector = SYMBOL_TO_SECTOR.get(sym, "")
+                if sector and sector in SECTOR_STRATEGY_MAP:
+                    resolved = SECTOR_STRATEGY_MAP[sector][0]
+                    print(f"  [map] Auto-selected '{resolved}' for {sym} (SECTOR_STRATEGY_MAP sector={sector})")
+            except Exception:
+                pass
+
+        # 3. Optimizer-assigned from param_history.json
+        if resolved is None:
+            try:
+                import json
+                from pathlib import Path
+                _hist = Path("config/param_history.json")
+                if _hist.exists():
+                    with open(_hist) as _f:
+                        _data = json.load(_f)
+                    resolved = _data.get("strategy_assignment", {}).get(sym, {}).get("strategy")
+                    if resolved:
+                        print(f"  [map] Auto-selected '{resolved}' for {sym} (param_history.json)")
+            except Exception:
+                pass
+
+        args.strategy = resolved or "ema_crossover"
+        if resolved is None:
+            print(f"  [map] No assignment found for {sym} — using default 'ema_crossover'")
+
+    if args.strategy and args.strategy not in STRATEGY_MAP and not args.all_strategies:
+        print(f"Unknown strategy '{args.strategy}'. Choose from: {list(STRATEGY_MAP)}")
+        sys.exit(1)
 
     if args.walk_forward:
         if args.all_strategies:

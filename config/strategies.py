@@ -40,6 +40,7 @@ STRATEGY_CONFIGS: dict = {
         "macd_signal": 9,
         "require_ema_alignment": True,  # Only short when EMA9 < EMA21; only buy when EMA9 > EMA21
         "use_vwap_filter": True,        # Only short above VWAP; only buy below VWAP
+        "vwap_band_pct": 0.005,         # ±0.5% band around VWAP — price within band counts as valid for either direction
         "rsi_sell_min": 40,             # Don't short if RSI < 40 — already oversold, expect bounce
         "min_sl_pct": 0.0075,           # SL at least 0.75% from entry — prevents noise-hits on tight stops
     },
@@ -88,6 +89,23 @@ STRATEGY_CONFIGS: dict = {
         "volume_multiplier": 1.2,     # candle volume ≥ 1.2× 20-bar avg (institutional confirmation)
         "min_sl_pct": 0.0075,         # SL at least 0.75% — avoids noise hits on tight stops
     },
+    "trend_rider": {
+        "enabled": True,
+        "name": "Trend Rider",
+        "description": (
+            "Enters at the exact candle where Supertrend flips direction — bearish→bullish "
+            "for longs, bullish→bearish for shorts — with ADX > 20 confirming the flip has "
+            "real conviction. Catches the start of each trend leg, both bull and bear. "
+            "Stop-loss is the Supertrend band itself (ATR-adaptive). "
+            "Works in trending markets; suppressed in ranging/volatile regimes."
+        ),
+        "supertrend_period": 10,       # ATR lookback for Supertrend band
+        "supertrend_multiplier": 3.0,  # Band width = multiplier × ATR
+        "adx_min": 20,                 # Minimum ADX for trade to fire — below this = no conviction
+        "adx_period": 14,              # ADX lookback period
+        "volume_multiplier": 1.2,      # Signal candle must have 1.2× 20-bar avg volume
+        "min_sl_pct": 0.005,           # SL at least 0.5% from entry — avoids noise-hits on tight stops
+    },
     "bb_mean_reversion": {
         "enabled": True,
         "name": "Bollinger Band Mean Reversion",
@@ -109,3 +127,34 @@ STRATEGY_CONFIGS: dict = {
 ACTIVE_STRATEGIES: list[str] = [
     name for name, cfg in STRATEGY_CONFIGS.items() if cfg.get("enabled", False)
 ]
+
+# ── Per-symbol strategy assignment (manual override, highest priority) ─────
+# Maps NSE symbol → ordered list of strategy names to evaluate for that symbol.
+# Any symbol NOT listed here falls through to SECTOR_STRATEGY_MAP, then the
+# optimizer-assigned entry in param_history.json, then all active strategies.
+#
+# Rules:
+#   • Listed symbol   → only those strategies are tried, in the listed order
+#   • Unlisted symbol → lower-priority maps are checked (see below)
+#   • Empty dict      → no manual overrides — no change to existing behaviour
+#
+# Example:
+#   SYMBOL_STRATEGY_MAP: dict[str, list[str]] = {
+#       "RELIANCE": ["ema_crossover", "rsi_macd_combo"],
+#       "INFY":     ["opening_range_breakout"],
+#   }
+SYMBOL_STRATEGY_MAP: dict[str, list[str]] = {}
+
+# ── Sector-level strategy assignment (second priority) ─────────────────────
+# Maps sector name (must match data/instruments.py Instrument.sector) →
+# ordered list of strategy names.  Applied when a symbol has no manual entry
+# in SYMBOL_STRATEGY_MAP.  Symbols whose sector is not listed fall through to
+# the optimizer file, then all active strategies.
+#
+# Example:
+#   SECTOR_STRATEGY_MAP: dict[str, list[str]] = {
+#       "Information Technology": ["opening_range_breakout", "ema_crossover"],
+#       "Financial Services":     ["vwap_bounce", "rsi_macd_combo"],
+#       "Oil & Gas":              ["ema_crossover"],
+#   }
+SECTOR_STRATEGY_MAP: dict[str, list[str]] = {}

@@ -4,6 +4,7 @@ yfinance>=0.2.54            # Free historical OHLCV data (NSE stocks)
 
 # ── Technical Analysis & Math ───────────────────────────────────────
 ta                          # RSI, MACD, EMA, Bollinger Bands, ATR
+optuna                      # Bayesian parameter optimization
 pandas>=2.2.3               # Core data manipulation
 numpy>=2.1.0                # Numerical computing
 

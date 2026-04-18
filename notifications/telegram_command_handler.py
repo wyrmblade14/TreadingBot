@@ -262,8 +262,7 @@ class TelegramCommandHandler:
         if callback_running:
             # Tap-and-go flow: browser lands on callback server, token saved automatically.
             # Requires Kite Redirect URL to point at this server:
-            #   docker-compose up  →  http://<tailscale-ip>:7777
-            #   make prod-up       →  http://<tailscale-ip>/kite/callback
+            #   Set Kite Redirect URL to: http://127.0.0.1:7777
             self._state = _IDLE   # no waiting — callback server handles the rest
             self._send(
                 "🔑 <b>Kite Login</b>\n\n"

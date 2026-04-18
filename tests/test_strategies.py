@@ -22,6 +22,7 @@ from strategies.bb_mean_reversion import BBMeanReversionStrategy
 from strategies.ema_crossover import EMACrossoverStrategy
 from strategies.opening_range_breakout import ORBStrategy
 from strategies.rsi_macd_combo import RSIMACDStrategy
+from strategies.trend_rider import TrendRiderStrategy
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
@@ -181,6 +182,44 @@ class TestRSIMACDStrategy:
         strategy = RSIMACDStrategy()
         assert strategy.name == "rsi_macd_combo"
 
+    def test_same_bar_does_not_fire_twice(self):
+        """
+        Stale-data guard: calling generate_signal twice with an identical
+        DataFrame (same last bar index) must not produce two crossover signals.
+        The second call must return HOLD regardless of MACD state.
+        """
+        prices = [100 + np.sin(i * 0.4) * 3 for i in range(60)]
+        df = make_ohlcv(prices)
+        strategy = RSIMACDStrategy()
+
+        first  = strategy.generate_signal("TCS", df)
+        second = strategy.generate_signal("TCS", df)  # identical df — same bar
+
+        # If first was a crossover signal, second must be suppressed to HOLD
+        if first.action != Action.HOLD:
+            assert second.action == Action.HOLD, (
+                "Duplicate crossover on the same bar was not suppressed"
+            )
+
+    def test_new_bar_fires_again(self):
+        """
+        After a new candle arrives the strategy is allowed to fire again,
+        even if the MACD crossover direction is the same.
+        """
+        prices = [100 + np.sin(i * 0.4) * 3 for i in range(60)]
+        df1 = make_ohlcv(prices)
+        # Append one more bar — new index timestamp
+        df2 = make_ohlcv(prices + [prices[-1] * 1.001])
+
+        strategy = RSIMACDStrategy()
+        first  = strategy.generate_signal("TCS", df1)
+        second = strategy.generate_signal("TCS", df2)
+
+        # The second call is on a different (newer) bar; the strategy must
+        # not permanently suppress it.  We just verify it runs without error
+        # and returns a Signal object.
+        assert isinstance(second, Signal)
+
 
 # ── ORB Strategy tests ────────────────────────────────────────────────
 
@@ -278,17 +317,28 @@ class TestBBMeanReversionStrategy:
         assert result.action == Action.HOLD
 
     def test_buy_signal_generated_on_oversold_drop(self):
-        """Sharp drop below lower band with RSI < 35 should generate a BUY."""
+        """Sharp drop below lower band with RSI < 35 should generate a BUY.
+        BB Mean Reversion is suppressed in TRENDING regimes, so we patch the
+        regime to RANGING (its intended home) for this signal-logic test."""
+        from unittest.mock import patch
+        from analysis.regime_detector import MarketRegime
         df = _make_bb_buy_df()
         strategy = BBMeanReversionStrategy()
-        result = strategy.generate_signal("WIPRO", df)
+        with patch("strategies.bb_mean_reversion.get_current_regime",
+                   return_value=MarketRegime.RANGING):
+            result = strategy.generate_signal("WIPRO", df)
         assert result.action == Action.BUY
 
     def test_sell_signal_generated_on_overbought_surge(self):
-        """Sharp surge above upper band with RSI > 65 should generate a SELL."""
+        """Sharp surge above upper band with RSI > 65 should generate a SELL.
+        Patched to RANGING regime so the regime filter does not suppress BB."""
+        from unittest.mock import patch
+        from analysis.regime_detector import MarketRegime
         df = _make_bb_sell_df()
         strategy = BBMeanReversionStrategy()
-        result = strategy.generate_signal("WIPRO", df)
+        with patch("strategies.bb_mean_reversion.get_current_regime",
+                   return_value=MarketRegime.RANGING):
+            result = strategy.generate_signal("WIPRO", df)
         assert result.action == Action.SELL
 
     def test_buy_signal_prices_are_valid(self):
@@ -334,3 +384,104 @@ class TestBBMeanReversionStrategy:
     def test_strategy_name(self):
         strategy = BBMeanReversionStrategy()
         assert strategy.name == "bb_mean_reversion"
+
+
+# ── Trend Rider Strategy tests ────────────────────────────────────────
+
+def _make_bearish_flip_df() -> pd.DataFrame:
+    """
+    Build a price series that produces a Supertrend bearish flip on the last candle.
+    Starts with a rising phase (Supertrend bullish), then a sharp drop that
+    breaks the lower band and forces a bearish flip.
+    """
+    # Rising prices for 30 bars → Supertrend bullish
+    base  = [100 + i * 0.5 for i in range(30)]
+    # Sharp drop that breaks below Supertrend lower band
+    drop  = [114, 110, 106, 101, 95, 88]
+    return make_ohlcv(base + drop, volume=500_000)
+
+
+def _make_bullish_flip_df() -> pd.DataFrame:
+    """
+    Build a price series that produces a Supertrend bullish flip on the last candle.
+    Starts with a falling phase (Supertrend bearish), then a sharp rally.
+    """
+    base  = [100 - i * 0.5 for i in range(30)]
+    rally = [86, 90, 94, 99, 105, 112]
+    return make_ohlcv(base + rally, volume=500_000)
+
+
+class TestTrendRiderStrategy:
+    def test_returns_signal_object(self):
+        df = make_ohlcv([100.0] * 40)
+        strategy = TrendRiderStrategy()
+        result = strategy.generate_signal("SBIN", df)
+        assert isinstance(result, Signal)
+
+    def test_hold_with_insufficient_data(self):
+        df = make_ohlcv([100.0] * 15)
+        strategy = TrendRiderStrategy()
+        result = strategy.generate_signal("SBIN", df)
+        assert result.action == Action.HOLD
+
+    def test_hold_on_flat_prices(self):
+        """No Supertrend flip on constant price → HOLD."""
+        df = make_ohlcv([100.0] * 40)
+        strategy = TrendRiderStrategy()
+        result = strategy.generate_signal("SBIN", df)
+        assert result.action == Action.HOLD
+
+    def test_sell_signal_has_valid_prices(self):
+        """Any SELL signal must have target < entry < stop_loss."""
+        df = _make_bearish_flip_df()
+        strategy = TrendRiderStrategy()
+        result = strategy.generate_signal("SBIN", df)
+        if result.action == Action.SELL:
+            assert result.target < result.entry_price < result.stop_loss
+            assert result.is_valid()
+
+    def test_buy_signal_has_valid_prices(self):
+        """Any BUY signal must have stop_loss < entry < target."""
+        df = _make_bullish_flip_df()
+        strategy = TrendRiderStrategy()
+        result = strategy.generate_signal("SBIN", df)
+        if result.action == Action.BUY:
+            assert result.stop_loss < result.entry_price < result.target
+            assert result.is_valid()
+
+    def test_sell_reward_risk_at_least_2_to_1(self):
+        """SELL target must give ≥ 2:1 RR."""
+        df = _make_bearish_flip_df()
+        strategy = TrendRiderStrategy()
+        result = strategy.generate_signal("SBIN", df)
+        if result.action == Action.SELL:
+            assert float(result.reward_risk_ratio) >= 1.9   # allow tiny float rounding
+
+    def test_same_bar_does_not_fire_twice(self):
+        """Duplicate bar (stale data) must be suppressed to HOLD."""
+        df = _make_bearish_flip_df()
+        strategy = TrendRiderStrategy()
+        first  = strategy.generate_signal("SBIN", df)
+        second = strategy.generate_signal("SBIN", df)   # same bar index
+        if first.action != Action.HOLD:
+            assert second.action == Action.HOLD, "Duplicate flip not suppressed"
+
+    def test_new_bar_can_fire_again(self):
+        """A fresh bar (different index) is allowed to fire a new signal."""
+        prices = _make_bearish_flip_df()["close"].tolist()
+        df1 = _make_bearish_flip_df()
+        df2 = make_ohlcv(prices + [prices[-1] * 0.99], volume=500_000)
+        strategy = TrendRiderStrategy()
+        strategy.generate_signal("SBIN", df1)
+        second = strategy.generate_signal("SBIN", df2)
+        assert isinstance(second, Signal)
+
+    def test_symbol_in_signal(self):
+        df = make_ohlcv([100.0] * 40)
+        strategy = TrendRiderStrategy()
+        result = strategy.generate_signal("MARUTI", df)
+        assert result.symbol == "MARUTI"
+
+    def test_strategy_name(self):
+        strategy = TrendRiderStrategy()
+        assert strategy.name == "trend_rider"

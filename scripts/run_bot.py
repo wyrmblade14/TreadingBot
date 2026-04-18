@@ -26,6 +26,7 @@ import argparse
 import signal
 import sys
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -34,8 +35,33 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from loguru import logger
-from config.settings import VIRTUAL_CAPITAL, WATCHLIST_SIZE
+from config.settings import VIRTUAL_CAPITAL, WATCHLIST_SIZE, IST
 from scheduler.bot_controller import get_controller
+
+
+def _sleep_until_next_morning() -> None:
+    """
+    If the bot is restarted after market close (>=15:35 IST), sleep until
+    08:29 IST the next calendar day, then exit so Docker brings it back
+    fresh before market open.
+
+    This avoids a wasteful setup + idle cycle when Docker's restart policy
+    kicks in after the 15:35 auto_shutdown fires.
+    """
+    now = datetime.now(IST)
+    after_close = now.hour > 15 or (now.hour == 15 and now.minute >= 35)
+    if not after_close:
+        return
+
+    wake = (now + timedelta(days=1)).replace(hour=8, minute=29, second=0, microsecond=0)
+    sleep_secs = (wake - now).total_seconds()
+    logger.info(
+        f"Started after market close ({now.strftime('%H:%M')} IST) — "
+        f"sleeping {sleep_secs / 3600:.1f}h until {wake.strftime('%Y-%m-%d %H:%M')} IST, "
+        f"then Docker will restart cleanly."
+    )
+    time.sleep(sleep_secs)
+    sys.exit(0)
 
 
 def _startup_token_refresh() -> None:
@@ -83,6 +109,10 @@ def main() -> None:
     parser.add_argument("--dry-run",   action="store_true",
                         help="Print job schedule and exit without starting")
     args = parser.parse_args()
+
+    # Guard: if Docker restarted us after the 15:35 auto_shutdown, sleep
+    # through the night rather than doing a useless setup + idle cycle.
+    _sleep_until_next_morning()
 
     logger.info("TreadingBot starting | mode=PAPER | no real money at risk")
 

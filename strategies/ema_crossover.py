@@ -64,36 +64,56 @@ class EMACrossoverStrategy(BaseStrategy):
     EMA 9/21/50 crossover strategy with volume and trend filters.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, params: dict | None = None) -> None:
         super().__init__(name="ema_crossover")
-        params = cfg.STRATEGY_CONFIGS["ema_crossover"]
+        self.default_params = params or cfg.STRATEGY_CONFIGS["ema_crossover"]
+        # Cache of (indicators, params) per symbol to support per-stock optimization
+        self._symbol_cache: dict[str, tuple[dict, dict]] = {}
 
-        self.short_period      = params["short_period"]
-        self.long_period       = params["long_period"]
-        self.trend_period      = params["trend_period"]
-        self.volume_multiplier = params["volume_multiplier"]
+    def _get_config(self, symbol: str) -> dict:
+        """Load optimized parameters for this symbol if they exist, else use defaults."""
+        try:
+            from learning.param_optimizer import load_optimized_params
+            optimized = load_optimized_params(self.name, symbol)
+            if optimized:
+                return optimized
+        except Exception:
+            pass
+        return self.default_params
 
-        self._indicator = EMAIndicator(
-            short_period=self.short_period,
-            long_period=self.long_period,
-            trend_period=self.trend_period,
-            volume_multiplier=self.volume_multiplier,
-        )
-        self._supertrend = SupertrendIndicator(
-            period=params["supertrend_period"],
-            multiplier=params["supertrend_multiplier"],
-        )
-        self.use_first_candle_filter = params.get("use_first_candle_filter", False)
+    def _init_indicators(self, params: dict) -> dict:
+        """Create the indicator instances for a specific set of parameters."""
+        return {
+            "ema": EMAIndicator(
+                short_period=params["short_period"],
+                long_period=params["long_period"],
+                trend_period=params["trend_period"],
+                volume_multiplier=params["volume_multiplier"],
+            ),
+            "supertrend": SupertrendIndicator(
+                period=params["supertrend_period"],
+                multiplier=params["supertrend_multiplier"],
+            ),
+            "params": params  # Store params to detect changes
+        }
 
     def generate_signal(self, symbol: str, df: pd.DataFrame) -> Signal:
         """
         Analyse the latest candles and return a BUY, SELL, or HOLD signal.
-
-        Args:
-            symbol: e.g. "RELIANCE"
-            df:     OHLCV DataFrame (5-minute candles, at least 55 candles needed)
         """
         current_price = df["close"].iloc[-1]
+
+        # 1. Get (or create) indicators for this specific symbol's parameters
+        config = self._get_config(symbol)
+        
+        if symbol not in self._symbol_cache or self._symbol_cache[symbol][1] != config:
+            logger.debug(f"EMACrossover: Initialising indicators for {symbol} with params: {config}")
+            inds = self._init_indicators(config)
+            self._symbol_cache[symbol] = (inds, config)
+        
+        inds, params = self._symbol_cache[symbol]
+        ema_ind      = inds["ema"]
+        st_ind       = inds["supertrend"]
 
         # ── Regime filter ─────────────────────────────────────────────
         # EMA Crossover needs a trending market — crossovers in a ranging
@@ -107,15 +127,19 @@ class EMACrossoverStrategy(BaseStrategy):
                 return self.hold_signal(symbol, current_price)
 
         # Need enough candles for both EMAs and Supertrend
-        min_needed = max(self.trend_period + 2, self._supertrend.min_candles)
+        min_needed = max(params["trend_period"] + 2, st_ind.min_candles)
         if len(df) < min_needed:
             return self.hold_signal(symbol, current_price)
 
-        result = self._indicator.compute(df)
+        result = ema_ind.compute(df)
 
-        fast_col  = f"ema_{self.short_period}"
-        slow_col  = f"ema_{self.long_period}"
-        trend_col = f"ema_{self.trend_period}"
+        short_p = params["short_period"]
+        long_p  = params["long_period"]
+        trend_p = params["trend_period"]
+        
+        fast_col  = f"ema_{short_p}"
+        slow_col  = f"ema_{long_p}"
+        trend_col = f"ema_{trend_p}"
 
         curr = result.iloc[-1]
         prev = result.iloc[-2]
@@ -126,27 +150,20 @@ class EMACrossoverStrategy(BaseStrategy):
 
         fast_now, fast_prev  = curr[fast_col], prev[fast_col]
         slow_now, slow_prev  = curr[slow_col], prev[slow_col]
-        trend_ema            = curr[trend_col]   # kept for logging/display
         vol_avg              = curr.get("vol_avg20", 0)
-        volume_ok            = vol_avg == 0 or curr["volume"] >= self.volume_multiplier * vol_avg
+        volume_ok            = vol_avg == 0 or curr["volume"] >= params["volume_multiplier"] * vol_avg
 
-        # Supertrend trend filter — replaces the 50-EMA price comparison.
-        # Supertrend adapts to volatility: in choppy markets its bands widen so
-        # small EMA crossovers don't pass the filter; in strong trends it sits
-        # close to price confirming the move quickly.
-        supertrend_bullish = self._supertrend.is_bullish(df)
-        supertrend_val     = self._supertrend.get_value(df)
+        # Supertrend trend filter
+        supertrend_bullish = st_ind.is_bullish(df)
+        supertrend_val     = st_ind.get_value(df)
 
         # VWAP filter: 0 means daily data (skip), +1 bullish, -1 bearish
         vwap_bias = get_vwap_signal(df)
 
         # ── First candle anchor filter ───────────────────────────────
-        # BUY only when price is above the 9:15 candle high (bullish day confirmed).
-        # SELL only when price is below the 9:15 candle low (bearish day confirmed).
-        # Returns None for daily data or before 9:20 AM — skipped gracefully.
         first_candle_ok_buy  = True
         first_candle_ok_sell = True
-        if self.use_first_candle_filter:
+        if params.get("use_first_candle_filter", False):
             fc_levels = get_first_candle_levels(df)
             if fc_levels is not None:
                 fc_high, fc_low = fc_levels
@@ -165,7 +182,7 @@ class EMACrossoverStrategy(BaseStrategy):
             st_str = f"{supertrend_val:.2f}" if supertrend_val else "n/a"
             logger.info(
                 f"EMA BUY | {symbol} | price={current_price:.2f} "
-                f"supertrend={st_str} sl={stop_loss:.2f} target={target:.2f}"
+                f"supertrend={st_str} sl={stop_loss:.2f} target={target:.2f} (optimized)"
             )
             return Signal(
                 symbol=symbol,
@@ -175,24 +192,27 @@ class EMACrossoverStrategy(BaseStrategy):
                 target=target,
                 strategy=self.name,
                 reason=(
-                    f"EMA{self.short_period} ({fast_now:.2f}) crossed above "
-                    f"EMA{self.long_period} ({slow_now:.2f}), "
+                    f"EMA{short_p} ({fast_now:.2f}) crossed above "
+                    f"EMA{long_p} ({slow_now:.2f}), "
                     f"Supertrend bullish ({st_str}), "
                     f"volume confirmed"
                 ),
             )
 
         # ── SELL signal (exit / short) ───────────────────────────────
-        bearish_cross = (fast_prev > slow_prev) and (fast_now < slow_now)
-        vwap_ok_sell  = vwap_bias <= 0   # below VWAP or daily (no filter)
+        bearish_cross      = (fast_prev > slow_prev) and (fast_now < slow_now)
+        vwap_ok_sell       = vwap_bias <= 0   # below VWAP or daily (no filter)
+        supertrend_bearish = not supertrend_bullish   # Supertrend must confirm downtrend
 
-        if bearish_cross and vwap_ok_sell and first_candle_ok_sell:
+        if bearish_cross and supertrend_bearish and vwap_ok_sell and first_candle_ok_sell:
             atr       = self._compute_atr(df)
             stop_loss = round(current_price + 1.5 * atr, 2)
             target    = round(current_price - 3.0 * atr, 2)  # 3/1.5 = 2:1 RR
 
+            st_str = f"{supertrend_val:.2f}" if supertrend_val else "n/a"
             logger.info(
-                f"EMA SELL | {symbol} | price={current_price:.2f}"
+                f"EMA SELL | {symbol} | price={current_price:.2f} "
+                f"supertrend={st_str} sl={stop_loss:.2f} target={target:.2f} (optimized)"
             )
             return Signal(
                 symbol=symbol,
@@ -202,8 +222,9 @@ class EMACrossoverStrategy(BaseStrategy):
                 target=target,
                 strategy=self.name,
                 reason=(
-                    f"EMA{self.short_period} ({fast_now:.2f}) crossed below "
-                    f"EMA{self.long_period} ({slow_now:.2f})"
+                    f"EMA{short_p} ({fast_now:.2f}) crossed below "
+                    f"EMA{long_p} ({slow_now:.2f}), "
+                    f"Supertrend bearish ({st_str})"
                 ),
             )
 

@@ -34,8 +34,9 @@ Usage:
 from __future__ import annotations
 
 import threading
+import time as _time
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time as _time_t, timedelta, timezone
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -116,6 +117,9 @@ class KiteTickerFeed:
         self._base_dfs:    dict[str, pd.DataFrame]  = {}   # historical backfill per symbol
         self._running      = False
         self._exit_callback = None   # fn(symbol, price) — called on every tick for exit monitoring
+        self._saved_watchlist: list[str] = []  # saved for reconnect attempts
+        self._auth_failed  = False   # set True on 403 — suppresses reconnect spam
+        self._last_start_fail: float = 0.0  # epoch time of last failed start attempt
 
     # ── Public API ────────────────────────────────────────────────────
 
@@ -137,6 +141,15 @@ class KiteTickerFeed:
             logger.warning("KiteTickerFeed: Kite credentials not set — feed disabled")
             return False
 
+        if self._auth_failed:
+            # Token was rejected (403) — don't hammer the API; wait for a manual refresh
+            return False
+
+        import time as _time_mod
+        _RETRY_COOLDOWN = 300  # 5 minutes between failed start attempts
+        if self._last_start_fail and (_time_mod.monotonic() - self._last_start_fail) < _RETRY_COOLDOWN:
+            return False  # silently skip — still in cooldown
+
         kite = get_kite_client()
         if kite is None:
             return False
@@ -151,6 +164,7 @@ class KiteTickerFeed:
             instruments = kite.instruments("NSE")
         except Exception as exc:
             logger.warning(f"KiteTickerFeed: could not fetch instruments — {exc}")
+            self._last_start_fail = _time_mod.monotonic()
             return False
 
         token_map: dict[int, str] = {}
@@ -171,6 +185,9 @@ class KiteTickerFeed:
         with self._lock:
             self._token_map = token_map
 
+        # Save for reconnect attempts after unexpected disconnects
+        self._saved_watchlist = list(watchlist)
+
         from config.settings import KITE_API_KEY, KITE_ACCESS_TOKEN
         from kiteconnect import KiteTicker
 
@@ -182,6 +199,7 @@ class KiteTickerFeed:
 
         self._kws.connect(threaded=True)
         self._running = True
+        self._auth_failed = False  # clear on successful connect
         logger.info(
             f"KiteTickerFeed started | {len(token_map)} symbols | "
             f"candle interval: {TICK_CANDLE_SECONDS}s"
@@ -357,8 +375,56 @@ class KiteTickerFeed:
         self._running = False
         logger.warning(f"KiteTickerFeed disconnected: {code} — {reason}")
 
+        # 403 Forbidden = expired/invalid token — reconnecting will never help.
+        # Stop the loop; the 8:30 AM kite_login_reminder will fix the token.
+        reason_str = str(reason).lower()
+        if code == 1006 and ("403" in reason_str or "forbidden" in reason_str):
+            self._auth_failed = True
+            logger.warning(
+                "KiteTickerFeed: token expired (403) — stopping reconnect loop. "
+                "Run /kite_login via Telegram or wait for the 8:30 AM auto-refresh."
+            )
+            return
+
+        # Don't reconnect at/after 15:10 IST — market is closing and the
+        # square-off job is about to run; a reconnect here would race with it.
+        now = datetime.now(_PANDAS_IST)
+        if now.time() >= _time_t(15, 10):
+            logger.info("KiteTickerFeed: past 15:10 — skipping reconnect")
+            return
+
+        t = threading.Thread(
+            target=self._reconnect,
+            daemon=True,
+            name="kite-reconnect",
+        )
+        t.start()
+
     def _on_error(self, ws, code, reason) -> None:
         logger.error(f"KiteTickerFeed error: {code} — {reason}")
+
+    def _reconnect(self) -> None:
+        """
+        Attempt to re-establish the WebSocket feed after an unexpected disconnect.
+
+        Waits 5 seconds (to avoid hammering Zerodha's server), then calls
+        start() again with the watchlist saved from the last successful connect.
+        Preserves accumulated tick history (completed candles, base_dfs) so
+        strategies don't lose intraday context on reconnect.
+        """
+        _time.sleep(5)
+        if self._running:
+            return   # reconnected by someone else (e.g. lazy restart in signal_check)
+
+        if not self._saved_watchlist:
+            logger.warning("KiteTickerFeed: no saved watchlist — cannot auto-reconnect")
+            return
+
+        logger.info("KiteTickerFeed: attempting auto-reconnect…")
+        try:
+            self.start(self._saved_watchlist)
+        except Exception as exc:
+            logger.warning(f"KiteTickerFeed: reconnect failed — {exc}")
 
 
 # ── Module-level singleton ────────────────────────────────────────────
