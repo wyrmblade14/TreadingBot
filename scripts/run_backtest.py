@@ -201,6 +201,42 @@ def _list_symbols() -> None:
     print(f"\n  {len(rows)} symbol(s). Run: make backtest SYMBOL=<symbol>\n")
 
 
+def run_optimizer(symbol: str, strategy_name: str, n_trials: int = 50) -> dict | None:
+    """Run Bayesian parameter optimizer on strategy for symbol. Returns optimized params or None."""
+    from learning.param_optimizer import ParamOptimizer
+
+    print(f"\n{'='*60}")
+    print(f"  Parameter Optimizer: {symbol} | {strategy_name}")
+    print(f"  Trials: {n_trials} (Bayesian search on last 30 days)")
+    print(f"{'='*60}\n")
+
+    optimizer = ParamOptimizer()
+
+    # Map strategy name to optimizer method
+    method_map = {
+        "ema_crossover":          optimizer.optimize_ema_crossover,
+        "rsi_macd_combo":         optimizer.optimize_rsi_macd_combo,
+        "opening_range_breakout": optimizer.optimize_opening_range_breakout,
+        "vwap_bounce":            optimizer.optimize_vwap_bounce,
+        "trend_rider":            optimizer.optimize_trend_rider,
+        "bb_mean_reversion":      optimizer.optimize_bb_mean_reversion,
+    }
+
+    if strategy_name not in method_map:
+        print(f"  Optimizer not available for '{strategy_name}' yet.")
+        return None
+
+    optimize_fn = method_map[strategy_name]
+    result = optimize_fn(symbol, n_trials=n_trials)
+
+    if result:
+        print(f"\n  ✅ Improved params found and saved to config/param_history.json")
+        return result
+    else:
+        print(f"\n  ℹ️  No significant improvement found (baseline still best)")
+        return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="TreadingBot Backtest Runner",
@@ -218,6 +254,7 @@ def main() -> None:
     parser.add_argument("--walk-forward",  action="store_true", help="Run walk-forward analysis instead of single backtest")
     parser.add_argument("--train-months",  default=6,  type=int, help="Walk-forward: training window in months (default: 6)")
     parser.add_argument("--test-months",   default=2,  type=int, help="Walk-forward: test window in months (default: 2)")
+    parser.add_argument("--optimize",      action="store_true", help="Run Bayesian parameter optimizer (50 trials) before backtest, save improved params if Sharpe improves >10%")
     parser.add_argument("--list-symbols",  action="store_true", help="List all symbols with assigned strategies from param_history.json and exit")
 
     args = parser.parse_args()
@@ -269,6 +306,14 @@ def main() -> None:
     if args.strategy and args.strategy not in STRATEGY_MAP and not args.all_strategies:
         print(f"Unknown strategy '{args.strategy}'. Choose from: {list(STRATEGY_MAP)}")
         sys.exit(1)
+
+    # Run optimizer if requested (single strategy only, not --all-strategies)
+    if args.optimize and not args.all_strategies and not args.walk_forward:
+        if args.strategy not in STRATEGY_MAP:
+            print(f"Unknown strategy '{args.strategy}'. Choose from: {list(STRATEGY_MAP)}")
+            sys.exit(1)
+        run_optimizer(args.symbol, args.strategy, n_trials=50)
+        print("\n  Running backtest with optimized parameters...\n")
 
     if args.walk_forward:
         if args.all_strategies:

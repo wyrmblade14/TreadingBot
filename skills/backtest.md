@@ -22,9 +22,35 @@ python scripts/run_backtest.py \
   --end <end_date>
 ```
 
+### Backtest + Bayesian Parameter Optimization
+Before running the full backtest, run the Bayesian Parameter Optimizer to find better parameters:
+
+```bash
+# 1. Optimize: runs 50 Optuna trials against last 30 days of data
+python -c "
+from learning.param_optimizer import ParamOptimizer
+opt = ParamOptimizer()
+result = opt.optimize_<strategy>(symbol='<symbol>', n_trials=50)
+if result:
+    print(f'✅ Improved params saved to config/param_history.json')
+else:
+    print(f'ℹ️ No significant improvement found (baseline still best)')
+"
+
+# 2. Re-run backtest with optimized params
+python scripts/run_backtest.py \
+  --symbol <symbol> \
+  --strategy <strategy> \
+  --start <start_date> \
+  --end <end_date>
+```
+
+Bayesian optimization finds parameters that maximize Sharpe ratio over 30 days of recent data. If Sharpe improves >10%, params are saved and reused automatically. Shows baseline vs optimized comparison.
+
 ### Walk-forward backtest (anti-overfitting — preferred)
 ```bash
-python scripts/run_walk_forward.py \
+python scripts/run_backtest.py \
+  --walk-forward \
   --symbol <symbol> \
   --strategy <strategy> \
   --start <start_date> \
@@ -62,7 +88,46 @@ Explain each metric in plain English:
 - >700 days → daily candles
 This is set automatically by `backtesting/engine.py`.
 
+## Bayesian Parameter Optimizer (Phase 3 — Self-Learning)
+
+The optimizer uses **Optuna** (Bayesian optimization) to find better parameters for your strategy:
+
+### How it works
+1. **Baseline**: measures current strategy performance on last 30 days of data (establishes Sharpe ratio)
+2. **Search**: runs 50 trials, each trying a different parameter combination, scoring by Sharpe ratio
+3. **Save**: if best trial beats baseline by >10%, saves params to `config/param_history.json`
+4. **Apply**: bot loads optimized params at startup; backtest uses them automatically
+
+### Parameter search spaces (per strategy)
+- **ema_crossover**: short/long periods (5–35), volume multiplier (1.0–2.5), supertrend period (7–21), multiplier (1.5–4.5)
+- **rsi_macd_combo**: RSI period (4–14), MACD fast/slow (8–32), signal (7–12), VWAP band (0.2–1.5%)
+- **opening_range_breakout**: ORB duration (15–45 min), volume/supertrend params
+- **bb_mean_reversion**: BB period (10–30), std dev (1.5–3.0), RSI period (4–14)
+- **trend_rider**: supertrend params, ADX min (15–35), period (10–20)
+- **vwap_bounce**: RSI period (4–14), VWAP tolerance (0.1–0.8%), volume (1.0–2.0×)
+
+### Why Bayesian > Grid Search
+- **Grid search** tries every combination (exhaustive but slow: 5×5×5 = 125 trials minimum)
+- **Bayesian** uses probability to focus only on promising zones (10–20× faster, fewer trials)
+
+### Example: optimizing RELIANCE EMA Crossover
+```bash
+python -c "
+from learning.param_optimizer import ParamOptimizer
+opt = ParamOptimizer()
+result = opt.optimize_ema_crossover('RELIANCE', n_trials=50)
+# Checks baseline Sharpe on last 30d, runs 50 trials, saves if >10% improvement
+"
+```
+
+### When to use optimizer
+- **After backtest shows good results** (win rate >45%, Sharpe >1.0)
+- **Weekly/monthly** — re-optimize as market regime changes
+- **Before paper trading** — lock in best params for the current market
+- **NOT for overfitting** — only saves if improvement is statistically meaningful (>10%)
+
 ## Known limitations
 - BB mean reversion shows poor intraday results (EOD square-off cuts trades before mean-reversion target) — needs swing mode
 - Backtest uses 0.2% slippage per side and realistic Zerodha costs (₹20/order + STT)
 - VIX/regime filters not applied in backtest by default (would need historical VIX data — idea #52)
+- Optimizer runs on last 30 days only — doesn't guarantee out-of-sample performance (walk-forward validation still needed)

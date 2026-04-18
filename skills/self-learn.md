@@ -24,7 +24,7 @@ Three levels, in order of complexity:
 |---|---|---|---|
 | 1 | Rule-based adaptation | VIX/regime/losses → NORMAL/DEFENSIVE/HALTED | ✅ `config/adaptive.py` |
 | 2 | Statistical learning | Train signal classifier on past trade features | ❌ Build this first |
-| 3 | Parameter optimization | Bayesian search for best strategy thresholds | ❌ Build after level 2 |
+| 3 | Parameter optimization | Bayesian search for best strategy thresholds | ✅ `learning/param_optimizer.py` + `scripts/weekly_review.py` |
 
 ---
 
@@ -154,45 +154,53 @@ Add `ConfidenceFilter()` to the pipeline list in `signal_pipeline.py` — **afte
 
 ---
 
-## Level 3: Parameter Optimizer
+## Level 3: Parameter Optimizer ✅ (DONE)
 
-### Create `learning/param_optimizer.py`
+Parameter optimization is **fully implemented** via `learning/param_optimizer.py` — uses Optuna (Bayesian search).
 
-Uses `optuna` (Bayesian optimization — better than grid search):
+### How to use
 
-```python
-import optuna
-from backtesting.engine import BacktestEngine
-
-def optimize_strategy(strategy_name: str, symbol: str, n_trials: int = 50):
-    """
-    Bayesian search for best strategy parameters.
-    Runs pre-market (called from job_runner.py at 9:00 AM).
-    Only applies new params if Sharpe ratio improves by >10%.
-    """
-    from learning.feature_store import FeatureStore
-    baseline_sharpe = FeatureStore().rolling_sharpe(strategy_name, last_n=50)
-
-    def objective(trial):
-        params = {
-            "rsi_buy_min":  trial.suggest_int("rsi_buy_min",  25, 45),
-            "rsi_buy_max":  trial.suggest_int("rsi_buy_max",  55, 70),
-            "volume_ratio": trial.suggest_float("volume_ratio", 1.0, 2.0),
-        }
-        result = BacktestEngine().run(symbol, strategy_name, params=params, days=30)
-        return result.sharpe  # maximise Sharpe ratio
-
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=n_trials, show_progress_bar=False)
-    best = study.best_params
-
-    # Safety gate: only apply if meaningfully better
-    new_result = BacktestEngine().run(symbol, strategy_name, params=best, days=30)
-    if new_result.sharpe > baseline_sharpe * 1.10:
-        _apply_params(strategy_name, best)
-        return best, new_result.sharpe
-    return None, baseline_sharpe   # keep current params
+**Option 1: Single symbol + strategy**
+```bash
+python -c "
+from learning.param_optimizer import ParamOptimizer
+opt = ParamOptimizer()
+result = opt.optimize_ema_crossover('RELIANCE', n_trials=50)
+# Checks baseline Sharpe on last 30d, runs 50 trials, saves if >10% improvement
+"
 ```
+
+**Option 2: Integrated with backtest**
+```bash
+# Run backtest + optimizer in one command
+python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --optimize
+# → runs 50 Optuna trials, re-backtests with improved params if found
+```
+
+**Option 3: Weekly review (all 6 strategies on top fundamentals)**
+```bash
+make weekly-review [TOP=25] [OPTIMIZE=1]
+# → gets top N fundamentally-ranked symbols
+# → backtests all 6 strategies on each symbol
+# → if OPTIMIZE=1, runs Bayesian optimizer on best strategy per symbol
+# → saves config/approved_symbols.json with winners for next week's trading
+```
+
+### What gets optimized (per strategy)
+
+- **ema_crossover**: short/long EMA periods, volume multiplier, supertrend params
+- **rsi_macd_combo**: RSI period, MACD fast/slow/signal, VWAP band %
+- **opening_range_breakout**: ORB duration (minutes), volume & supertrend params
+- **bb_mean_reversion**: Bollinger Band period, std dev, RSI period
+- **trend_rider**: Supertrend, ADX min/period, volume multiplier
+- **vwap_bounce**: RSI period, VWAP tolerance %, volume multiplier
+
+### How it works
+
+1. **Baseline**: measures current params on last 30 days of data (establishes baseline Sharpe)
+2. **Search**: 50 Optuna trials (Bayesian — focuses on promising zones, 10–20× faster than grid search)
+3. **Gate**: only saves if improvement >10% (prevents overfitting)
+4. **Apply**: optimized params auto-loaded from `config/param_history.json` on next backtest/paper trade
 
 ---
 

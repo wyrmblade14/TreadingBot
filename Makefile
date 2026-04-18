@@ -20,6 +20,8 @@
 #   make backtest-all SYMBOL=RELIANCE        — all 6 strategies, comparison table
 #   make backtest-wf  SYMBOL=RELIANCE        — walk-forward (6m train / 2m test)
 #   make backtest-symbols                    — list symbols with assigned strategies
+#   make weekly-review                       — backtest + optimize top 25 fundamentals (→ approved_symbols.json)
+#   make weekly-review TOP=30 OPTIMIZE=1     — wider universe, with parameter optimization
 #
 # ── Dev ───────────────────────────────────────────────────────────────────────
 #   make test           — run the full pytest suite
@@ -31,7 +33,7 @@ START    ?= 2023-01-01
 END      ?= 2024-12-31
 
 .PHONY: login login-manual up bot down logs build shell db \
-        backtest backtest-all backtest-wf backtest-symbols \
+        backtest backtest-all backtest-wf backtest-symbols weekly-review \
         test clean
 
 # ── Kite Auth ─────────────────────────────────────────────────────────────────
@@ -103,6 +105,13 @@ backtest-wf:
 backtest-symbols:
 	@source .venv/bin/activate 2>/dev/null || true; \
 	python3 scripts/run_backtest.py --list-symbols
+
+weekly-review:
+	@source .venv/bin/activate 2>/dev/null || true; \
+	python3 scripts/weekly_review.py \
+	  $(if $(TOP),--top $(TOP),) \
+	  $(if $(OPTIMIZE),--optimize,) \
+	  --start $(START) --end $(END)
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
 
