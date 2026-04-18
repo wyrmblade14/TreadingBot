@@ -30,15 +30,15 @@ This project uses a **Universal AI Agent Protocol** for seamless context handoff
 # 1. Clone and set up
 git clone <repo>
 cd TreadingBot
-python -m venv venv
+python -m venv .venv
 
 # Activate the virtual environment:
 # Mac/Linux:
-source venv/bin/activate
+source .venv/bin/activate
 # Windows (Command Prompt):
-# venv\Scripts\activate
+# .venv\Scripts\activate
 # Windows (PowerShell):
-# venv\Scripts\Activate.ps1
+# .venv\Scripts\Activate.ps1
 
 pip install -r requirements.txt
 
@@ -196,14 +196,15 @@ TreadingBot/
 │   └── package.json         # React dashboard scripts and dependencies
 │
 ├── scripts/
-│   ├── run_bot.py           # CLI entry point for the scheduler
-│   ├── run_backtest.py      # CLI for running backtests
-│   ├── run_dashboard.py     # Convenience launcher for legacy Streamlit
-│   ├── run_react_dashboard.py # Python JSON API for the React dashboard
-│   ├── run_replay.py        # Replay one market day
-│   └── schedule_bot.py      # Cron/Task Scheduler installer
+│   ├── run_bot.py              # CLI entry point for the scheduler
+│   ├── run_backtest.py         # CLI for running backtests (+ --optimize flag)
+│   ├── assign_strategies.py    # Weekend review: backtest + optimize top fundamentals, lock approved_symbols.json
+│   ├── run_dashboard.py        # Convenience launcher for legacy Streamlit
+│   ├── run_react_dashboard.py  # Python JSON API for the React dashboard
+│   ├── run_replay.py           # Replay one market day
+│   └── schedule_bot.py         # Cron/Task Scheduler installer
 │
-└── tests/                   # 272 tests, 0 failures
+└── tests/                   # 374 tests, 0 failures
 ```
 
 ---
@@ -216,8 +217,12 @@ TreadingBot/
 | RSI+MACD Combo | MACD crossover when RSI confirms | RSI not overbought/oversold |
 | Opening Range Breakout | Close above/below 9:15–9:45 range | Volume spike + VWAP |
 | VWAP Bounce | Price crosses VWAP after a pullback | EMA alignment + RSI + volume + time filter |
+| Trend Rider | SuperTrend signal with ADX strength gate | ADX > threshold + volume filter |
+| BB Mean Reversion | Bollinger Band touch + RSI confirmation | Best in ranging/sideways markets |
 
 All signals pass through the **RiskManager** before any order is placed.
+
+The **weekend review** (`make weekly-review OPTIMIZE=1`) automatically picks the best strategy per symbol each Saturday and locks it in for the week.
 
 ---
 
@@ -241,10 +246,31 @@ All signals pass through the **RiskManager** before any order is placed.
 ## Backtesting
 
 ```bash
+# Standard backtest
 python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --start 2024-01-01 --end 2024-12-31
+
+# With Bayesian parameter optimization (finds better params before backtesting)
+python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --optimize
+
+# Walk-forward (anti-overfitting)
+python scripts/run_backtest.py --symbol RELIANCE --strategy ema_crossover --walk-forward
 ```
 
 Or use the **Backtest** page in the dashboard for an interactive UI with equity curve and drawdown shading.
+
+## Weekend Review
+
+Run every Saturday to lock in the best-performing stocks and strategies for the next week:
+
+```bash
+make weekly-review OPTIMIZE=1
+# 1. Ranks NIFTY50 by fundamentals, takes top 25
+# 2. Backtests all 6 strategies on each symbol (Kite 60-min or yfinance)
+# 3. Bayesian optimizer (50 Optuna trials) on best strategy per symbol
+# 4. Saves config/approved_symbols.json — bot trades ONLY these symbols next week
+```
+
+This runs automatically at **Saturday 10 AM IST** when the bot is active. The lock expires after 7 days and falls back to live fundamentals ranking.
 
 ---
 
@@ -326,12 +352,9 @@ Before switching `TRADING_MODE=live`:
 ## Tests
 
 ```bash
-# Mac/Linux:
-source venv/bin/activate
-# Windows: venv\Scripts\activate
-
+source .venv/bin/activate
 python -m pytest tests/ -v
-# 272 passed
+# 374 passed
 ```
 
 ## Deployment

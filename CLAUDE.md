@@ -12,7 +12,9 @@ This project uses a **Universal AI Agent Protocol**.
 
 ```bash
 # Quick reference
-source venv/bin/activate
+source .venv/bin/activate
 python -m pytest tests/ -v
 streamlit run dashboard/app.py
+make weekly-review OPTIMIZE=1          # weekend: backtest + optimize top 25, lock symbols
+python scripts/assign_strategies.py --top 25 --optimize  # same as above, verbose
 ```

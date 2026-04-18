@@ -48,18 +48,19 @@ Market data → indicators/ → strategies/ → RiskManager.evaluate()
 | 6 Scheduler + Notifications | ✅ Done | — | scheduler/job_runner.py, scheduler/watchlist.py, notifications/ |
 | Fundamentals Watchlist | ✅ Done | 15 | analysis/fundamental_selector.py, scheduler/watchlist.py |
 | Build & Ops Optimization | ✅ Done | — | Dockerfile, web/Dockerfile, .dockerignore, Makefile |
+| 3.5 Weekend Review / Lock-In | ✅ Done | — | scripts/assign_strategies.py, scheduler/watchlist.py, scheduler/job_runner.py |
 | 6b Live Kite | 🔲 Deferred | — | data/kite_auth.py, data/kite_feed.py, data/kite_ticker.py, broker/kite_broker.py |
 | 7 Paper Period | 🔲 | — | 30+ trading days, win rate >45% |
 | 8 Go Live | 🔲 | — | `TRADING_MODE=live`, start ₹10k–₹20k |
 
-**Total tests: 272 passing, 0 failures**
+**Total tests: 374 passing, 0 failures**
 
 ## Key Constants (config/settings.py)
 ```
 Market: 9:15–15:30 IST | Blackout: <9:20 | No new entries: >14:30 | Square-off: 15:15
 Risk: 1%/trade | Daily loss halt: 3% | Max positions: 3 | Min RR: 2:1 | Consec losses halt: 3→1hr
 Zerodha costs: ₹20/order + STT 0.025% sell + exchange 0.00325% + GST 18% + SEBI ₹10/cr + stamp 0.003% buy
-Slippage: 0.2%/side | Virtual capital: ₹1,00,000
+Slippage: 0.02%/side | Virtual capital: ₹1,00,000
 ```
 
 ## Risk Gates (risk/risk_manager.py)
@@ -98,7 +99,14 @@ with patch("risk.risk_manager.datetime") as mock_dt:
 - `backtesting/engine.py`: tiered intervals (5m≤55d, 1h≤700d, 1d>700d), global_idx no-lookahead
 - `backtesting/performance.py`: Sharpe, max drawdown, win rate, profit factor
 - `backtesting/report.py`: Plotly HTML equity curve + drawdown shading + trade markers
-- `scripts/run_backtest.py`: CLI `--symbol`, `--strategy`, `--start`, `--end`
+- `scripts/run_backtest.py`: CLI `--symbol`, `--strategy`, `--start`, `--end`, `--optimize` (runs Bayesian param optimizer before backtest)
+
+## Weekend Review / Lock-In Workflow (DONE)
+- `scripts/assign_strategies.py --top 25 --optimize`: Saturday 10 AM workflow — fundamentals → backtest all 6 strategies → pick best per symbol → Bayesian optimizer (50 trials) → save `config/approved_symbols.json` + `config/param_history.json`
+- `config/approved_symbols.json`: locked trading universe (valid 7 days) — symbols + best strategy each; auto-expires to prevent stale lock-in
+- `scheduler/watchlist.py`: `_load_approved_symbols()` — Priority 1 source; falls back to fundamentals → static NIFTY50
+- `scheduler/job_runner.py`: `_load_approved_weekly_strategy(symbol)` — Priority 0 in `_get_strategies_for_symbol()`; Saturday 10 AM cron triggers `weekend_review_job()`
+- `make weekly-review [TOP=25] [OPTIMIZE=1] [DRY_RUN=1]`
 
 ## Phase 5 — Dashboard (DONE)
 - React (Next.js) at `localhost:3000` — `cd web && npm run dev`

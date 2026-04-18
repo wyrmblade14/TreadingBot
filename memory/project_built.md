@@ -283,8 +283,9 @@ strategies/vwap_bounce.py, strategies/trend_rider.py, strategies/bb_mean_reversi
 learning/param_optimizer.py
 Tests after: 374 passing (up from 275).
 
-**Per-symbol strategy assignment (4-level priority):**
-1. `SYMBOL_STRATEGY_MAP` dict in `config/strategies.py` — manual per-symbol override (highest priority)
+**Per-symbol strategy assignment (5-level priority):**
+0. `approved_symbols.json["symbols"][symbol]["strategy"]` — weekend review locked strategy (highest — expires 7 days)
+1. `SYMBOL_STRATEGY_MAP` dict in `config/strategies.py` — manual per-symbol override
 2. `SECTOR_STRATEGY_MAP` dict in `config/strategies.py` — sector-level default
 3. `param_history.json["strategy_assignment"][symbol]` — optimizer-assigned (written by `scripts/assign_strategies.py`)
 4. All active strategies — original fallback (no behaviour change if maps are empty)
@@ -295,7 +296,24 @@ Tests after: 374 passing (up from 275).
 **`scripts/assign_strategies.py`:** backtests all 6 strategies for up to 25 top-fundamental stocks
 using Kite Connect 60-min historical data (380 days; yfinance 1h fallback). Scores by
 `Sharpe × (win_rate / 50)` gated on `num_trades >= 15`, writes the winner to `param_history.json`.
-CLI: `python scripts/assign_strategies.py [--top 25] [--symbol INFY] [--days 380] [--dry-run]`
+CLI: `python scripts/assign_strategies.py [--top 25] [--symbol INFY] [--days 380] [--optimize] [--dry-run]`
+
+## Weekend Review / Lock-In Workflow (April 2026) ✅
+Files added/changed: scripts/assign_strategies.py, scheduler/watchlist.py, scheduler/job_runner.py, Makefile
+Deleted: scripts/weekly_review.py (merged into assign_strategies.py)
+
+**Workflow (runs Saturday 10 AM IST automatically, or `make weekly-review OPTIMIZE=1` manually):**
+1. Fundamental analysis → top 25 NIFTY50 by sector-relative score
+2. Backtest all 6 strategies per symbol (Kite 60-min, yfinance fallback)
+3. Pick best strategy: `Sharpe × (win_rate / 50)`, min 15 trades
+4. Bayesian optimizer (50 Optuna trials) on best strategy per symbol — saves if Sharpe improves >10%
+5. Write `config/approved_symbols.json` (expires 7 days) + `config/param_history.json`
+
+**From Monday:** `select_daily_watchlist()` loads `approved_symbols.json` as Priority 1 (`source="approved_weekly"`).
+`_get_strategies_for_symbol()` uses locked strategy from `approved_symbols.json` as Priority 0.
+After 7 days expiry → falls back to live fundamentals ranking.
+
+Key constants: `LOCK_DAYS = 7` in assign_strategies.py, `expires` field in JSON checked by both watchlist.py and job_runner.py.
 
 **Per-symbol parameters — all 6 strategies now support `_get_config(symbol)`:**
 Each of the 5 remaining strategies was refactored to match the existing EMA Crossover pattern:

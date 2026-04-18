@@ -10,7 +10,7 @@
 ---
 
 ## 🔄 Session Sync (Cross-Agent Status)
-*Last update: 2026-04-17*
+*Last update: 2026-04-18*
 
 | Agent | Current Task | Status |
 |---|---|---|
@@ -20,11 +20,15 @@
 
 ### 📝 Latest Context (Handoff Note)
 **Last Agent:** Claude Code
-**Completed:**
-1. Per-symbol strategy assignment: `SYMBOL_STRATEGY_MAP` / `SECTOR_STRATEGY_MAP` in `config/strategies.py` + `_get_strategies_for_symbol()` helper in `job_runner.py` (4-level priority lookup). `scripts/assign_strategies.py` backtests all 6 strategies per symbol (Kite 60-min data) and writes the winner to `param_history.json["strategy_assignment"]`.
-2. Per-symbol strategy parameters extended to all 5 remaining strategies (`rsi_macd_combo`, `opening_range_breakout`, `vwap_bounce`, `trend_rider`, `bb_mean_reversion`). Each now has `_get_config(symbol)`, `_symbol_cache`, and `_init_indicators(params)` matching the EMA Crossover pattern.
-3. `learning/param_optimizer.py` expanded with `optimize_*` methods for all 6 strategies + `optimize_all(symbol)` convenience wrapper. `job_runner.py` now calls `optimize_all()` instead of `optimize_ema_crossover()`.
-4. Test suite: 374 passing (was 275). New test file: `tests/test_symbol_strategy_map.py` (16 tests).
-**Next Recommended Step:** Run `scripts/assign_strategies.py --top 25` against live Kite data to populate initial strategy assignments. Then observe paper-trading results with per-symbol routing active.
+**Completed (Apr 18):**
+1. **Weekend Review / Lock-In Workflow** — unified strategy assignment + optimization into one command. `scripts/assign_strategies.py --top 25 --optimize` is the single weekend entry point.
+2. **`config/approved_symbols.json`** — new locked trading universe file (7-day expiry). Bot trades ONLY these symbols + their locked strategies during weekdays.
+3. **Watchlist Priority** — `scheduler/watchlist.py` now checks `approved_symbols.json` first (`source="approved_weekly"`), falls back to fundamentals, then static NIFTY50.
+4. **Strategy Resolution Priority 0** — `_get_strategies_for_symbol()` in `job_runner.py` now checks `approved_symbols.json` before all other sources.
+5. **Saturday 10 AM IST cron** — `weekend_review_job()` auto-runs `assign_strategies.py --optimize` every Saturday.
+6. **Deleted** `scripts/weekly_review.py` (was duplicate of assign_strategies.py).
+7. Tests: 374 passing (unchanged).
+
+**Next Recommended Step:** Run `make weekly-review OPTIMIZE=1` on a weekend to populate `approved_symbols.json`, then start paper trading from Monday with the locked universe.
 
 **Active Locks:** None

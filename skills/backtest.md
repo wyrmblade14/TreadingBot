@@ -23,29 +23,23 @@ python scripts/run_backtest.py \
 ```
 
 ### Backtest + Bayesian Parameter Optimization
-Before running the full backtest, run the Bayesian Parameter Optimizer to find better parameters:
+Use `--optimize` to run 50 Optuna trials before the backtest and apply improved params automatically:
 
 ```bash
-# 1. Optimize: runs 50 Optuna trials against last 30 days of data
-python -c "
-from learning.param_optimizer import ParamOptimizer
-opt = ParamOptimizer()
-result = opt.optimize_<strategy>(symbol='<symbol>', n_trials=50)
-if result:
-    print(f'✅ Improved params saved to config/param_history.json')
-else:
-    print(f'ℹ️ No significant improvement found (baseline still best)')
-"
-
-# 2. Re-run backtest with optimized params
 python scripts/run_backtest.py \
   --symbol <symbol> \
   --strategy <strategy> \
   --start <start_date> \
-  --end <end_date>
+  --end <end_date> \
+  --optimize
 ```
 
-Bayesian optimization finds parameters that maximize Sharpe ratio over 30 days of recent data. If Sharpe improves >10%, params are saved and reused automatically. Shows baseline vs optimized comparison.
+Runs 50 Bayesian trials on last 30 days of data. If Sharpe improves >10%, saves to `config/param_history.json` and re-runs backtest with optimized params.
+
+For all symbols at once (weekend workflow):
+```bash
+make weekly-review OPTIMIZE=1    # top 25 fundamentals + optimize + lock approved_symbols.json
+```
 
 ### Walk-forward backtest (anti-overfitting — preferred)
 ```bash
