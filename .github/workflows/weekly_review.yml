@@ -1,0 +1,84 @@
+name: Weekly Strategy Review
+
+on:
+  schedule:
+    - cron: '30 6 * * 0'   # Sunday 6:30 AM UTC = Sunday 12:00 PM IST
+  workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  weekly-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # Needed to commit + push results back to repo
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            requirements-base.txt
+            requirements-bot.txt
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements-base.txt -r requirements-bot.txt
+
+      - name: Create .env from GitHub Secrets
+        run: |
+          echo "KITE_API_KEY=${{ secrets.KITE_API_KEY }}"               >> .env
+          echo "KITE_API_SECRET=${{ secrets.KITE_API_SECRET }}"         >> .env
+          echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}"   >> .env
+          echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}"       >> .env
+          echo "TRADING_MODE=paper"                                      >> .env
+
+      - name: Kite login via Telegram
+        continue-on-error: true   # Weekly review continues with yfinance if you miss the prompt
+        run: python scripts/kite_login_via_telegram.py
+        # Sends you the Kite login URL on Telegram.
+        # Log in via browser, paste the redirect URL back — you have 10 minutes.
+        # If skipped, yfinance is used for all price data.
+
+      - name: Run weekly strategy review
+        run: python scripts/assign_strategies.py --optimize
+
+      - name: Commit results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage config files and any new optimizer CSV log
+          git add config/approved_symbols.json config/param_history.json
+          git add "logs/optimizer_$(date +%Y-%m-%d).csv" 2>/dev/null || true
+
+          # Only commit if something actually changed
+          if git diff --staged --quiet; then
+            echo "No changes — approved universe unchanged this week."
+          else
+            git commit -m "chore: weekly review $(date +'%Y-%m-%d') [skip ci]"
+            git push
+            echo "Results committed and pushed."
+          fi
+
+      - name: Notify completion on Telegram
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          STATUS="${{ job.status }}"
+          if [ "$STATUS" = "success" ]; then
+            MSG="✅ Weekly strategy review complete. Check config/approved_symbols.json for this week's universe."
+          else
+            MSG="❌ Weekly strategy review finished with status: $STATUS. Check GitHub Actions for details."
+          fi
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d text="$MSG" || true

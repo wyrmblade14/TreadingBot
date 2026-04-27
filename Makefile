@@ -23,6 +23,8 @@
 #   make weekly-review                       — backtest top 25 fundamentals, lock to approved_symbols.json
 #   make weekly-review TOP=30 OPTIMIZE=1     — wider universe + Bayesian parameter optimization
 #   make weekly-review DRY_RUN=1             — dry run, nothing written to disk
+#   make weekly-review-now                   — Telegram Kite login + full review (same as Sunday cron)
+#   make trigger-weekly-review               — trigger the GitHub Actions workflow_dispatch remotely
 #
 # ── Dev ───────────────────────────────────────────────────────────────────────
 #   make test           — run the full pytest suite
@@ -34,7 +36,8 @@ START    ?= 2023-01-01
 END      ?= 2024-12-31
 
 .PHONY: login login-manual up bot down logs build shell db \
-        backtest backtest-all backtest-wf backtest-symbols weekly-review \
+        backtest backtest-all backtest-wf backtest-symbols \
+        weekly-review weekly-review-now trigger-weekly-review \
         test clean
 
 # ── Kite Auth ─────────────────────────────────────────────────────────────────
@@ -115,6 +118,20 @@ weekly-review:
 	  $(if $(TRIALS),--trials $(TRIALS),) \
 	  $(if $(FAST),--fast,) \
 	  $(if $(DRY_RUN),--dry-run,)
+
+weekly-review-now:
+	@echo "Starting Telegram-based Kite login + full weekly review..."
+	@source .venv/bin/activate 2>/dev/null || true; \
+	python3 scripts/kite_login_via_telegram.py || true; \
+	python3 scripts/assign_strategies.py --optimize \
+	  $(if $(TOP),--top $(TOP),) \
+	  $(if $(TRIALS),--trials $(TRIALS),) \
+	  $(if $(FAST),--fast,)
+
+trigger-weekly-review:
+	@echo "Triggering GitHub Actions weekly review workflow..."
+	gh workflow run weekly_review.yml
+	@echo "Running — check progress at: https://github.com/wyrmblade14/TreadingBot/actions"
 
 # ── Dev ───────────────────────────────────────────────────────────────────────
 

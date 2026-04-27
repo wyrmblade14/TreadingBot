@@ -19,10 +19,15 @@ Prerequisites (add to .env):
                           shown when you first set up 2FA in Zerodha's settings)
 
 TOTP secret setup:
-  • Go to Zerodha Console → Account → Security → External TOTP
-  • Enable it; when shown the QR code click "show secret" to see the raw key
-  • Copy that key here (looks like JBSWY3DPEHPK3PXP or similar)
+  • Go to Zerodha Console → Account → Security → Two-factor authentication
+  • Under "Authenticator app (TOTP)", click "Set up" or "Show secret"
+  • Copy the raw base32 key (e.g. JBSWY3DPEHPK3PXP) — NOT the 6-digit code
   • Add to .env:  ZERODHA_TOTP_SECRET=JBSWY3DPEHPK3PXP
+  • Verify it works in your TOTP app (Google Authenticator / Authy) first
+
+  NOTE: If your account uses Zerodha's own app ("app_code"), the TOTP secret
+  must match what the Zerodha Authenticator app uses. The twofa_type is read
+  automatically from the login response — no manual config needed.
 
 Security:
   • Credentials are read from .env — never hard-coded.
@@ -136,7 +141,9 @@ def auto_login() -> bool:
         return False
 
     request_id = j1["data"]["request_id"]
-    logger.debug(f"auto_kite_login: login OK, request_id={request_id[:8]}...")
+    # Use the twofa_type the server declared (e.g. "app_code" or "totp")
+    twofa_type = j1["data"].get("twofa_type", "totp")
+    logger.debug(f"auto_kite_login: login OK, request_id={request_id[:8]}..., twofa_type={twofa_type}")
 
     # ── Step 2: TOTP two-factor auth ──────────────────────────────────────────
     try:
@@ -144,9 +151,10 @@ def auto_login() -> bool:
         r2 = session.post(
             f"{_BASE}/api/twofa",
             data={
+                "user_id": user_id,
                 "request_id": request_id,
                 "twofa_value": totp_code,
-                "twofa_type": "totp",
+                "twofa_type": twofa_type,
             },
             timeout=15,
         )
@@ -157,7 +165,10 @@ def auto_login() -> bool:
         return False
 
     if j2.get("status") != "success":
-        logger.warning(f"auto_kite_login: TOTP rejected — {j2.get('message', j2)}")
+        attempts = j2.get("data", {}) or {}
+        remaining = attempts.get("attempts_remaining")
+        warn = f" ({remaining} attempts remaining before lockout)" if remaining is not None else ""
+        logger.warning(f"auto_kite_login: TOTP rejected — {j2.get('message', j2)}{warn}")
         return False
 
     logger.debug("auto_kite_login: TOTP OK")
