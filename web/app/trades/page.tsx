@@ -9,7 +9,9 @@ export default async function TradesPage() {
   return (
     <>
       <PageHeader
+        apiSource={data.source}
         description="Open and closed trades for today, plus the latest journal entries."
+        generatedAt={data.generatedAt}
         status={data.bot.status}
         title="Trades"
       />

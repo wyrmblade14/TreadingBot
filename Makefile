@@ -82,7 +82,7 @@ shell:
 	docker compose exec bot bash
 
 db:
-	docker exec -it treadingbot_postgres psql -U $${POSTGRES_USER:-treadingbot} -d $${POSTGRES_DB:-treadingbot}
+	docker compose up -d postgres && docker compose exec -it postgres psql -U $${POSTGRES_USER:-treadingbot} -d $${POSTGRES_DB:-treadingbot}
 
 # ── Backtesting ───────────────────────────────────────────────────────────────
 
@@ -112,6 +112,8 @@ weekly-review:
 	python3 scripts/assign_strategies.py \
 	  $(if $(TOP),--top $(TOP),) \
 	  $(if $(OPTIMIZE),--optimize,) \
+	  $(if $(TRIALS),--trials $(TRIALS),) \
+	  $(if $(FAST),--fast,) \
 	  $(if $(DRY_RUN),--dry-run,)
 
 # ── Dev ───────────────────────────────────────────────────────────────────────

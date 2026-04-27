@@ -17,5 +17,264 @@
       },
       "optimized_at": "2026-04-17"
     }
+  },
+  "strategy_assignment": {
+    "AXISBANK": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.97,
+      "win_rate": 45.5,
+      "num_trades": 55,
+      "assigned_at": "2026-04-20"
+    },
+    "ITC": {
+      "strategy": "ema_crossover",
+      "score": 0.096,
+      "sharpe": 0.16,
+      "win_rate": 30.0,
+      "num_trades": 10,
+      "assigned_at": "2026-04-20"
+    },
+    "MARUTI": {
+      "strategy": "ema_crossover",
+      "score": 0.0,
+      "sharpe": -0.24,
+      "win_rate": 60.0,
+      "num_trades": 15,
+      "assigned_at": "2026-04-20"
+    },
+    "COALINDIA": {
+      "strategy": "vwap_bounce",
+      "score": 2.4677,
+      "sharpe": 1.94,
+      "win_rate": 63.6,
+      "num_trades": 11,
+      "assigned_at": "2026-04-20"
+    },
+    "BHARTIARTL": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -1.3,
+      "win_rate": 59.6,
+      "num_trades": 52,
+      "assigned_at": "2026-04-20"
+    },
+    "ASIANPAINT": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -3.31,
+      "win_rate": 38.3,
+      "num_trades": 60,
+      "assigned_at": "2026-04-20"
+    },
+    "HDFCBANK": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.36,
+      "win_rate": 51.8,
+      "num_trades": 56,
+      "assigned_at": "2026-04-20"
+    },
+    "SBIN": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.35,
+      "win_rate": 46.0,
+      "num_trades": 63,
+      "assigned_at": "2026-04-20"
+    },
+    "TCS": {
+      "strategy": "ema_crossover",
+      "score": 0.0,
+      "sharpe": -1.78,
+      "win_rate": 30.0,
+      "num_trades": 10,
+      "assigned_at": "2026-04-20"
+    },
+    "IOC": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -2.24,
+      "win_rate": 40.3,
+      "num_trades": 62,
+      "assigned_at": "2026-04-20"
+    },
+    "HINDUNILVR": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.8,
+      "win_rate": 41.2,
+      "num_trades": 51,
+      "assigned_at": "2026-04-20"
+    },
+    "M&M": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.93,
+      "win_rate": 41.2,
+      "num_trades": 51,
+      "assigned_at": "2026-04-20"
+    },
+    "EICHERMOT": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.93,
+      "win_rate": 35.0,
+      "num_trades": 60,
+      "assigned_at": "2026-04-20"
+    },
+    "CIPLA": {
+      "strategy": "vwap_bounce",
+      "score": 0.0,
+      "sharpe": -2.29,
+      "win_rate": 27.3,
+      "num_trades": 11,
+      "assigned_at": "2026-04-20"
+    },
+    "HINDALCO": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.54,
+      "win_rate": 45.3,
+      "num_trades": 53,
+      "assigned_at": "2026-04-20"
+    },
+    "POWERGRID": {
+      "strategy": "ema_crossover",
+      "score": 0.1966,
+      "sharpe": 0.27,
+      "win_rate": 36.4,
+      "num_trades": 11,
+      "assigned_at": "2026-04-20"
+    },
+    "WIPRO": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -1.03,
+      "win_rate": 45.5,
+      "num_trades": 55,
+      "assigned_at": "2026-04-20"
+    },
+    "RELIANCE": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -1.47,
+      "win_rate": 40.7,
+      "num_trades": 54,
+      "assigned_at": "2026-04-20"
+    },
+    "ONGC": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.88,
+      "win_rate": 46.4,
+      "num_trades": 56,
+      "assigned_at": "2026-04-20"
+    },
+    "DRREDDY": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -2.11,
+      "win_rate": 36.2,
+      "num_trades": 47,
+      "assigned_at": "2026-04-20"
+    },
+    "DIVISLAB": {
+      "strategy": "opening_range_breakout",
+      "score": 0.0,
+      "sharpe": -1.16,
+      "win_rate": 31.2,
+      "num_trades": 16,
+      "assigned_at": "2026-04-20"
+    },
+    "ADANIENT": {
+      "strategy": "opening_range_breakout",
+      "score": 0.0,
+      "sharpe": -1.59,
+      "win_rate": 21.4,
+      "num_trades": 14,
+      "assigned_at": "2026-04-20"
+    },
+    "ADANIPORTS": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -1.58,
+      "win_rate": 45.0,
+      "num_trades": 60,
+      "assigned_at": "2026-04-20"
+    },
+    "GRASIM": {
+      "strategy": "vwap_bounce",
+      "score": 0.0,
+      "sharpe": -3.96,
+      "win_rate": 20.0,
+      "num_trades": 15,
+      "assigned_at": "2026-04-20"
+    },
+    "VEDL": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -0.14,
+      "win_rate": 40.4,
+      "num_trades": 52,
+      "assigned_at": "2026-04-20"
+    },
+    "ULTRACEMCO": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.2946,
+      "sharpe": 0.3,
+      "win_rate": 49.1,
+      "num_trades": 55,
+      "assigned_at": "2026-04-20"
+    },
+    "BRITANNIA": {
+      "strategy": "bb_mean_reversion",
+      "score": 1.0282,
+      "sharpe": 1.01,
+      "win_rate": 50.9,
+      "num_trades": 53,
+      "assigned_at": "2026-04-20"
+    },
+    "ICICIBANK": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.4066,
+      "sharpe": 0.46,
+      "win_rate": 44.2,
+      "num_trades": 52,
+      "assigned_at": "2026-04-20"
+    },
+    "KOTAKBANK": {
+      "strategy": "bb_mean_reversion",
+      "score": 0.0,
+      "sharpe": -1.95,
+      "win_rate": 45.8,
+      "num_trades": 48,
+      "assigned_at": "2026-04-20"
+    },
+    "BPCL": {
+      "strategy": "opening_range_breakout",
+      "score": 0.0,
+      "sharpe": -0.28,
+      "win_rate": 36.4,
+      "num_trades": 11,
+      "assigned_at": "2026-04-20"
+    }
+  },
+  "ema_crossover": {
+    "MARUTI": {
+      "params": {
+        "enabled": true,
+        "name": "EMA Crossover",
+        "description": "Buys when the fast EMA (9-period) crosses above the slow EMA (21-period) while Supertrend confirms bullish trend. Volume filter applied. Simple and effective for trending intraday markets.",
+        "short_period": 8,
+        "long_period": 24,
+        "trend_period": 50,
+        "volume_multiplier": 1.1735717498640184,
+        "supertrend_period": 14,
+        "supertrend_multiplier": 1.6348694425100516,
+        "use_first_candle_filter": true
+      },
+      "optimized_at": "2026-04-20"
+    }
   }
 }

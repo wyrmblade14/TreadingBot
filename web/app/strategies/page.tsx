@@ -10,7 +10,9 @@ export default async function StrategiesPage() {
   return (
     <>
       <PageHeader
+        apiSource={data.source}
         description="Closed-trade performance grouped by strategy — win rate, net P&L, and average trade."
+        generatedAt={data.generatedAt}
         title="Strategies"
       />
       <Panel

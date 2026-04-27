@@ -39,6 +39,7 @@ Cache: result held for 5 minutes so strategies don't hit yfinance every candle.
 
 from __future__ import annotations
 
+import threading
 import time
 from enum import Enum
 
@@ -91,6 +92,18 @@ _cache: dict = {
     "timestamp": 0.0,
 }
 _CACHE_TTL_SECONDS = 300   # refresh at most once every 5 minutes
+
+# Per-thread backtest flag so parallel backtests don't interfere with each other.
+# BacktestEngine calls _set_backtest(True/False) instead of touching this directly.
+_tls = threading.local()
+
+
+def _is_backtest() -> bool:
+    return getattr(_tls, "backtest_mode", False)
+
+
+def _set_backtest(flag: bool) -> None:
+    _tls.backtest_mode = flag
 
 
 # ── Pure computation (testable without network) ───────────────────────
@@ -183,6 +196,9 @@ def get_current_regime() -> MarketRegime:
     """
     global _cache
     now = time.monotonic()
+
+    if _is_backtest():
+        return MarketRegime.UNKNOWN
 
     # Return cached result if still fresh
     if now - _cache["timestamp"] < _CACHE_TTL_SECONDS and _cache["regime"] != MarketRegime.UNKNOWN:

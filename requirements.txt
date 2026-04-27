@@ -1,5 +1,2 @@
 -r requirements-base.txt
 -r requirements-bot.txt
-
-# ── Legacy Streamlit Dashboard (kept for reference) ────────────
-streamlit>=1.35.0           # Web dashboard (run: streamlit run dashboard/app.py)

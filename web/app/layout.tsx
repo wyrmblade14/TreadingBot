@@ -16,7 +16,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <div className="shell">
           <Sidebar />
           <main className="content">
-            <AutoRefresh interval={60000} />
+            <AutoRefresh />
             {children}
           </main>
         </div>

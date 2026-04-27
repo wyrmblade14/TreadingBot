@@ -34,6 +34,7 @@ from typing import Optional
 import pandas as pd
 from loguru import logger
 
+import analysis.regime_detector as _regime_detector
 from config.settings import IST, SLIPPAGE_PCT, SQUAREOFF_TIME
 from data.historical import fetch_ohlcv
 from data.instruments import KITE_TO_YF
@@ -118,6 +119,7 @@ class BacktestEngine:
         symbol: str,
         start: str = "2023-01-01",
         end:   str = "2024-12-31",
+        df:    "Optional[pd.DataFrame]" = None,
     ) -> BacktestResult:
         """
         Run the backtest for one symbol over a date range.
@@ -126,6 +128,8 @@ class BacktestEngine:
             symbol: Kite symbol e.g. "RELIANCE". Converted to yfinance format internally.
             start:  Start date "YYYY-MM-DD"
             end:    End date "YYYY-MM-DD"
+            df:     Pre-fetched OHLCV DataFrame (e.g. from Kite). When provided, skips
+                    the yfinance fetch so the caller controls the data source.
 
         Returns:
             BacktestResult with all trades and summary stats.
@@ -136,23 +140,28 @@ class BacktestEngine:
             f"| {start} → {end}"
         )
 
-        # yfinance intraday limits:
-        #   5m  → last 60 days only
-        #   1h  → last 730 days (2 years)
-        #   1d  → unlimited
-        # We always prefer intraday candles so strategies run as designed.
-        days = (pd.Timestamp(end) - pd.Timestamp(start)).days
-        if days <= 55:
-            interval = "5m"
-        elif days <= 700:
-            interval = "1h"
+        if df is not None and not df.empty:
+            logger.info(f"Using pre-fetched data: {len(df)} rows")
+            df_all = df.copy()
+            use_daily = False
         else:
-            interval = "1d"
+            # yfinance intraday limits:
+            #   5m  → last 60 days only
+            #   1h  → last 730 days (2 years)
+            #   1d  → unlimited
+            # We always prefer intraday candles so strategies run as designed.
+            days = (pd.Timestamp(end) - pd.Timestamp(start)).days
+            if days <= 55:
+                interval = "5m"
+            elif days <= 700:
+                interval = "1h"
+            else:
+                interval = "1d"
 
-        use_daily = (interval == "1d")
+            use_daily = (interval == "1d")
 
-        logger.info(f"Using {interval} candles for {days}-day range")
-        df_all = fetch_ohlcv(yf_symbol, interval=interval, start=start, end=end)
+            logger.info(f"Using {interval} candles for {days}-day range")
+            df_all = fetch_ohlcv(yf_symbol, interval=interval, start=start, end=end)
 
         if df_all.empty:
             logger.warning(f"No data for {yf_symbol}. Returning empty result.")
@@ -175,6 +184,7 @@ class BacktestEngine:
         capital = self._initial_capital
         open_trade: Optional[_OpenTrade] = None
 
+        _regime_detector._set_backtest(True)
         if use_daily:
             # ── Daily mode: one candle per bar, iterate the full series ───
             # Entry signal fires on candle i; exit checked on candle i+1 onwards.
@@ -393,6 +403,7 @@ class BacktestEngine:
                     capital += trade.net_pnl
                     open_trade = None
 
+        _regime_detector._set_backtest(False)
         logger.info(
             f"Backtest complete | {symbol} {self._strategy.name} "
             f"| trades={result.num_trades} "

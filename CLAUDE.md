@@ -14,7 +14,7 @@ This project uses a **Universal AI Agent Protocol**.
 # Quick reference
 source .venv/bin/activate
 python -m pytest tests/ -v
-streamlit run dashboard/app.py
+cd web && npm run dev          # Next.js dashboard at http://localhost:3000
 make weekly-review OPTIMIZE=1          # weekend: backtest + optimize top 25, lock symbols
 python scripts/assign_strategies.py --top 25 --optimize  # same as above, verbose
 ```

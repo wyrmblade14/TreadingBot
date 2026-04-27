@@ -64,7 +64,9 @@
       "Bash(docker compose build *)",
       "Bash(docker compose logs *)",
       "Bash(docker compose *)",
-      "Bash(xargs cat *)"
+      "Bash(xargs cat *)",
+      "Bash(python3 *)",
+      "Bash(git -C /home/wyrmblade/TreadingBot log --oneline --since=\"2026-04-15\" --until=\"2026-04-28\")"
     ]
   },
   "enabledPlugins": {

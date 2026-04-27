@@ -10,7 +10,9 @@ export default async function HistoryPage() {
   return (
     <>
       <PageHeader
+        apiSource={data.source}
         description="Complete paper trade history — every entry and exit recorded to date."
+        generatedAt={data.generatedAt}
         title="Trade History"
       />
       <Panel

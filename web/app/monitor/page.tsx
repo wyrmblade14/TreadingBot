@@ -10,7 +10,9 @@ export default async function MonitorPage() {
   return (
     <>
       <PageHeader
+        apiSource={data.source}
         description="Process health, scheduler state, and runtime status for the trading bot."
+        generatedAt={data.generatedAt}
         status={data.bot.status}
         title="Bot Monitor"
       />

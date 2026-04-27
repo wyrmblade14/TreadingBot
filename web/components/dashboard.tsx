@@ -1,5 +1,7 @@
 import type { DashboardData, MarketOverview, StrategySummary, Trade } from "@/lib/api";
 import type { ReactNode } from "react";
+import { FreshnessTag } from "@/components/FreshnessTag";
+import { RefreshButton } from "@/components/auto-refresh";
 import {
   BotIcon,
   ChartIcon,
@@ -21,22 +23,37 @@ import {
 // ── Page header ────────────────────────────────────────────────────
 
 export function PageHeader({
+  apiSource,
   description,
+  generatedAt,
   status,
   title
 }: {
+  apiSource?: DashboardData["source"];
   description: string;
+  generatedAt?: string;
   status?: DashboardData["bot"]["status"];
   title: string;
 }) {
   return (
-    <header className="pageHeader">
-      <div>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </div>
-      {status && <StatusPill status={status} />}
-    </header>
+    <>
+      <header className="pageHeader">
+        <div>
+          <h1>{title}</h1>
+          <p>{description}</p>
+        </div>
+        <div className="pageHeaderActions">
+          {status && <StatusPill status={status} />}
+          {generatedAt && <FreshnessTag generatedAt={generatedAt} />}
+          <RefreshButton />
+        </div>
+      </header>
+      {apiSource === "empty" && (
+        <div className="offlineBanner" role="alert">
+          Dashboard API is not responding — showing defaults. Start the bot server to restore live data.
+        </div>
+      )}
+    </>
   );
 }
 
@@ -75,6 +92,79 @@ export function ChartGrid({
       </Panel>
     </section>
   );
+}
+
+// ── Open positions panel ───────────────────────────────────────────
+
+export function OpenPositionsPanel({ trades }: { trades: Trade[] }) {
+  const open = trades.filter((t) => t.status === "open");
+  const now = new Date();
+
+  if (open.length === 0) {
+    return (
+      <div className="positionsSection">
+        <div className="positionsFlat">
+          <span className="flatDot" />
+          Flat — no open positions
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="positionsSection">
+      <div className="positionsHeader">
+        <h2 style={{ margin: 0, fontSize: 16 }}>Open Positions</h2>
+        <span className="openBadge">{open.length} open</span>
+      </div>
+      <div className="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Side</th>
+              <th>Strategy</th>
+              <th>Entry Time</th>
+              <th>Entry ₹</th>
+              <th>Qty</th>
+              <th>Hold</th>
+              <th>P&L</th>
+            </tr>
+          </thead>
+          <tbody>
+            {open.map((trade) => (
+              <tr key={trade.id}>
+                <td><strong>{trade.symbol}</strong></td>
+                <td><span className={`tag tag--${trade.side.toLowerCase()}`}>{trade.side}</span></td>
+                <td>{humanStrategy(trade.strategy)}</td>
+                <td>{formatDateTime(trade.entryTime)}</td>
+                <td>{formatMoney(trade.entryPrice)}</td>
+                <td>{formatNumber(trade.quantity)}</td>
+                <td className="neutralText">{holdDuration(trade.entryTime, now)}</td>
+                <td>
+                  {trade.pnl === null
+                    ? <span className="openBadge">Open</span>
+                    : <span className={toneClass(trade.pnl)}>{formatSignedMoney(trade.pnl)}</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function holdDuration(entryTime: string, now: Date): string {
+  if (!entryTime) return "—";
+  const entry = new Date(entryTime);
+  if (Number.isNaN(entry.getTime())) return "—";
+  const diffMs = now.getTime() - entry.getTime();
+  if (diffMs < 0) return "—";
+  const h = Math.floor(diffMs / 3600000);
+  const m = Math.floor((diffMs % 3600000) / 60000);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }
 
 // ── Today trades + journal ─────────────────────────────────────────
