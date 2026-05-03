@@ -1,15 +1,6 @@
 {
-  "week_of": "2026-04-28",
-  "generated_at": "2026-04-28",
-  "expires": "2026-05-05",
-  "symbols": [
-    {
-      "symbol": "ICICIBANK",
-      "strategy": "bb_mean_reversion",
-      "sharpe": 0.68,
-      "win_rate": 44.0,
-      "num_trades": 50,
-      "score": 0.5984
-    }
-  ]
+  "week_of": "2026-05-03",
+  "generated_at": "2026-05-03",
+  "expires": "2026-05-10",
+  "symbols": []
 }

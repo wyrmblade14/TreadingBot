@@ -20,76 +20,76 @@
   },
   "strategy_assignment": {
     "AXISBANK": {
-      "strategy": "bb_mean_reversion",
-      "score": -0.7363,
-      "sharpe": -0.78,
-      "win_rate": 47.2,
-      "num_trades": 53,
-      "assigned_at": "2026-04-27"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "ITC": {
-      "strategy": "bb_mean_reversion",
-      "score": -1.4834,
-      "sharpe": -2.01,
-      "win_rate": 36.9,
-      "num_trades": 65,
-      "assigned_at": "2026-04-27"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": -5.78,
+      "win_rate": 0.0,
+      "num_trades": 2,
+      "assigned_at": "2026-05-03"
     },
     "MARUTI": {
-      "strategy": "ema_crossover",
-      "score": 0.0,
-      "sharpe": -0.24,
-      "win_rate": 60.0,
-      "num_trades": 15,
-      "assigned_at": "2026-04-20"
+      "strategy": "bb_mean_reversion",
+      "score": -0.0,
+      "sharpe": -21.13,
+      "win_rate": 0.0,
+      "num_trades": 10,
+      "assigned_at": "2026-05-03"
     },
     "COALINDIA": {
-      "strategy": "bb_mean_reversion",
-      "score": -1.3332,
-      "sharpe": -1.65,
-      "win_rate": 40.4,
-      "num_trades": 47,
-      "assigned_at": "2026-04-27"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "BHARTIARTL": {
-      "strategy": "bb_mean_reversion",
-      "score": -1.3133,
-      "sharpe": -1.08,
-      "win_rate": 60.8,
-      "num_trades": 51,
-      "assigned_at": "2026-04-27"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0,
+      "win_rate": 0,
+      "num_trades": 0,
+      "assigned_at": "2026-05-03"
     },
     "ASIANPAINT": {
-      "strategy": "bb_mean_reversion",
-      "score": -2.3187,
-      "sharpe": -2.95,
-      "win_rate": 39.3,
-      "num_trades": 61,
-      "assigned_at": "2026-04-27"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "HDFCBANK": {
-      "strategy": "bb_mean_reversion",
-      "score": -0.7134,
-      "sharpe": -0.74,
-      "win_rate": 48.2,
-      "num_trades": 56,
-      "assigned_at": "2026-04-27"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "SBIN": {
       "strategy": "bb_mean_reversion",
-      "score": 0.0,
-      "sharpe": -0.35,
-      "win_rate": 46.0,
-      "num_trades": 63,
-      "assigned_at": "2026-04-20"
+      "score": -0.0,
+      "sharpe": -27.0,
+      "win_rate": 0.0,
+      "num_trades": 10,
+      "assigned_at": "2026-05-03"
     },
     "TCS": {
       "strategy": "ema_crossover",
-      "score": -1.068,
-      "sharpe": -1.78,
-      "win_rate": 30.0,
-      "num_trades": 10,
-      "assigned_at": "2026-04-27"
+      "score": -Infinity,
+      "sharpe": -96.94,
+      "win_rate": 0.0,
+      "num_trades": 2,
+      "assigned_at": "2026-05-03"
     },
     "IOC": {
       "strategy": "bb_mean_reversion",
@@ -100,12 +100,12 @@
       "assigned_at": "2026-04-20"
     },
     "HINDUNILVR": {
-      "strategy": "bb_mean_reversion",
-      "score": 0.0,
-      "sharpe": -0.8,
-      "win_rate": 41.2,
-      "num_trades": 51,
-      "assigned_at": "2026-04-20"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0,
+      "win_rate": 0,
+      "num_trades": 0,
+      "assigned_at": "2026-05-03"
     },
     "M&M": {
       "strategy": "bb_mean_reversion",
@@ -117,35 +117,35 @@
     },
     "EICHERMOT": {
       "strategy": "ema_crossover",
-      "score": -0.39,
-      "sharpe": -0.39,
-      "win_rate": 50.0,
-      "num_trades": 10,
-      "assigned_at": "2026-04-28"
+      "score": -Infinity,
+      "sharpe": 0,
+      "win_rate": 0,
+      "num_trades": 0,
+      "assigned_at": "2026-05-03"
     },
     "CIPLA": {
       "strategy": "bb_mean_reversion",
-      "score": -1.6817,
-      "sharpe": -3.08,
-      "win_rate": 27.3,
-      "num_trades": 44,
-      "assigned_at": "2026-04-28"
+      "score": -0.0,
+      "sharpe": -18.44,
+      "win_rate": 0.0,
+      "num_trades": 10,
+      "assigned_at": "2026-05-03"
     },
     "HINDALCO": {
-      "strategy": "bb_mean_reversion",
-      "score": -0.5382,
-      "sharpe": -0.62,
-      "win_rate": 43.4,
-      "num_trades": 53,
-      "assigned_at": "2026-04-28"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": -18.68,
+      "win_rate": 0.0,
+      "num_trades": 2,
+      "assigned_at": "2026-05-03"
     },
     "POWERGRID": {
       "strategy": "ema_crossover",
-      "score": 0.1966,
-      "sharpe": 0.27,
-      "win_rate": 36.4,
-      "num_trades": 11,
-      "assigned_at": "2026-04-28"
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "WIPRO": {
       "strategy": "bb_mean_reversion",
@@ -156,12 +156,12 @@
       "assigned_at": "2026-04-20"
     },
     "RELIANCE": {
-      "strategy": "bb_mean_reversion",
-      "score": -1.0503,
-      "sharpe": -1.21,
-      "win_rate": 43.4,
-      "num_trades": 53,
-      "assigned_at": "2026-04-28"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "ONGC": {
       "strategy": "ema_crossover",
@@ -169,7 +169,7 @@
       "sharpe": 0.0,
       "win_rate": 0.0,
       "num_trades": 1,
-      "assigned_at": "2026-04-28"
+      "assigned_at": "2026-05-03"
     },
     "DRREDDY": {
       "strategy": "ema_crossover",
@@ -177,7 +177,7 @@
       "sharpe": 0,
       "win_rate": 0,
       "num_trades": 0,
-      "assigned_at": "2026-04-28"
+      "assigned_at": "2026-05-03"
     },
     "DIVISLAB": {
       "strategy": "ema_crossover",
@@ -185,7 +185,7 @@
       "sharpe": 0.0,
       "win_rate": 0.0,
       "num_trades": 1,
-      "assigned_at": "2026-04-28"
+      "assigned_at": "2026-05-03"
     },
     "ADANIENT": {
       "strategy": "opening_range_breakout",
@@ -196,12 +196,12 @@
       "assigned_at": "2026-04-20"
     },
     "ADANIPORTS": {
-      "strategy": "bb_mean_reversion",
-      "score": 0.0,
-      "sharpe": -1.58,
-      "win_rate": 45.0,
-      "num_trades": 60,
-      "assigned_at": "2026-04-20"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "GRASIM": {
       "strategy": "ema_crossover",
@@ -212,12 +212,12 @@
       "assigned_at": "2026-04-28"
     },
     "VEDL": {
-      "strategy": "bb_mean_reversion",
-      "score": 0.0,
-      "sharpe": -0.14,
-      "win_rate": 40.4,
-      "num_trades": 52,
-      "assigned_at": "2026-04-20"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": -10.29,
+      "win_rate": 0.0,
+      "num_trades": 2,
+      "assigned_at": "2026-05-03"
     },
     "ULTRACEMCO": {
       "strategy": "ema_crossover",
@@ -252,20 +252,20 @@
       "assigned_at": "2026-04-20"
     },
     "BPCL": {
-      "strategy": "opening_range_breakout",
-      "score": 0.0,
-      "sharpe": -0.28,
-      "win_rate": 36.4,
-      "num_trades": 11,
-      "assigned_at": "2026-04-20"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": -355.19,
+      "win_rate": 0.0,
+      "num_trades": 2,
+      "assigned_at": "2026-05-03"
     },
     "HCLTECH": {
-      "strategy": "bb_mean_reversion",
-      "score": -0.29,
-      "sharpe": -0.29,
-      "win_rate": 50.0,
-      "num_trades": 50,
-      "assigned_at": "2026-04-27"
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": 0.0,
+      "win_rate": 0.0,
+      "num_trades": 1,
+      "assigned_at": "2026-05-03"
     },
     "INFY": {
       "strategy": "bb_mean_reversion",
@@ -281,7 +281,7 @@
       "sharpe": 0.0,
       "win_rate": 0.0,
       "num_trades": 1,
-      "assigned_at": "2026-04-28"
+      "assigned_at": "2026-05-03"
     },
     "LT": {
       "strategy": "ema_crossover",
@@ -306,6 +306,14 @@
       "win_rate": 0.0,
       "num_trades": 1,
       "assigned_at": "2026-04-28"
+    },
+    "TATACONSUM": {
+      "strategy": "ema_crossover",
+      "score": -Infinity,
+      "sharpe": -10.32,
+      "win_rate": 0.0,
+      "num_trades": 2,
+      "assigned_at": "2026-05-03"
     }
   },
   "ema_crossover": {
