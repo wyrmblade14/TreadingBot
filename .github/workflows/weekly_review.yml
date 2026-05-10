@@ -1,8 +1,6 @@
 name: Weekly Strategy Review
 
 on:
-  schedule:
-    - cron: '30 6 * * 0'   # Sunday 6:30 AM UTC = Sunday 12:00 PM IST
   workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
 
 jobs:
